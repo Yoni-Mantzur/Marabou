@@ -11,6 +11,7 @@
 
 class SigmoidConstraint : public PiecewiseLinearConstraint, PiecewiseLinearAbstraction
 {
+public:
     SigmoidConstraint( unsigned b, unsigned f );
     SigmoidConstraint( const String &serializedRelu );
 
@@ -75,12 +76,16 @@ class SigmoidConstraint : public PiecewiseLinearConstraint, PiecewiseLinearAbstr
     /*
       Check if the constraint's phase has been fixed.
     */
-    bool phaseFixed() const;
+    bool phaseFixed() const {
+        return false;
+    }
 
     /*
       If the constraint's phase has been fixed, get the (valid) case split.
     */
-    PiecewiseLinearCaseSplit getValidCaseSplit() const;
+    PiecewiseLinearCaseSplit getValidCaseSplit() const {
+        return PiecewiseLinearCaseSplit();  // Not implemented
+    }
 
     /*
       Preprocessing related functions, to inform that a variable has been eliminated completely

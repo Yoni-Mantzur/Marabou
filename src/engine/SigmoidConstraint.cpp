@@ -137,13 +137,13 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
     return fixes;
 }
 
-List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getSmartFixes( ITableau *tableau ) const
+List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getSmartFixes(__attribute__((unused)) ITableau *tableau ) const
 {
     // TODO: write something smarter
     return getPossibleFixes();
 }
 
-List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits()
+List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
 {
     // TODO: Refactor this casting
     List<Equation> refinedAbstractionEquations = const_cast<SigmoidConstraint&>(*this).extractNewLowerEquations();
@@ -163,9 +163,7 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits()
 
 void SigmoidConstraint::dump( String &output ) const
 {
-    output = Stringf( "SigmoidConstraint: x%u = sigmoid( x%u ).\n",
-                      _f, _b
-    );
+    output = Stringf( "SigmoidConstraint: x%u = sigmoid( x%u ).\n", _f, _b);
 
     output += Stringf( "b in [%s, %s], ",
                        _lowerBounds.exists( _b ) ? Stringf( "%lf", _lowerBounds[_b] ).ascii() : "-inf",
@@ -220,17 +218,17 @@ bool SigmoidConstraint::constraintObsolete() const
     return false;
 }
 
-void SigmoidConstraint::getEntailedTightenings( List<Tightening> &tightenings ) const
+void SigmoidConstraint::getEntailedTightenings(__attribute__((unused)) List<Tightening> &tightenings ) const
 {
     //TODO: implement this
 }
 
-void SigmoidConstraint::addAuxiliaryEquations( InputQuery &inputQuery )
+void SigmoidConstraint::addAuxiliaryEquations(__attribute__((unused)) InputQuery &inputQuery )
 {
     //TODO: implement this
 }
 
-void SigmoidConstraint::getCostFunctionComponent( Map<unsigned, double> &cost ) const
+void SigmoidConstraint::getCostFunctionComponent(__attribute__((unused)) Map<unsigned, double> &cost ) const
 {
     //TODO: implement this
 }

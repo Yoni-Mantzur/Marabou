@@ -143,6 +143,11 @@ bool FloatUtils::isInf( double x )
     return isinf( x );
 }
 
+double FloatUtils::sigmoid( double x )
+{
+    return 1 / ( 1 + exp( -x ) );
+}
+
 //
 // Local Variables:
 // compile-command: "make -C ../.. "

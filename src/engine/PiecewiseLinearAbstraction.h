@@ -10,25 +10,41 @@
 #include "Equation.h"
 #include "PiecewiseLinearConstraint.h"
 
-class PiecewiseLinearAbstraction {
+class PiecewiseLinearAbstraction
+{
 public:
-    /*
-     * Refine the abstraction guided _listViolations
-     */
-    List<Equation> extractNewUpperEquations();
 
-    List<Equation> extractNewLowerEquations();
+    class GuidedPoint
+    {
+    public:
+        GuidedPoint(double x, double y) :  x(x), y(y) {}
+        double x;
+        double y;
+    };
 
-    void addGuidedPoint(double b, double f);
 
-    virtual PiecewiseLinearConstraint& getConstraint() = 0;
+    List<PiecewiseLinearCaseSplit> getUpperSplits() const;
+
+    List<PiecewiseLinearCaseSplit> getLowerSplits() const;
+
+    void addGuidedPoint(GuidedPoint p);
+
+    void refine();
+
+    virtual unsigned getB() const = 0;
+    virtual unsigned getF() const = 0;
+
 
 private:
-    List<Pair<double, double>> _guidedPoints;
-    List<Equation> _abstractedUpperEquations;
-    List<Equation> _abstractedLowerEquations;
+    List<GuidedPoint> _guidedPoints;
+    List<PiecewiseLinearCaseSplit> _abstractedUpperSplits;
+    List<PiecewiseLinearCaseSplit> _abstractedLowerSplits;
 
-    Equation buildLinearEquationGivenTwoPoints(double x0, double y0, double x1, double y1);
+    void refineUpperAbstraction();
+    void refineLowerAbstraction();
+    Equation buildLinearEquationGivenTwoPoints(GuidedPoint p1, GuidedPoint p2);
+
+    List<Tightening> boundVars(GuidedPoint p1, GuidedPoint p2);
 
 };
 

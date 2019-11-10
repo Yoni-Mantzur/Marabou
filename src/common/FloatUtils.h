@@ -52,7 +52,7 @@ public:
     static bool wellFormed( double x );
     static bool isNan( double x );
     static bool isInf( double x );
-    static double sigmoid( double x );
+    static double sigmoid( double x, unsigned accuracyFactor = 6 );
 };
 
 #endif // __FloatUtils_h__

@@ -131,8 +131,12 @@ public:
     /*
       Get the index of the B variable.
     */
-    unsigned getB() const;
+    unsigned getB() const { return _b; }
 
+    /*
+        Get the index of the B variable.
+    */
+    unsigned getF() const { return _f; }
 
     /*
       Check if the aux variable is in use and retrieve it
@@ -146,7 +150,16 @@ public:
     */
     bool supportsSymbolicBoundTightening() const;
 
+
     virtual PiecewiseLinearConstraint& getConstraint();
+
+    /*
+     * The constraint is active even if splited
+     */
+    virtual bool isActive() const
+    {
+        return true;
+    }
 
 private:
 

@@ -143,9 +143,13 @@ bool FloatUtils::isInf( double x )
     return isinf( x );
 }
 
-double FloatUtils::sigmoid( double x )
+double FloatUtils::sigmoid( double x, unsigned accuracyFactor )
 {
-    return 1 / ( 1 + exp( -x ) );
+    double sigmoid_val = 1 / ( 1 + exp( -x ) );
+    double decimalPart;
+    double fracPart = modf(sigmoid_val, &decimalPart);
+    double sigmoid_val_chopped = decimalPart + round(fracPart * pow(10, accuracyFactor)) / pow(10, accuracyFactor);
+    return sigmoid_val_chopped;
 }
 
 //

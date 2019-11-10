@@ -4,45 +4,73 @@
 
 #include "PiecewiseLinearAbstraction.h"
 
-List<Equation> PiecewiseLinearAbstraction::extractNewLowerEquations()
+void PiecewiseLinearAbstraction::refineLowerAbstraction()
 {
-    List<Equation> refinedEquations;
-
     auto guidedPointsIter =_guidedPoints.begin();
-    double x0 = guidedPointsIter->first(), y0 = guidedPointsIter->second();
-    double x1, y1;
+    GuidedPoint p1  = *guidedPointsIter;
     while (++guidedPointsIter != _guidedPoints.end())
     {
-        x1 = guidedPointsIter->first(), y1 = guidedPointsIter->second();
+        GuidedPoint p2 = *guidedPointsIter;
+        PiecewiseLinearCaseSplit split;
 
-        Equation newLowerEquation = buildLinearEquationGivenTwoPoints(x0, y0, x1, y1);
-        refinedEquations.append(newLowerEquation);
+        Equation lowerEquation = buildLinearEquationGivenTwoPoints(p1, p2);
+        lowerEquation.setType(Equation::GE);
+        split.addEquation(buildLinearEquationGivenTwoPoints(p1, p2));
+        for (Tightening tightening: boundVars(p1, p2))
+            split.storeBoundTightening(tightening);
 
-        x0 = x1, y0 = y1;
+        _abstractedLowerSplits.append(split);
+
+        p1 = p2;
     }
-    _abstractedUpperEquations.append(refinedEquations);
-    return refinedEquations;
 }
 
-Equation PiecewiseLinearAbstraction::buildLinearEquationGivenTwoPoints(double x0, double y0,
-                                                                       double x1, double y1)
+void PiecewiseLinearAbstraction::refineUpperAbstraction()
 {
-    List<unsigned>  vars = getConstraint().getParticipatingVariables();
+}
 
-    unsigned b = vars.back(), f = vars.front();
+List<Tightening> PiecewiseLinearAbstraction::boundVars(GuidedPoint p1, GuidedPoint p2) {
+    List<Tightening> bounds;
+    unsigned b = getB(), f = getF();
+
+    // Bound b
+    bounds.append(Tightening (b, p1.x, Tightening::LB));
+    bounds.append(Tightening(b, p2.x, Tightening::UB));
+
+    // Bound f
+    bounds.append(Tightening(f, p1.y, Tightening::LB));
+    bounds.append(Tightening(f, p2.y, Tightening::UB));
+
+    return bounds;
+}
+
+Equation PiecewiseLinearAbstraction::buildLinearEquationGivenTwoPoints(GuidedPoint p1, GuidedPoint p2)
+{
+    unsigned b = getB(), f = getF();
+    double x0 = p1.x, y0 = p1.y, x1 = p2.x, y1 = p2.y;
     double slot = (y1 - y0) / (x1 - x0);
 
     Equation equation;
-    equation.addAddend(1, f);
-    equation.addAddend(-slot, b);
-    equation.setScalar(y0 - slot * x0);
+    equation.addAddend(slot, b);
+    equation.addAddend(-1, f);
+    equation.setScalar(slot * x0 - y0);
 
     return equation;
 }
 
-
-void PiecewiseLinearAbstraction::addGuidedPoint(double b, double f)
+void PiecewiseLinearAbstraction::addGuidedPoint(GuidedPoint p)
 {
-    _guidedPoints.append(Pair<double, double>(b, f));
+    _guidedPoints.append(p);
+}
+
+void PiecewiseLinearAbstraction::refine()
+{
+    refineLowerAbstraction();
+    refineUpperAbstraction();
+}
+
+List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getLowerSplits() const
+{
+    return _abstractedLowerSplits;
 }
 

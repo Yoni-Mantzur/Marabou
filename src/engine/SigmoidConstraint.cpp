@@ -130,10 +130,7 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
 
     List <PiecewiseLinearConstraint::Fix> fixes;
 
-    // TODO: Refactor this casting
-    const_cast<SigmoidConstraint&>(*this).addGuidedPoint(bValue, sigmoidValue);
-    // TODO: Add all unsatisfied pts
-
+    fixes.append(Fix(_f, sigmoidValue));
     return fixes;
 }
 
@@ -145,19 +142,25 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getSmartFixes(__attribut
 
 List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
 {
-    // TODO: Refactor this casting
-    List<Equation> refinedAbstractionEquations = const_cast<SigmoidConstraint&>(*this).extractNewLowerEquations();
-    // TODO: ADD UPPER EQUATIONS
-    
-    List<PiecewiseLinearCaseSplit> splits;
+    ASSERT(_assignment.exists(_b));
+    ASSERT(_assignment.exists(_f));
+    ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f));
+    ASSERT(_upperBounds.exists(_b) && _upperBounds.exists(_f));
 
-    for (Equation equation : refinedAbstractionEquations)
-    {
-        PiecewiseLinearCaseSplit caseSplit;
-        caseSplit.addEquation(equation);
-        // TODO: storeBoundTightening for the current region
-        splits.append(caseSplit);
-    }
+    double bValue = _assignment.get(_b);
+    double sigmoidValue = FloatUtils::sigmoid(bValue);
+
+    // TODO: Refactor this casting
+    // TODO: guided points should be appended in satisfied
+    const_cast<SigmoidConstraint*>(this)->addGuidedPoint(GuidedPoint(_lowerBounds[_b], _lowerBounds[_f]));
+    const_cast<SigmoidConstraint*>(this)->addGuidedPoint(GuidedPoint(bValue, sigmoidValue));
+    const_cast<SigmoidConstraint*>(this)->addGuidedPoint(GuidedPoint(_upperBounds[_b], _upperBounds[_f]));
+
+    const_cast<SigmoidConstraint*>(this)->refine();
+
+    List<PiecewiseLinearCaseSplit> splits = getLowerSplits();
+    // TODO: ADD UPPER EQUATIONS
+
     return splits;
 }
 
@@ -249,3 +252,4 @@ PiecewiseLinearConstraint& SigmoidConstraint::getConstraint()
 {
     return *this;
 }
+

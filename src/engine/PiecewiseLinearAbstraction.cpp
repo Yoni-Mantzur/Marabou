@@ -7,6 +7,7 @@
 
 List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedLowerAbstraction(List<GuidedPoint> guidedPoints) const
 {
+    List<PiecewiseLinearCaseSplit> splits;
     auto guidedPointsIter = guidedPoints.begin();
 
     GuidedPoint p1  = *guidedPointsIter;
@@ -21,8 +22,10 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedLowerAbstra
         for (Tightening tightening: boundVars(p1, p2))
             split.storeBoundTightening(tightening);
 
+        splits.append(split);
         p1 = p2;
     }
+    return splits;
 }
 
 List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedUpperAbstraction(__attribute__((unused))List<GuidedPoint> guidedPoints) const
@@ -30,7 +33,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedUpperAbstra
     return List<PiecewiseLinearCaseSplit>();
 }
 
-List<Tightening> PiecewiseLinearAbstraction::boundVars(GuidedPoint p1, GuidedPoint p2) {
+List<Tightening> PiecewiseLinearAbstraction::boundVars(GuidedPoint p1, GuidedPoint p2) const{
     List<Tightening> bounds;
     unsigned b = getB(), f = getF();
 
@@ -64,7 +67,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedSplits(List
 {
     List<PiecewiseLinearCaseSplit> splits;
     splits.append(getRefinedLowerAbstraction(guidedPoints));
-    splits.append(getRefinedUpperAbstraction(guidedPoints));
+//    splits.append(getRefinedUpperAbstraction(guidedPoints));
 
     return splits;
 }

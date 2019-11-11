@@ -146,7 +146,10 @@ public:
         unsigned b = 2;
         unsigned f = 3;
 
+        MockConstraintBoundTightener constraintBoundTightener;
         SigmoidConstraint sigmoid( b, f );
+
+        sigmoid.registerConstraintBoundTightener(&constraintBoundTightener);
 
         List<PiecewiseLinearConstraint::Fix> fixes;
 
@@ -157,7 +160,7 @@ public:
         sigmoid.notifyUpperBound(f, FloatUtils::sigmoid(1));
 
         sigmoid.notifyVariableValue(b, 0.5);
-        sigmoid.notifyVariableValue(f, 2);
+        sigmoid.notifyVariableValue(f, 0.6);
 
         List<PiecewiseLinearCaseSplit> splits = sigmoid.getCaseSplits();
 
@@ -188,7 +191,7 @@ public:
         assertBounds(split1, boundsForSplit1);
 
         Equation eq2 = split2.getEquations().front();
-        TS_ASSERT_EQUALS(getEquationValue(eq1, 0.5, FloatUtils::sigmoid(0.5)), 0);
+        TS_ASSERT_EQUALS(getEquationValue(eq2, 0.5, FloatUtils::sigmoid(0.5)), 0);
         TS_ASSERT_EQUALS(getEquationValue(eq2, 1, FloatUtils::sigmoid(1)), 0);
         assertBounds(split2, boundsForSplit2);
     }

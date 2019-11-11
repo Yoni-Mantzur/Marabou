@@ -70,7 +70,7 @@ public:
 
         inputQuery.addPiecewiseLinearConstraint( sigmoid1 );
 
-        int outputStream = redirectOutputToFile( "logs/sigmoid_feasible_1.txt" );
+        int outputStream = redirectOutputToFile( "/cs/labs/guykatz/yoni_mantzur/marabou/regress/logs/sigmoid_feasible_1.txt" );
 
         struct timespec start = TimeUtils::sampleMicro();
 

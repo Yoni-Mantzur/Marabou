@@ -33,7 +33,7 @@ private:
     List<PiecewiseLinearCaseSplit> getRefinedLowerAbstraction(List<GuidedPoint> guidedPoints) const;
     Equation buildLinearEquationGivenTwoPoints(GuidedPoint p1, GuidedPoint p2) const;
 
-    List<Tightening> boundVars(GuidedPoint p1, GuidedPoint p2);
+    List<Tightening> boundVars(GuidedPoint p1, GuidedPoint p2) const;
 };
 
 

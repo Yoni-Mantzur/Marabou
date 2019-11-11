@@ -150,9 +150,6 @@ public:
     */
     bool supportsSymbolicBoundTightening() const;
 
-
-    virtual PiecewiseLinearConstraint& getConstraint();
-
     /*
      * The constraint is active even if splited
      */
@@ -171,6 +168,7 @@ private:
       Return true iff b or f are out of bounds.
     */
     bool haveOutOfBoundVariables() const;
+    bool isValueInSigmoidBounds(double value) const;
 
 };
 

@@ -64,6 +64,8 @@ const double GlobalConfiguration::PSE_GAMMA_UPDATE_TOLERANCE = 0.000000001;
 
 const double GlobalConfiguration::RELU_CONSTRAINT_COMPARISON_TOLERANCE = 0.001;
 const double GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE = 0.000001;
+const double GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND = 1 - SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE;
+const double GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND = -1 + SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE;
 
 const bool GlobalConfiguration::ONLY_AUX_INITIAL_BASIS = false;
 

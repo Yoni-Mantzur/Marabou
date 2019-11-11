@@ -102,13 +102,13 @@ int main()
 {
     try
     {
-//        lps();
-//
-//    	relus();
-//
-//        max();
-//
-//        max_relu();
+        lps();
+
+    	relus();
+
+        max();
+
+        max_relu();
 
         sigmoid();
 

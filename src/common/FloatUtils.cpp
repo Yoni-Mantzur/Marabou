@@ -160,9 +160,9 @@ double FloatUtils::sigmoid( double x, unsigned precisionFactor )
 
 double FloatUtils::sigmoidInverse( double x, unsigned accuracyFactor )
 {
-    ASSERT(x != 1);
-    double sigmoidInverseValue = log ( x / 1 - x );
-    return setPreciosion(sigmoidInverseValue);
+    ASSERT(x < 1 && x > -1);
+    double sigmoidInverseValue = log ( x / ( 1 - x ) );
+    return setPrecision(sigmoidInverseValue, accuracyFactor);
 }
 
 //

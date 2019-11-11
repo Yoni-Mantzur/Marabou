@@ -31,6 +31,7 @@
 #include "mps_lp_infeasible_1.h"
 #include "relu_feasible_1.h"
 #include "relu_feasible_2.h"
+#include "sigmoid_feasible_1.h"
 
 void lps()
 {
@@ -90,6 +91,13 @@ void max_relu()
     mrf1.run();
 }
 
+void sigmoid()
+{
+    printTitle( "Sigmoid / Sat" );
+    Sigmoid_Feasible_1 sf1;
+    sf1.run;
+}
+
 int main()
 {
     try
@@ -101,6 +109,8 @@ int main()
         max();
 
         max_relu();
+
+        sigmoid();
 
         printf( "\n\n" );
 	}

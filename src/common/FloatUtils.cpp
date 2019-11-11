@@ -14,6 +14,7 @@
 **/
 
 #include "FloatUtils.h"
+#include "Debug.h"
 #include <iomanip>
 #include <math.h>
 #include <sstream>
@@ -143,13 +144,25 @@ bool FloatUtils::isInf( double x )
     return isinf( x );
 }
 
-double FloatUtils::sigmoid( double x, unsigned accuracyFactor )
+
+double FloatUtils::setPrecision( double number, unsigned precisionFactor )
 {
-    double sigmoid_val = 1 / ( 1 + exp( -x ) );
     double decimalPart;
-    double fracPart = modf(sigmoid_val, &decimalPart);
-    double sigmoid_val_chopped = decimalPart + round(fracPart * pow(10, accuracyFactor)) / pow(10, accuracyFactor);
-    return sigmoid_val_chopped;
+    double fracPart = modf(number, &decimalPart);
+    return decimalPart + round(fracPart * pow(10, precisionFactor)) / pow(10, precisionFactor);
+}
+
+double FloatUtils::sigmoid( double x, unsigned precisionFactor )
+{
+    double sigmoidVal = 1 / ( 1 + exp( -x ) );
+    return setPrecision(sigmoidVal, precisionFactor);
+}
+
+double FloatUtils::sigmoidInverse( double x, unsigned accuracyFactor )
+{
+    ASSERT(x != 1);
+    double sigmoidInverseValue = log ( x / 1 - x );
+    return setPreciosion(sigmoidInverseValue);
 }
 
 //

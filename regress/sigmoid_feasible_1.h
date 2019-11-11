@@ -12,11 +12,12 @@
 #include "RegressUtils.h"
 
 class Sigmoid_Feasible_1 {
+public:
     void run()
     {
         //   0.5   <= x0  <= 1
-        //   0.62246   <= x1f
-        //   0.62246 <= x3
+        //   -1  <= x1f  <= 1
+        //   -1 <= x3 <= 1
         //
         //  x0 - x1b = 0        -->  x0 - x1b + x4 = 0
         //  x1f - x3 = 0  -->  x1f - x3 + x5 = 0
@@ -28,16 +29,14 @@ class Sigmoid_Feasible_1 {
         //   x2: x1f
         //   x3: x3
 
-        double large = 1000;
-
         InputQuery inputQuery;
         inputQuery.setNumberOfVariables( 6 );
 
         inputQuery.setLowerBound( 0, 0.5 );
         inputQuery.setUpperBound( 0, 1 );
 
-        inputQuery.setLowerBound( 1, -large );
-        inputQuery.setUpperBound( 1, large );
+        inputQuery.setLowerBound( 1, -1 );
+        inputQuery.setUpperBound( 1, 1 );
 
         inputQuery.setLowerBound( 2, -1 );
         inputQuery.setUpperBound( 2, 1 );

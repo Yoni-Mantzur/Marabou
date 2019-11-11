@@ -64,7 +64,12 @@ void SigmoidConstraint::unregisterAsWatcher( ITableau *tableau )
 
 void SigmoidConstraint::notifyVariableValue( unsigned variable, double value )
 {
-    //  TODO:ADD ASSIGNMENT TOLERANCE
+    if ( FloatUtils::isZero( 1 - value, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE ) )
+        value = 0.0;
+
+    if ( FloatUtils::isZero( 1 + value, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE ) )
+        value = 0.0;
+
     _assignment[variable] = value;
 }
 
@@ -77,7 +82,16 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound )
         return;
 
     _lowerBounds[variable] = bound;
-    //  TODO:ADD TIGHTER BOUND
+
+    double sigmoidBound = FloatUtils::sigmoid(bound);
+    if (variable == _b && FloatUtils::gt(sigmoidBound, _lowerBounds[_f] ) ) {
+        _constraintBoundTightener->registerTighterLowerBound(_f, sigmoidBound);
+        return;
+    }
+
+    double sigmoidInverseBound = FloatUtils::sigmoidInverse(bound);
+    if (variable == _f && FloatUtils::gt(sigmoidInverseBound, _lowerBounds[_b] ) )
+        _constraintBoundTightener->registerTighterLowerBound(_b, sigmoidInverseBound);
 }
 
 void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
@@ -89,7 +103,16 @@ void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
         return;
 
     _upperBounds[variable] = bound;
-    //  TODO: ADD TIGHTER BOUND
+
+    double sigmoidBound = FloatUtils::sigmoid(bound);
+    if (variable == _b && FloatUtils::lt(sigmoidBound, _upperBounds[_f] ) ) {
+        _constraintBoundTightener->registerTighterUpperBound(_f, sigmoidBound);
+        return;
+    }
+
+    double sigmoidInverseBound = FloatUtils::sigmoidInverse(bound);
+    if (variable == _f && FloatUtils::lt(sigmoidInverseBound, _upperBounds[_b] ) )
+        _constraintBoundTightener->registerTighterUpperBound(_b, sigmoidInverseBound);
 }
 
 bool SigmoidConstraint::participatingVariable( unsigned variable ) const
@@ -128,9 +151,13 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
     double bValue = _assignment.get(_b);
     double sigmoidValue = FloatUtils::sigmoid(bValue);
 
+    double fValue = _assignment.get(_f);
+    double sigmoidInverseValue = FloatUtils::sigmoidInverse(fValue);
+
     List <PiecewiseLinearConstraint::Fix> fixes;
 
-    fixes.append(Fix(_f, sigmoidValue));
+    fixes.append(Fix(_f, sigmoidValue ));
+    fixes.append(Fix(_b, sigmoidInverseValue ));
     return fixes;
 }
 
@@ -151,14 +178,13 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
     double sigmoidValue = FloatUtils::sigmoid(bValue);
 
     // TODO: Refactor this casting
-    // TODO: guided points should be appended in satisfied
-    const_cast<SigmoidConstraint*>(this)->addGuidedPoint(GuidedPoint(_lowerBounds[_b], _lowerBounds[_f]));
-    const_cast<SigmoidConstraint*>(this)->addGuidedPoint(GuidedPoint(bValue, sigmoidValue));
-    const_cast<SigmoidConstraint*>(this)->addGuidedPoint(GuidedPoint(_upperBounds[_b], _upperBounds[_f]));
+    // TODO: guided points should be append in satisfied
+    List<GuidedPoint> guidedPoints;
+    guidedPoints.append(GuidedPoint(_lowerBounds[_b], _lowerBounds[_f]));
+    guidedPoints.append(GuidedPoint(bValue, sigmoidValue));
+    guidedPoints.append(GuidedPoint(_upperBounds[_b], _upperBounds[_f]));
 
-    const_cast<SigmoidConstraint*>(this)->refine();
-
-    List<PiecewiseLinearCaseSplit> splits = getLowerSplits();
+    List<PiecewiseLinearCaseSplit> splits = getRefinedSplits(guidedPoints);
     // TODO: ADD UPPER EQUATIONS
 
     return splits;
@@ -221,9 +247,28 @@ bool SigmoidConstraint::constraintObsolete() const
     return false;
 }
 
-void SigmoidConstraint::getEntailedTightenings(__attribute__((unused)) List<Tightening> &tightenings ) const
+void SigmoidConstraint::getEntailedTightenings(List<Tightening> &tightenings ) const
 {
-    //TODO: implement this
+    ASSERT( _lowerBounds.exists( _b ) && _lowerBounds.exists( _f ) &&
+            _upperBounds.exists( _b ) && _upperBounds.exists( _f ) );
+
+    double bLowerBound = _lowerBounds[_b], sigmoidbLowerBound = FloatUtils::sigmoid( bLowerBound );
+    double fLowerBound = _lowerBounds[_f], sigmoidInversefLowerBound = FloatUtils::sigmoidInverse( fLowerBound );
+
+    double bUpperBound = _upperBounds[_b], sigmoidbUpperBound = FloatUtils::sigmoid( bUpperBound );
+    double fUpperBound = _upperBounds[_f], sigmoidInversefUpperBound = FloatUtils::sigmoidInverse( fUpperBound );
+
+    if (FloatUtils::lt(bLowerBound, sigmoidInversefLowerBound))
+        tightenings.append(Tightening(_b, sigmoidInversefLowerBound, Tightening::LB));
+    
+    if (FloatUtils::lt(fLowerBound, sigmoidbLowerBound))
+        tightenings.append(Tightening(_f, sigmoidbLowerBound, Tightening::LB));
+    
+    if (FloatUtils::gt(bUpperBound, sigmoidInversefUpperBound))
+        tightenings.append(Tightening(_b, sigmoidInversefUpperBound, Tightening::UB));
+
+    if (FloatUtils::gt(fUpperBound, sigmoidbUpperBound))
+        tightenings.append(Tightening(_f, sigmoidbUpperBound, Tightening::UB));
 }
 
 void SigmoidConstraint::addAuxiliaryEquations(__attribute__((unused)) InputQuery &inputQuery )
@@ -248,8 +293,4 @@ bool SigmoidConstraint::supportsSymbolicBoundTightening() const
     return false;
 }
 
-PiecewiseLinearConstraint& SigmoidConstraint::getConstraint()
-{
-    return *this;
-}
 

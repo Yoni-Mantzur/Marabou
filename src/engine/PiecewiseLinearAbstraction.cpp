@@ -4,11 +4,13 @@
 
 #include "PiecewiseLinearAbstraction.h"
 
-void PiecewiseLinearAbstraction::refineLowerAbstraction()
+
+List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedLowerAbstraction(List<GuidedPoint> guidedPoints) const
 {
-    auto guidedPointsIter =_guidedPoints.begin();
+    auto guidedPointsIter = guidedPoints.begin();
+
     GuidedPoint p1  = *guidedPointsIter;
-    while (++guidedPointsIter != _guidedPoints.end())
+    while (++guidedPointsIter != guidedPoints.end())
     {
         GuidedPoint p2 = *guidedPointsIter;
         PiecewiseLinearCaseSplit split;
@@ -19,14 +21,13 @@ void PiecewiseLinearAbstraction::refineLowerAbstraction()
         for (Tightening tightening: boundVars(p1, p2))
             split.storeBoundTightening(tightening);
 
-        _abstractedLowerSplits.append(split);
-
         p1 = p2;
     }
 }
 
-void PiecewiseLinearAbstraction::refineUpperAbstraction()
+List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedUpperAbstraction(__attribute__((unused))List<GuidedPoint> guidedPoints) const
 {
+    return List<PiecewiseLinearCaseSplit>();
 }
 
 List<Tightening> PiecewiseLinearAbstraction::boundVars(GuidedPoint p1, GuidedPoint p2) {
@@ -44,7 +45,7 @@ List<Tightening> PiecewiseLinearAbstraction::boundVars(GuidedPoint p1, GuidedPoi
     return bounds;
 }
 
-Equation PiecewiseLinearAbstraction::buildLinearEquationGivenTwoPoints(GuidedPoint p1, GuidedPoint p2)
+Equation PiecewiseLinearAbstraction::buildLinearEquationGivenTwoPoints(GuidedPoint p1, GuidedPoint p2) const
 {
     unsigned b = getB(), f = getF();
     double x0 = p1.x, y0 = p1.y, x1 = p2.x, y1 = p2.y;
@@ -58,19 +59,14 @@ Equation PiecewiseLinearAbstraction::buildLinearEquationGivenTwoPoints(GuidedPoi
     return equation;
 }
 
-void PiecewiseLinearAbstraction::addGuidedPoint(GuidedPoint p)
+
+List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedSplits(List<GuidedPoint> guidedPoints) const
 {
-    _guidedPoints.append(p);
+    List<PiecewiseLinearCaseSplit> splits;
+    splits.append(getRefinedLowerAbstraction(guidedPoints));
+    splits.append(getRefinedUpperAbstraction(guidedPoints));
+
+    return splits;
 }
 
-void PiecewiseLinearAbstraction::refine()
-{
-    refineLowerAbstraction();
-    refineUpperAbstraction();
-}
-
-List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getLowerSplits() const
-{
-    return _abstractedLowerSplits;
-}
 

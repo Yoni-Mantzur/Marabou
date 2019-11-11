@@ -95,20 +95,20 @@ void sigmoid()
 {
     printTitle( "Sigmoid / Sat" );
     Sigmoid_Feasible_1 sf1;
-    sf1.run;
+    sf1.run();
 }
 
 int main()
 {
     try
     {
-        lps();
-
-    	relus();
-
-        max();
-
-        max_relu();
+//        lps();
+//
+//    	relus();
+//
+//        max();
+//
+//        max_relu();
 
         sigmoid();
 

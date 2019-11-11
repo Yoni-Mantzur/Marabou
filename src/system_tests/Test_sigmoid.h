@@ -2,25 +2,33 @@
 // Created by yoni_mantzur on 11/11/19.
 //
 
-#ifndef MARABOU_SIGMOID_FEASIBLE_1_H
-#define MARABOU_SIGMOID_FEASIBLE_1_H
+#include <cxxtest/TestSuite.h>
 
 #include "Engine.h"
 #include "FloatUtils.h"
 #include "InputQuery.h"
 #include "SigmoidConstraint.h"
-#include "RegressUtils.h"
 
-class Sigmoid_Feasible_1 {
+
+class SigmoidTestSuite : public CxxTest::TestSuite
+{
 public:
-    void run()
+    void setUp()
+    {
+    }
+
+    void tearDown()
+    {
+    }
+
+    void test_sigmoid_1()
     {
         //   0.5   <= x0  <= 1
         //   -1  <= x1f  <= 1
         //   -1 <= x3 <= 1
         //
-        //  x0 - x1b = 0        -->  x0 - x1b + x4 = 0
-        //  x1f - x3 = 0  -->  x1f - x3 + x5 = 0
+        //  x0 - x1b = 0        -->  x0 - x1b  = 0
+        //  x1f - x3 = 0  -->  x1f - x3  = 0
         //
         //  x1f = Sigmoid(x1b)
         //
@@ -29,40 +37,37 @@ public:
         //   x2: x1f
         //   x3: x3
 
+        double sigLowerBound = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
+        double sigUpperBound = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
+        double large = 1000;
+
         InputQuery inputQuery;
-        inputQuery.setNumberOfVariables( 6 );
+        inputQuery.setNumberOfVariables( 4 );
 
         inputQuery.setLowerBound( 0, 0.5 );
         inputQuery.setUpperBound( 0, 1 );
 
-        inputQuery.setLowerBound( 1, -1 );
-        inputQuery.setUpperBound( 1, 1 );
+        inputQuery.setLowerBound( 1, -large );
+        inputQuery.setUpperBound( 1, large );
 
-        inputQuery.setLowerBound( 2, -1 );
-        inputQuery.setUpperBound( 2, 1 );
+        inputQuery.setLowerBound( 2, sigLowerBound );
+        inputQuery.setUpperBound( 2, sigUpperBound );
 
-        inputQuery.setLowerBound( 3, -1 );
-        inputQuery.setUpperBound( 3, 1 );
+        inputQuery.setLowerBound( 3, sigLowerBound );
+        inputQuery.setUpperBound( 3, sigUpperBound );
 
 
-        inputQuery.setLowerBound( 4, 0 );
-        inputQuery.setUpperBound( 4, 0 );
-        inputQuery.setLowerBound( 5, 0 );
-        inputQuery.setUpperBound( 5, 0 );
-
-        // x0 - x1b + x4 = 0
+        // x0 - x1b = 0
         Equation equation1;
         equation1.addAddend( 1, 0 );
         equation1.addAddend( -1, 1 );
-        equation1.addAddend( 1, 4 );
         equation1.setScalar( 0 );
         inputQuery.addEquation( equation1 );
 
-        // x1f - x3 + x5 = 0
+        // x1f - x3 = 0
         Equation equation2;
         equation2.addAddend( 1, 2 );
         equation2.addAddend( -1, 3 );
-        equation2.addAddend( 1, 5 );
         equation2.setScalar( 0 );
         inputQuery.addEquation( equation2 );
 
@@ -70,30 +75,9 @@ public:
 
         inputQuery.addPiecewiseLinearConstraint( sigmoid1 );
 
-        int outputStream = redirectOutputToFile( "/cs/labs/guykatz/yoni_mantzur/marabou/regress/logs/sigmoid_feasible_1.txt" );
-
-        struct timespec start = TimeUtils::sampleMicro();
-
         Engine engine;
-        if ( !engine.processInputQuery( inputQuery ) )
-        {
-            struct timespec end = TimeUtils::sampleMicro();
-            restoreOutputStream( outputStream );
-            printFailed( "sigmoid_feasible_1", start, end );
-            return;
-        }
-
-        bool result = engine.solve();
-
-        struct timespec end = TimeUtils::sampleMicro();
-
-        restoreOutputStream( outputStream );
-
-        if ( !result )
-        {
-            printFailed( "sigmoid_feasible_1", start, end );
-            return;
-        }
+        TS_ASSERT_THROWS_NOTHING ( engine.processInputQuery( inputQuery ) );
+        TS_ASSERT_THROWS_NOTHING ( engine.solve() );
 
         engine.extractSolution( inputQuery );
 
@@ -124,12 +108,7 @@ public:
             correctSolution = false;
         }
 
-        if ( !correctSolution )
-            printFailed( "sigmoid_feasible_1", start, end );
-        else
-            printPassed( "sigmoid", start, end );
+        TS_ASSERT ( correctSolution );
     }
 };
 
-
-#endif //MARABOU_SIGMOID_FEASIBLE_1_H

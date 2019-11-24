@@ -159,6 +159,8 @@ public:
         return true;
     }
 
+    void setLogFile(File *file = nullptr);
+
 private:
 
     unsigned _b, _f;
@@ -172,7 +174,7 @@ private:
     bool isValueInSigmoidBounds(double value) const;
 
     /* For debugging propose */
-    File _file;
+    IFile *_logFile = nullptr;
     void writePoint(double x, double y, bool isFix = false);
     void writeLimit(double lower, double upper, bool isB = false);
     void writeEquations(Equation eq);

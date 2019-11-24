@@ -34,6 +34,7 @@ void BerkeleyNeuralNetwork::Equation::dump()
 BerkeleyNeuralNetwork::BerkeleyNeuralNetwork( const String &path )
     : _file( path )
     , _maxVar( 0 )
+    , _isNetWithSigmoidNodes(false)
 {
     _file.open( File::MODE_READ );
 }
@@ -63,6 +64,11 @@ unsigned BerkeleyNeuralNetwork::getNumReluNodes() const
     return _bToF.size();
 }
 
+unsigned BerkeleyNeuralNetwork::getNumSigmoidNodes() const
+{
+    return _bToF.size();
+}
+
 Set<unsigned> BerkeleyNeuralNetwork::getInputVariables() const
 {
     return _inputVars;
@@ -81,6 +87,11 @@ Map<unsigned, unsigned> BerkeleyNeuralNetwork::getFToB() const
 List<BerkeleyNeuralNetwork::Equation> BerkeleyNeuralNetwork::getEquations() const
 {
     return _equations;
+}
+
+bool BerkeleyNeuralNetwork::isNetWithSigmoidNodes() const
+{
+    return _isNetWithSigmoidNodes;
 }
 
 void BerkeleyNeuralNetwork::parseFile()
@@ -116,6 +127,8 @@ void BerkeleyNeuralNetwork::processLine( const String &line )
 {
     if ( line.contains( "Relu" ) )
         processReluLine( line );
+    if ( line.contains("Sigmoid" ) )
+        processSigmoidLine( line );
     else
         processEquationLine( line );
 }
@@ -150,6 +163,40 @@ void BerkeleyNeuralNetwork::processReluLine( const String &line )
 
     _allRhsVars.insert( b );
     _allLhsVars.insert( f );
+}
+
+void BerkeleyNeuralNetwork::processSigmoidLine( const String &line )
+{
+    List<String> tokens = line.tokenize( "=" );
+    if ( tokens.size() != 2 )
+    {
+        printf( "Error! Expected 2 tokens\n" );
+        exit( 1 );
+    }
+
+    auto it = tokens.begin();
+    String firstToken = *it;
+    ++it;
+    String secondToken = *it;
+
+    unsigned f = varStringToUnsigned( firstToken.trim() );
+    String sigmoidB = secondToken.trim();
+    if ( !sigmoidB.contains( "Sigmoid" ) )
+    {
+        printf( "Error! Not a valid sigmoidB string: %s\n", sigmoidB.ascii() );
+        exit( 1 );
+    }
+
+    unsigned b = varStringToUnsigned( sigmoidB.substring( 8, sigmoidB.length() - 9 ) );
+
+    _bToF[b] = f;
+    _fToB[f] = b;
+    processVar( b );
+
+    _allRhsVars.insert( b );
+    _allLhsVars.insert( f );
+
+    _isNetWithSigmoidNodes = true;
 }
 
 unsigned BerkeleyNeuralNetwork::varStringToUnsigned( String varString )

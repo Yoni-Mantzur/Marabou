@@ -39,6 +39,9 @@ public:
 
         // Version flag
         VERSION,
+
+        // Model format
+        ACAS_FORMAT,
     };
 
     enum IntOptions {

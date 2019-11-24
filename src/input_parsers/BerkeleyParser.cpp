@@ -13,6 +13,7 @@
 
 **/
 
+#include <SigmoidConstraint.h>
 #include "BerkeleyParser.h"
 #include "FloatUtils.h"
 #include "InputQuery.h"
@@ -48,18 +49,32 @@ void BerkeleyParser::generateQuery( InputQuery &inputQuery )
         inputQuery.setUpperBound( it, max );
     }
 
-    // Declare relu pairs and set bounds
+    // Declare relu/sigmoid pairs and set bounds
     Map<unsigned, unsigned> fToB = _berkeleyNeuralNetwork.getFToB();
     for ( const auto &it : fToB )
     {
         unsigned f = it.first;
         unsigned b = it.second;
 
-        PiecewiseLinearConstraint *relu = new ReluConstraint( b, f );
-        inputQuery.addPiecewiseLinearConstraint( relu );
+        PiecewiseLinearConstraint *constraint;
+        double minF, maxF;
+        if (_berkeleyNeuralNetwork.isNetWithSigmoidNodes())
+        {
+            constraint = new SigmoidConstraint( b, f);
+            minF = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
+            maxF = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
+        }
+        else
+        {
+            constraint = new ReluConstraint( b, f );
+            minF = 0.0;
+            maxF = FloatUtils::infinity();
+        }
 
-        inputQuery.setLowerBound( f, 0.0 );
-        inputQuery.setUpperBound( f, FloatUtils::infinity() );
+        inputQuery.addPiecewiseLinearConstraint( constraint );
+
+        inputQuery.setLowerBound( f, minF );
+        inputQuery.setUpperBound( f, maxF );
 
         inputQuery.setLowerBound( b, FloatUtils::negativeInfinity() );
         inputQuery.setUpperBound( b, FloatUtils::infinity() );

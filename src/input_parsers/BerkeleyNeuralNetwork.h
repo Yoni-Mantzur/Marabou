@@ -62,6 +62,8 @@ public:
     unsigned getNumInputVariables() const;
     unsigned getNumOutputVariables() const;
     unsigned getNumReluNodes() const;
+    unsigned getNumSigmoidNodes() const;
+    bool isNetWithSigmoidNodes() const;
     Set<unsigned> getInputVariables() const;
     Set<unsigned> getOutputVariables() const;
     Map<unsigned, unsigned> getFToB() const;
@@ -90,13 +92,15 @@ private:
     unsigned _maxVar;
     Set<unsigned> _allRhsVars;
     Set<unsigned> _outputVars;
+    bool _isNetWithSigmoidNodes;
 
     /*
-      Process a single line of the input file, either a ReLU or
+      Process a single line of the input file, either a Sigmoid, a ReLU or
       an equation.
     */
     void processLine( const String &line );
     void processReluLine( const String &line );
+    void processSigmoidLine( const String &line );
     void processEquationLine( const String &line );
 
     /*

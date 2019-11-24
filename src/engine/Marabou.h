@@ -16,6 +16,7 @@
 #ifndef __Marabou_h__
 #define __Marabou_h__
 
+#include <BerkeleyParser.h>
 #include "AcasParser.h"
 #include "Engine.h"
 #include "InputQuery.h"
@@ -54,6 +55,11 @@ private:
       ACAS network parser
     */
     AcasParser *_acasParser;
+
+    /*
+      Berkley network parser
+     */
+    BerkeleyParser *_berkeleyParser;
 
     /*
       The solver

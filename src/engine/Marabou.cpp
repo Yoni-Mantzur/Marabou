@@ -28,6 +28,7 @@
 
 Marabou::Marabou( unsigned verbosity )
     : _acasParser( NULL )
+    , _berkeleyParser( NULL )
     , _engine( verbosity )
 {
 }
@@ -38,6 +39,12 @@ Marabou::~Marabou()
     {
         delete _acasParser;
         _acasParser = NULL;
+    }
+
+    if ( _berkeleyParser )
+    {
+        delete _berkeleyParser;
+        _berkeleyParser = NULL;
     }
 }
 
@@ -68,8 +75,16 @@ void Marabou::prepareInputQuery()
     printf( "Network: %s\n", networkFilePath.ascii() );
 
     // For now, assume the network is given in ACAS format
-    _acasParser = new AcasParser( networkFilePath );
-    _acasParser->generateQuery( _inputQuery );
+
+    if ( Options::get()->getBool( Options::ACAS_FORMAT ) )
+    {
+        _acasParser = new AcasParser( networkFilePath );
+        _acasParser->generateQuery( _inputQuery );
+    } else
+    {
+        _berkeleyParser = new BerkeleyParser( networkFilePath );
+        _berkeleyParser->generateQuery( _inputQuery );
+    }
 
     /*
       Step 2: extract the property in question

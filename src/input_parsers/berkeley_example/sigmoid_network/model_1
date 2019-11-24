@@ -1,3 +1,5 @@
-v3 = Sigmoid(v0)
-v4 = Sigmoid(v1)
-v5 = v3 + v4
+v2 = v0
+v3 = v1
+v4 = Sigmoid(v2)
+v5 = Sigmoid(v3)
+v6 = v4 + v5

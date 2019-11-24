@@ -32,7 +32,7 @@ void BerkeleyParser::generateQuery( InputQuery &inputQuery )
     //   1. One for every variable that's part of the query
 
     unsigned numberOfVariables =
-        _berkeleyNeuralNetwork.getNumVariables();
+        _berkeleyNeuralNetwork.getNumVariables();   
 
     printf( "Total number of Marabou variables: %u\n", numberOfVariables );
 
@@ -40,13 +40,30 @@ void BerkeleyParser::generateQuery( InputQuery &inputQuery )
 
     // Set bounds for inputs. Currently just [0,1]
     Set<unsigned> inputVariables = _berkeleyNeuralNetwork.getInputVariables();
+    int i = 0;
     for ( const auto &it : inputVariables )
     {
         double min = 0.0;
         double max = 1.0;
 
+        inputQuery.markInputVariable(it, i);
         inputQuery.setLowerBound( it, min );
         inputQuery.setUpperBound( it, max );
+        i++;
+    }
+
+    // Set bounds for outputs. Currently just [0,1]
+    Set<unsigned> outputsVariables = _berkeleyNeuralNetwork.getOutputVariables();
+    i = 0;
+    for ( const auto &it : outputsVariables )
+    {
+        double min = 0.0;
+        double max = 1.0;
+
+        inputQuery.markOutputVariable(it, i);
+        inputQuery.setLowerBound( it, min );
+        inputQuery.setUpperBound( it, max );
+        i++;
     }
 
     // Declare relu/sigmoid pairs and set bounds

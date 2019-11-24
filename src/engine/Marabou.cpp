@@ -74,9 +74,7 @@ void Marabou::prepareInputQuery()
     }
     printf( "Network: %s\n", networkFilePath.ascii() );
 
-    // For now, assume the network is given in ACAS format
-
-    if ( Options::get()->getBool( Options::ACAS_FORMAT ) )
+    if ( !Options::get()->getBool( Options::BERKELEY_FORMAT ) )
     {
         _acasParser = new AcasParser( networkFilePath );
         _acasParser->generateQuery( _inputQuery );

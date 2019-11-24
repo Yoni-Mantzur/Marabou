@@ -29,11 +29,11 @@ int main()
     {
         // Extract an input query from the network
         InputQuery inputQuery;
-        BerkeleyParser berkeleyParser( "./madry_network/model" );
+        BerkeleyParser berkeleyParser( "src/input_parsers/berkeley_example/madry_network/model" );
         berkeleyParser.generateQuery( inputQuery );
 
         // Run one of the examples through the network
-        File fixedInputFile( "./madry_network/real_0_adv_0.in" );
+        File fixedInputFile( "src/input_parsers/berkeley_example/madry_network/real_0_adv_0.in" );
         fixedInputFile.open( File::MODE_READ );
         String line = fixedInputFile.readLine();
         List<String> tokens = line.tokenize( " " );

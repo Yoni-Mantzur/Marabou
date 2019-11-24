@@ -41,7 +41,7 @@ public:
         VERSION,
 
         // Model format
-        ACAS_FORMAT,
+        BERKELEY_FORMAT,
     };
 
     enum IntOptions {

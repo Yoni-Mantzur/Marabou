@@ -21,10 +21,12 @@
 SigmoidConstraint::SigmoidConstraint( unsigned b, unsigned f )
         : _b ( b )
         , _f( f )
+        , _file(File( "/cs/labs/guykatz/yoni_mantzur/marabou/log/log_test.txt" ))
 {
 }
 
 SigmoidConstraint::SigmoidConstraint( const String &serializedSigmoid )
+    : _file(File( "/cs/labs/guykatz/yoni_mantzur/marabou/log/log_test.txt" ))
 {
     String constraintType = serializedSigmoid.substring(0, 7);
     ASSERT(constraintType == String("sigmoid"));
@@ -100,7 +102,7 @@ void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
 {
     ASSERT(variable == _b || isValueInSigmoidBounds(bound));
 
-        if ( _statistics )
+    if ( _statistics )
         _statistics->incNumBoundNotificationsPlConstraints();
 
     if ( _upperBounds.exists( variable ) && !FloatUtils::lt( bound, _upperBounds[variable] ) )
@@ -146,6 +148,14 @@ bool SigmoidConstraint::satisfied() const
     double bValue = _assignment.get( _b );
     double fValue = _assignment.get( _f );
 
+
+    DEBUG({
+    auto *s = const_cast<SigmoidConstraint*>(this);
+    s->writePoint(bValue, fValue);
+    s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
+    s->writeLimit(_lowerBounds[_f], _upperBounds[_f]);
+          });
+
     return FloatUtils::areEqual( FloatUtils::sigmoid(bValue), fValue,
             GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE );
 }
@@ -170,6 +180,13 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
         double sigmoidInverseValue = FloatUtils::sigmoidInverse(fValue);
         fixes.append(Fix(_b, sigmoidInverseValue ));
     }
+
+    DEBUG({
+    auto* s = const_cast<SigmoidConstraint*>(this);
+    s->writePoint(bValue, sigmoidValue, true);
+    if (isValueInSigmoidBounds( fValue ))
+        s->writePoint(FloatUtils::sigmoidInverse(fValue), fValue, true);
+          });
     return fixes;
 }
 
@@ -189,7 +206,6 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
     double bValue = _assignment.get(_b);
     double sigmoidValue = FloatUtils::sigmoid(bValue);
 
-    // TODO: Refactor this casting
     // TODO: guided points should be append in satisfied
     List<GuidedPoint> guidedPoints;
     guidedPoints.append(GuidedPoint(_lowerBounds[_b], _lowerBounds[_f]));
@@ -311,3 +327,53 @@ bool SigmoidConstraint::isValueInSigmoidBounds(double value) const
     return value < 1 && value > -1;
 }
 
+void SigmoidConstraint::writePoint(double x, double y, bool isFix)
+{
+    _file.open(IFile::MODE_WRITE_APPEND);
+    if (isFix)
+        _file.write("F,");
+    else
+        _file.write("P,");
+    _file.write(std::to_string(x));
+    _file.write(",");
+    _file.write(std::to_string(y));
+    _file.write("\n");
+    _file.close();
+}
+
+void SigmoidConstraint::writeLimit(double lower, double upper, bool isB)
+{
+    _file.open(IFile::MODE_WRITE_APPEND);
+    _file.write("L,");
+    isB? _file.write("b,") : _file.write("f,");
+    _file.write(std::to_string(lower));
+    _file.write(",");
+    _file.write(std::to_string(upper));
+    _file.write("\n");
+    _file.close();
+}
+
+
+void SigmoidConstraint::writeEquations(Equation eq)
+{
+    _file.open(IFile::MODE_WRITE_APPEND);
+    _file.write("E,");
+    for (Equation::Addend addend : eq._addends)
+    {
+        _file.write(std::to_string(addend._coefficient));
+        _file.write(std::to_string(addend._variable));
+    }
+
+    if (eq._type == Equation::EquationType::GE)
+        _file.write(">");
+
+    else if (eq._type == Equation::EquationType::LE)
+        _file.write("<");
+
+    else
+        _file.write("=");
+
+    _file.write(std::to_string(eq._scalar));
+    _file.write("\n");
+    _file.close();
+}

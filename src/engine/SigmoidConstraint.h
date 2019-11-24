@@ -5,6 +5,7 @@
 #ifndef MARABOU_SIGMOIDCONSTRAINT_H
 #define MARABOU_SIGMOIDCONSTRAINT_H
 
+#include <File.h>
 #include "Map.h"
 #include "PiecewiseLinearConstraint.h"
 #include "PiecewiseLinearAbstraction.h"
@@ -170,6 +171,11 @@ private:
     bool haveOutOfBoundVariables() const;
     bool isValueInSigmoidBounds(double value) const;
 
+    /* For debugging propose */
+    File _file;
+    void writePoint(double x, double y, bool isFix = false);
+    void writeLimit(double lower, double upper, bool isB = false);
+    void writeEquations(Equation eq);
 };
 
 

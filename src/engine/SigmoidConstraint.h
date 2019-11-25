@@ -177,7 +177,7 @@ private:
     IFile *_logFile = nullptr;
     void writePoint(double x, double y, bool isFix = false);
     void writeLimit(double lower, double upper, bool isB = false);
-    void writeEquations(Equation eq);
+    void writeEquations(List<Equation> eqs);
 };
 
 

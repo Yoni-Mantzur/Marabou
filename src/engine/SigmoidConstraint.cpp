@@ -71,15 +71,17 @@ void SigmoidConstraint::notifyVariableValue( unsigned variable, double value )
 }
 
 void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound ) {
-    ASSERT(variable == _b || isValueInSigmoidBounds(bound));
-
     if (_statistics)
         _statistics->incNumBoundNotificationsPlConstraints();
 
     if (_lowerBounds.exists(variable) && !FloatUtils::gt(bound, _lowerBounds[variable]))
         return;
 
+    if (variable == _f && !isValueInSigmoidBounds(bound))
+        bound = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
+
     _lowerBounds[variable] = bound;
+    printf("variable %u lower bound %f\n", variable, _lowerBounds[variable]);
 
     if (variable == _b && _constraintBoundTightener)
     {
@@ -98,15 +100,17 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound ) {
 
 void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
 {
-    ASSERT(variable == _b || isValueInSigmoidBounds(bound));
-
     if ( _statistics )
         _statistics->incNumBoundNotificationsPlConstraints();
 
     if ( _upperBounds.exists( variable ) && !FloatUtils::lt( bound, _upperBounds[variable] ) )
         return;
 
+    if (variable == _f && !isValueInSigmoidBounds(bound))
+        bound = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
+
     _upperBounds[variable] = bound;
+    printf("variable %u upper bound %f\n", variable, _upperBounds[variable]);
 
     if (variable == _b && _constraintBoundTightener)
     {
@@ -148,8 +152,13 @@ bool SigmoidConstraint::satisfied() const
 
 
     DEBUG({
+        static int i = 0;
+        i++;
         if (_logFile != nullptr) {
             auto *s = const_cast<SigmoidConstraint *>(this);
+            s->_logFile->open(IFile::MODE_WRITE_APPEND);
+            s->_logFile->write("Iteration: " + std::to_string(i) + " satisfied() was called\n");
+            s->_logFile->close();
             s->writePoint(bValue, fValue);
             s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
             s->writeLimit(_lowerBounds[_f], _upperBounds[_f]);
@@ -182,8 +191,15 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
     }
 
     DEBUG({
+      static int i = 0;
+      i++;
       if (_logFile != nullptr) {
+
           auto *s = const_cast<SigmoidConstraint *>(this);
+          // Equations before:
+          s->_logFile->open(IFile::MODE_WRITE_APPEND);
+          s->_logFile->write("Iteration: " + std::to_string(i) + " fixes() was called\n");
+          s->_logFile->close();
           s->writePoint(bValue, sigmoidValue, true);
           if (isValueInSigmoidBounds(fValue))
               s->writePoint(FloatUtils::sigmoidInverse(fValue), fValue, true);
@@ -216,6 +232,21 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
 
     List<PiecewiseLinearCaseSplit> splits = getRefinedSplits(guidedPoints);
     // TODO: ADD UPPER EQUATIONS
+
+    DEBUG({
+              static int i = 0;
+              i++;
+              if (_logFile != nullptr) {
+
+                  auto *s = const_cast<SigmoidConstraint *>(this);
+                  // Equations before:
+                  s->_logFile->open(IFile::MODE_WRITE_APPEND);
+                  s->_logFile->write("Iteration: " + std::to_string(i) + " case_splits() was called\n");
+                  s->_logFile->close();
+                  for (PiecewiseLinearCaseSplit split : splits)
+                    s->writeEquations(split.getEquations());
+              }
+          });
 
     return splits;
 }
@@ -326,7 +357,7 @@ bool SigmoidConstraint::supportsSymbolicBoundTightening() const
 
 bool SigmoidConstraint::isValueInSigmoidBounds(double value) const
 {
-    return value < 1 && value > -1;
+    return value < 1.0 && value > -1.0;
 }
 
 void SigmoidConstraint::setLogFile(File *file)
@@ -361,26 +392,27 @@ void SigmoidConstraint::writeLimit(double lower, double upper, bool isB)
 }
 
 
-void SigmoidConstraint::writeEquations(Equation eq)
+void SigmoidConstraint::writeEquations(List<Equation> eqs)
 {
     _logFile->open(IFile::MODE_WRITE_APPEND);
-    _logFile->write("E,");
-    for (Equation::Addend addend : eq._addends)
-    {
-        _logFile->write(std::to_string(addend._coefficient));
-        _logFile->write(std::to_string(addend._variable));
+    for (auto eq : eqs) {
+        _logFile->write("E,");
+        for (Equation::Addend addend : eq._addends) {
+            _logFile->write(std::to_string(addend._coefficient));
+            addend._variable == _b? _logFile->write("b,") : _logFile->write("f,");
+        }
+
+        if (eq._type == Equation::EquationType::GE)
+            _logFile->write(">=");
+
+        else if (eq._type == Equation::EquationType::LE)
+            _logFile->write("<=");
+
+        else
+            _logFile->write("=");
+
+        _logFile->write(std::to_string(eq._scalar));
+        _logFile->write("\n");
     }
-
-    if (eq._type == Equation::EquationType::GE)
-        _logFile->write(">");
-
-    else if (eq._type == Equation::EquationType::LE)
-        _logFile->write("<");
-
-    else
-        _logFile->write("=");
-
-    _logFile->write(std::to_string(eq._scalar));
-    _logFile->write("\n");
     _logFile->close();
 }

@@ -9,16 +9,41 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedLowerAbstra
 {
     List<PiecewiseLinearCaseSplit> splits;
     auto guidedPointsIter = guidedPoints.begin();
+    auto guidedPointsIterReverse = guidedPoints.rbegin();
 
     GuidedPoint p1  = *guidedPointsIter;
+    GuidedPoint lowerBound = p1, upperBound = *guidedPointsIterReverse;
     while (++guidedPointsIter != guidedPoints.end())
     {
         GuidedPoint p2 = *guidedPointsIter;
 
+        // We're w/o guided points, choosing one randomly
+        if (p1 == lowerBound && p2 == upperBound)
+        {
+            double x = (p1.x + p2.x) / 2;
+            double y = evaluateConciseFunction(x);
+            p2 = GuidedPoint(x, y);
+            guidedPointsIter--;
+        }
+
+        // Invalid guided points due to bounds were changed
+        if (p2 > upperBound || p2 < lowerBound)
+            continue;
+
+        // Same assignment as guided point
         if ( p1 == p2 )
         {
-            continue;
+            guidedPointsIter++;
+            double x = ((*guidedPointsIter).x + p2.x) / 2;
+            double y = evaluateConciseFunction(x);
+            p2 = GuidedPoint(x, y);
+            guidedPointsIter--;
         }
+        std::cout << ("p1: ");
+        std::cout << ("(" + std::to_string(p1.x) + ", " + std::to_string(p1.y) + ")\n");
+        std::cout << ("p2: ");
+        std::cout << ("(" + std::to_string(p2.x) + ", " + std::to_string(p2.y) + ")\n");
+
 
         PiecewiseLinearCaseSplit split;
 
@@ -31,6 +56,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedLowerAbstra
         splits.append(split);
         p1 = p2;
     }
+
     return splits;
 }
 
@@ -50,6 +76,11 @@ List<Tightening> PiecewiseLinearAbstraction::boundVars(GuidedPoint p1, GuidedPoi
     // Bound f
     bounds.append(Tightening(f, p1.y, Tightening::LB));
     bounds.append(Tightening(f, p2.y, Tightening::UB));
+
+    std::cout << ("b bound: ");
+    std::cout << ("(" + std::to_string(p1.x) + ", " + std::to_string(p2.x) + ")\n");
+    std::cout << ("f bound: ");
+    std::cout << ("(" + std::to_string(p1.y) + ", " + std::to_string(p2.y) + ")\n");
 
     return bounds;
 }

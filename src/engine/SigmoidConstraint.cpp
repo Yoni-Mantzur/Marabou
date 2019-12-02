@@ -101,6 +101,7 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound ) {
 
 void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
 {
+    printf("variable %u bound %f\n", variable, bound);
     if ( _statistics )
         _statistics->incNumBoundNotificationsPlConstraints();
 

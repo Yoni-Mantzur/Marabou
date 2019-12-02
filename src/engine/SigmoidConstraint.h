@@ -140,7 +140,7 @@ public:
     unsigned getF() const { return _f; }
 
 
-    double evaluateConciseFunction(double x) { return FloatUtils::sigmoid(x); }
+    double evaluateConciseFunction(double x) const { return FloatUtils::sigmoid(x); }
 
     /*
       Check if the aux variable is in use and retrieve it

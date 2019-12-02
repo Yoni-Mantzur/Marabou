@@ -557,9 +557,9 @@ public:
         auto *sigmoid2 = new SigmoidConstraint( 3, 5 );
         auto *sigmoid3 = new SigmoidConstraint( 6, 7 );
 
-        sigmoid1->setLogFile(new File("log/log_test_5"));
-        sigmoid2->setLogFile(new File("log/log_test_5"));
-        sigmoid3->setLogFile(new File("log/log_test_5"));
+        sigmoid1->setLogFile(new File("log/test_5_sigmoid_1"));
+        sigmoid2->setLogFile(new File("log/test_5_sigmoid_2"));
+        sigmoid3->setLogFile(new File("log/test_5_sigmoid_3"));
 
         inputQuery.addPiecewiseLinearConstraint( sigmoid1 );
         inputQuery.addPiecewiseLinearConstraint( sigmoid2 );

@@ -23,7 +23,17 @@ public:
 
         bool operator==(GuidedPoint other)
         {
-            return (this->x == other.x && this->y == other.y);
+            return (x == other.x && y == other.y);
+        }
+
+        bool operator<(GuidedPoint other)
+        {
+            return (x < other.x || y < other.y);
+        }
+
+        bool operator>(GuidedPoint other)
+        {
+            return (x > other.x || y > other.y);
         }
     };
 
@@ -31,7 +41,7 @@ public:
 
     virtual unsigned getB() const = 0;
     virtual unsigned getF() const = 0;
-    virtual double evaluateConciseFunction(double x) = 0;
+    virtual double evaluateConciseFunction(double x) const = 0;
 
 
 private:

@@ -71,6 +71,7 @@ void SigmoidConstraint::notifyVariableValue( unsigned variable, double value )
 }
 
 void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound ) {
+    printf("variable %u bound %f\n", variable, bound);
     if (_statistics)
         _statistics->incNumBoundNotificationsPlConstraints();
 
@@ -152,12 +153,11 @@ bool SigmoidConstraint::satisfied() const
 
 
     DEBUG({
-        static int i = 0;
-        i++;
         if (_logFile != nullptr) {
             auto *s = const_cast<SigmoidConstraint *>(this);
+            s->_iter_satisfied++;
             s->_logFile->open(IFile::MODE_WRITE_APPEND);
-            s->_logFile->write("Iteration: " + std::to_string(i) + " satisfied() was called\n");
+            s->_logFile->write("\nIteration: " + std::to_string(s->_iter_satisfied) + " satisfied() was called\n");
             s->_logFile->close();
             s->writePoint(bValue, fValue);
             s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
@@ -191,14 +191,13 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
     }
 
     DEBUG({
-      static int i = 0;
-      i++;
       if (_logFile != nullptr) {
 
           auto *s = const_cast<SigmoidConstraint *>(this);
           // Equations before:
+          s->_iter_fixes++;
           s->_logFile->open(IFile::MODE_WRITE_APPEND);
-          s->_logFile->write("Iteration: " + std::to_string(i) + " fixes() was called\n");
+          s->_logFile->write("\nIteration: " + std::to_string(s->_iter_fixes) + " fixes() was called\n");
           s->_logFile->close();
           s->writePoint(bValue, sigmoidValue, true);
           if (isValueInSigmoidBounds(fValue))
@@ -234,14 +233,12 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
     // TODO: ADD UPPER EQUATIONS
 
     DEBUG({
-              static int i = 0;
-              i++;
               if (_logFile != nullptr) {
 
                   auto *s = const_cast<SigmoidConstraint *>(this);
-                  // Equations before:
+                  s->_iter_case_splits++;
                   s->_logFile->open(IFile::MODE_WRITE_APPEND);
-                  s->_logFile->write("Iteration: " + std::to_string(i) + " case_splits() was called\n");
+                  s->_logFile->write("\nIteration: " + std::to_string(s->_iter_case_splits) + " case_splits() was called\n");
                   s->_logFile->close();
                   for (PiecewiseLinearCaseSplit split : splits)
                     s->writeEquations(split.getEquations());
@@ -383,7 +380,8 @@ void SigmoidConstraint::writeLimit(double lower, double upper, bool isB)
 {
     _logFile->open(IFile::MODE_WRITE_APPEND);
     _logFile->write("L,");
-    isB? _logFile->write("b,") : _logFile->write("f,");
+    isB? _logFile->write("b," + std::to_string(_b) + ",") :
+         _logFile->write("f," + std::to_string(_f) + ",");
     _logFile->write(std::to_string(lower));
     _logFile->write(",");
     _logFile->write(std::to_string(upper));
@@ -399,7 +397,9 @@ void SigmoidConstraint::writeEquations(List<Equation> eqs)
         _logFile->write("E,");
         for (Equation::Addend addend : eq._addends) {
             _logFile->write(std::to_string(addend._coefficient));
-            addend._variable == _b? _logFile->write("b,") : _logFile->write("f,");
+            addend._variable == _b?
+            _logFile->write("b(" + std::to_string(_b) + ")") :
+            _logFile->write("f(" + std::to_string(_f) + ")");
         }
 
         if (eq._type == Equation::EquationType::GE)

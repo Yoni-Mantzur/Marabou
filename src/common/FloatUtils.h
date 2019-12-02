@@ -54,8 +54,8 @@ public:
     static bool isInf( double x );
 
     static double setPrecision( double number, unsigned precisionFactor );
-    static double sigmoid( double x, unsigned precisionFactor = 6 );
-    static double sigmoidInverse( double x, unsigned accuracyFactor = 6);
+    static double sigmoid( double x, unsigned precisionFactor = 12 );
+    static double sigmoidInverse( double x, unsigned accuracyFactor = 12);
 };
 
 #endif // __FloatUtils_h__

@@ -139,6 +139,9 @@ public:
     */
     unsigned getF() const { return _f; }
 
+
+    double evaluateConciseFunction(double x) { return FloatUtils::sigmoid(x); }
+
     /*
       Check if the aux variable is in use and retrieve it
     */
@@ -175,6 +178,9 @@ private:
 
     /* For debugging propose */
     IFile *_logFile = nullptr;
+    int _iter_case_splits = 0;
+    int _iter_fixes = 0;
+    int _iter_satisfied = 0;
     void writePoint(double x, double y, bool isFix = false);
     void writeLimit(double lower, double upper, bool isB = false);
     void writeEquations(List<Equation> eqs);

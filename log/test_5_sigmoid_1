@@ -1,0 +1,1928 @@
+
+Sigmoid 1
+Iteration: 1 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 1 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 1 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 2 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 1 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 3 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 2 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 2 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 3 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 1 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 4 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 4 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 3 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 5 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 2 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 6 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 5 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 4 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 6 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 2 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 7 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 7 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 5 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 8 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 3 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 9 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 8 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 6 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 9 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 3 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 10 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 10 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 7 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 11 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 4 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 12 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 11 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 8 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 12 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 4 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 13 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 13 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 9 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 14 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 5 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 15 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 14 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 10 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 15 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 5 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 16 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 16 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 11 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 17 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 6 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 18 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 17 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 12 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 18 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 6 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 19 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 19 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 13 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 20 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 7 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 21 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 20 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 14 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 21 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 7 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 22 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 22 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 15 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 23 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 8 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 24 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 23 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 16 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 24 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 8 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 25 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 25 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 17 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 26 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 9 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 27 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 26 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 18 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 27 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 9 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 28 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 28 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 19 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 29 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 10 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 30 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 29 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 20 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 30 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 10 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 31 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 31 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 21 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 32 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 11 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 33 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 32 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 22 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 33 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 11 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 34 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 34 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 23 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 35 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 12 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 36 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 35 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 24 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 36 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 12 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 37 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 37 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 25 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 38 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 13 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 39 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 38 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 26 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 39 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 13 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 40 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 40 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 27 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 41 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 14 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 42 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 41 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 28 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 42 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 14 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 43 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 43 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 29 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 44 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 15 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 45 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 44 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 30 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 45 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 15 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 46 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 46 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 31 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 47 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 16 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 48 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 47 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 32 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 48 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 16 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 49 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 49 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 33 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 50 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 17 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 51 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 50 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 34 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 51 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 17 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 52 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 52 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 35 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 53 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 18 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 54 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 53 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 36 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 54 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 18 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 55 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 55 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 37 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 56 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 19 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 57 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 56 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 38 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 57 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 19 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 58 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 58 satisfied() was called
+P,1.000000,0.731059
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 39 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 59 satisfied() was called
+P,1.000000,0.875981
+L,b,2,1.000000,2.000000
+L,f,4,0.731059,0.880797
+
+Sigmoid 1
+Iteration: 20 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 1
+Iteration: 1 case_splits() was called
+E,1.000000f(4)-0.173032b(2)>=0.558027
+L,b,2,1.000000,1.500000
+L,f,4,0.731059,0.817574
+E,1.000000f(4)-0.126445b(2)>=0.627907
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 1
+Iteration: 60 satisfied() was called
+P,1.000000,0.731059
+L,b,2,1.000000,1.500000
+L,f,4,0.731059,0.817574
+
+Sigmoid 2
+Iteration: 59 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 40 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 60 satisfied() was called
+P,1.000000,0.875981
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 20 fixes() was called
+F,1.000000,0.731059
+F,1.954912,0.875981
+
+Sigmoid 2
+Iteration: 1 case_splits() was called
+E,1.000000f(5)-0.150044b(3)>=0.591151
+L,b,3,1.321706,1.660853
+L,f,5,0.789465,0.840352
+E,1.000000f(5)-0.119254b(3)>=0.642289
+L,b,3,1.660853,2.000000
+L,f,5,0.840352,0.880797
+
+Sigmoid 1
+Iteration: 61 satisfied() was called
+P,1.321706,0.817574
+L,b,2,1.000000,1.500000
+L,f,4,0.731059,0.817574
+
+Sigmoid 2
+Iteration: 61 satisfied() was called
+P,1.321706,0.789465
+L,b,3,1.321706,1.660853
+L,f,5,0.789465,0.840352
+
+Sigmoid 3
+Iteration: 41 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 1
+Iteration: 62 satisfied() was called
+P,1.321706,0.817574
+L,b,2,1.000000,1.500000
+L,f,4,0.731059,0.817574
+
+Sigmoid 1
+Iteration: 21 fixes() was called
+F,1.321706,0.789465
+F,1.500000,0.817574
+
+Sigmoid 1
+Iteration: 2 case_splits() was called
+E,1.000000f(4)-0.172553b(2)>=0.561401
+L,b,2,1.189700,1.321706
+L,f,4,0.766687,0.789465
+E,1.000000f(4)-0.157656b(2)>=0.581091
+L,b,2,1.321706,1.500000
+L,f,4,0.789465,0.817574
+
+Sigmoid 1
+Iteration: 63 satisfied() was called
+P,1.321706,0.789465
+L,b,2,1.189700,1.321706
+L,f,4,0.766687,0.789465
+
+Sigmoid 2
+Iteration: 62 satisfied() was called
+P,1.321706,0.817574
+L,b,3,1.321706,1.660853
+L,f,5,0.789465,0.840352
+
+Sigmoid 3
+Iteration: 42 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.657927
+L,f,7,0.833000,0.839960
+
+Sigmoid 2
+Iteration: 63 satisfied() was called
+P,1.321706,0.817574
+L,b,3,1.321706,1.660853
+L,f,5,0.789465,0.840352
+
+Sigmoid 2
+Iteration: 21 fixes() was called
+F,1.321706,0.789465
+F,1.500000,0.817574
+
+Sigmoid 1
+Iteration: 63 satisfied() was called
+P,1.321706,0.789465
+L,b,2,1.321706,1.500000
+L,f,4,0.789465,0.817574
+
+Sigmoid 2
+Iteration: 62 satisfied() was called
+P,1.321706,0.817574
+L,b,3,1.321706,1.660853
+L,f,5,0.789465,0.840352
+
+Sigmoid 3
+Iteration: 42 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.657927
+L,f,7,0.833000,0.839960
+
+Sigmoid 2
+Iteration: 63 satisfied() was called
+P,1.321706,0.817574
+L,b,3,1.321706,1.660853
+L,f,5,0.789465,0.840352
+
+Sigmoid 2
+Iteration: 21 fixes() was called
+F,1.321706,0.789465
+F,1.500000,0.817574
+
+Sigmoid 1
+Iteration: 60 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 59 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 3
+Iteration: 40 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 60 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,2.000000
+L,f,5,0.731059,0.880797
+
+Sigmoid 2
+Iteration: 20 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 61 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 61 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 41 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 62 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 21 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 62 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 63 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 42 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 64 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 22 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 63 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 65 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 43 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 66 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 23 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 64 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 67 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 44 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 68 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 24 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 65 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 69 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 45 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 70 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 25 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 66 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 71 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 46 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 72 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 26 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 67 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 73 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 47 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 74 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 27 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 68 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 75 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 48 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 76 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 28 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 69 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 77 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 49 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 78 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 29 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 70 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 79 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 50 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 80 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 30 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 71 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 81 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 51 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 82 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 31 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 72 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 83 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 52 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 84 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 32 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 73 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 85 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 53 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 86 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 33 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 74 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 87 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 54 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 88 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 34 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 75 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 89 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 55 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 90 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 35 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 76 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 91 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 56 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 92 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 36 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 77 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 93 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 57 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 94 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 37 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 78 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 95 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 58 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 96 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 38 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 1
+Iteration: 79 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 97 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 3
+Iteration: 59 satisfied() was called
+P,1.607040,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 2
+Iteration: 98 satisfied() was called
+P,1.500000,0.789465
+L,b,3,1.000000,1.907358
+L,f,5,0.731059,0.870722
+
+Sigmoid 2
+Iteration: 39 fixes() was called
+F,1.500000,0.817574
+F,1.321706,0.789465
+
+Sigmoid 2
+Iteration: 1 case_splits() was called
+E,1.000000f(5)-0.173032b(3)>=0.558027
+L,b,3,1.000000,1.500000
+L,f,5,0.731059,0.817574
+E,1.000000f(5)-0.130469b(3)>=0.621871
+L,b,3,1.500000,1.907358
+L,f,5,0.817574,0.870722
+
+Sigmoid 1
+Iteration: 80 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,2.000000
+L,f,4,0.817574,0.880797
+
+Sigmoid 2
+Iteration: 99 satisfied() was called
+P,1.500000,0.817574
+L,b,3,1.500000,1.907358
+L,f,5,0.817574,0.870722
+
+Sigmoid 3
+Iteration: 60 satisfied() was called
+P,1.635149,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 3
+Iteration: 61 satisfied() was called
+P,1.635149,0.833000
+L,b,6,1.607040,1.688296
+L,f,7,0.833000,0.844000
+
+Sigmoid 3
+Iteration: 1 fixes() was called
+F,1.635149,0.836874
+F,1.607040,0.833000
+
+Sigmoid 1
+Iteration: 81 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,1.907358
+L,f,4,0.817574,0.870722
+
+Sigmoid 2
+Iteration: 100 satisfied() was called
+P,1.500000,0.817574
+L,b,3,1.500000,1.907358
+L,f,5,0.817574,0.870722
+
+Sigmoid 3
+Iteration: 62 satisfied() was called
+P,1.635149,0.836874
+L,b,6,1.635149,1.688296
+L,f,7,0.836874,0.844000
+
+Sigmoid 1
+Iteration: 82 satisfied() was called
+P,1.500000,0.817574
+L,b,2,1.500000,1.907358
+L,f,4,0.817574,0.870722
+
+Sigmoid 2
+Iteration: 101 satisfied() was called
+P,1.500000,0.817574
+L,b,3,1.500000,1.907358
+L,f,5,0.817574,0.870722
+
+Sigmoid 3
+Iteration: 63 satisfied() was called
+P,1.635149,0.836874
+L,b,6,1.635149,1.688296
+L,f,7,0.836874,0.844000

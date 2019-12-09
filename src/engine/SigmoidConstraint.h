@@ -162,7 +162,9 @@ public:
         return true;
     }
 
-    void setLogFile(File *file = nullptr);
+    /* For debugging propose */
+    void setLogFile(File *file = nullptr) { _logFile = file; };
+    void setSigmoidNum (int sigmoidNum) { sigmoid_num = sigmoidNum; };
 
 private:
 
@@ -184,6 +186,7 @@ private:
     void writePoint(double x, double y, bool isFix = false);
     void writeLimit(double lower, double upper, bool isB = false);
     void writeEquations(List<Equation> eqs);
+    int sigmoid_num;
 };
 
 

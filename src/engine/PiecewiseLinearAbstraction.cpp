@@ -66,7 +66,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedUpperAbstra
 }
 
 List<Tightening> PiecewiseLinearAbstraction::boundVars(GuidedPoint p1, GuidedPoint p2) const{
-    List<Tightening> bounds;
+        List<Tightening> bounds;
     unsigned b = getB(), f = getF();
 
     // Bound b

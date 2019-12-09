@@ -558,8 +558,13 @@ public:
         auto *sigmoid3 = new SigmoidConstraint( 6, 7 );
 
         sigmoid1->setLogFile(new File("log/test_5_sigmoid_1"));
-        sigmoid2->setLogFile(new File("log/test_5_sigmoid_2"));
-        sigmoid3->setLogFile(new File("log/test_5_sigmoid_3"));
+        sigmoid2->setLogFile(new File("log/test_5_sigmoid_1"));
+        sigmoid3->setLogFile(new File("log/test_5_sigmoid_1"));
+
+        sigmoid1->setSigmoidNum(1);
+        sigmoid2->setSigmoidNum(2);
+        sigmoid3->setSigmoidNum(3);
+
 
         inputQuery.addPiecewiseLinearConstraint( sigmoid1 );
         inputQuery.addPiecewiseLinearConstraint( sigmoid2 );

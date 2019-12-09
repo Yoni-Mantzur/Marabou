@@ -158,7 +158,7 @@ bool SigmoidConstraint::satisfied() const
             auto *s = const_cast<SigmoidConstraint *>(this);
             s->_iter_satisfied++;
             s->_logFile->open(IFile::MODE_WRITE_APPEND);
-            s->_logFile->write("\nIteration: " + std::to_string(s->_iter_satisfied) + " satisfied() was called\n");
+            s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num)  + "\nIteration: " + std::to_string(s->_iter_satisfied) + " satisfied() was called\n");
             s->_logFile->close();
             s->writePoint(bValue, fValue);
             s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
@@ -198,7 +198,7 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
           // Equations before:
           s->_iter_fixes++;
           s->_logFile->open(IFile::MODE_WRITE_APPEND);
-          s->_logFile->write("\nIteration: " + std::to_string(s->_iter_fixes) + " fixes() was called\n");
+          s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num) + "\nIteration: " + std::to_string(s->_iter_fixes) + " fixes() was called\n");
           s->_logFile->close();
           s->writePoint(bValue, sigmoidValue, true);
           if (isValueInSigmoidBounds(fValue))
@@ -239,10 +239,28 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
                   auto *s = const_cast<SigmoidConstraint *>(this);
                   s->_iter_case_splits++;
                   s->_logFile->open(IFile::MODE_WRITE_APPEND);
-                  s->_logFile->write("\nIteration: " + std::to_string(s->_iter_case_splits) + " case_splits() was called\n");
+                  s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num) + "\nIteration: " + std::to_string(s->_iter_case_splits) + " case_splits() was called\n");
                   s->_logFile->close();
-                  for (PiecewiseLinearCaseSplit split : splits)
-                    s->writeEquations(split.getEquations());
+                  for (PiecewiseLinearCaseSplit split : splits) {
+                      s->writeEquations(split.getEquations());
+                      List<Tightening> b = split.getBoundTightenings();
+                      double bounds[4] = {0};
+                      for (Tightening bound : b) {
+                          if (bound._variable == _b) {
+                              if (bound._type == bound.LB)
+                                  bounds[0] = bound._value;
+                              else
+                                  bounds[1] = bound._value;
+                          } else if (bound._variable == _f){
+                              if (bound._type == bound.LB)
+                                  bounds[2] = bound._value;
+                              else
+                                  bounds[3] = bound._value;
+                          }
+                      }
+                      s->writeLimit(bounds[0], bounds[1], true);
+                      s->writeLimit(bounds[2], bounds[3], false);
+                  }
               }
           });
 
@@ -356,11 +374,6 @@ bool SigmoidConstraint::supportsSymbolicBoundTightening() const
 bool SigmoidConstraint::isValueInSigmoidBounds(double value) const
 {
     return value < 1.0 && value > -1.0;
-}
-
-void SigmoidConstraint::setLogFile(File *file)
-{
-    _logFile = file;
 }
 
 void SigmoidConstraint::writePoint(double x, double y, bool isFix)

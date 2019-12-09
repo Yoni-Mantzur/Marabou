@@ -66,6 +66,7 @@ public:
     enum StringOptions {
         INPUT_FILE_PATH = 0,
         PROPERTY_FILE_PATH,
+        INPUT_QUERY_FILE_PATH,
         SUMMARY_FILE,
     };
 

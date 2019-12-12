@@ -94,6 +94,11 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
     storeInitialEngineState();
 
+    // TODO: find alternative
+    for (auto plc : _plConstraints){
+        plc->registerEngine(this);
+    }
+
     if ( _verbosity > 0 )
     {
         printf( "\nEngine::solve: Initial statistics\n" );
@@ -1312,15 +1317,10 @@ bool Engine::attemptToMergeVariables( unsigned x1, unsigned x2 )
     return true;
 }
 
-void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
+void Engine::addEquations(List<Equation> equations, List<Tightening> bounds)
 {
-    log( "" );
-    log( "Applying a split. " );
-
     DEBUG( _tableau->verifyInvariants() );
 
-    List<Tightening> bounds = split.getBoundTightenings();
-    List<Equation> equations = split.getEquations();
     for ( auto &equation : equations )
     {
         /*
@@ -1365,16 +1365,16 @@ void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
         */
         unsigned x1, x2;
         bool canMergeColumns =
-            // Only if the flag is on
-            GlobalConfiguration::USE_COLUMN_MERGING_EQUATIONS &&
-            // Only if the equation has the correct form
-            equation.isVariableMergingEquation( x1, x2 ) &&
-            // And only if the variables are not out of bounds
-            ( !_tableau->isBasic( x1 ) ||
-              !_tableau->basicOutOfBounds( _tableau->variableToIndex( x1 ) ) )
-            &&
-            ( !_tableau->isBasic( x2 ) ||
-              !_tableau->basicOutOfBounds( _tableau->variableToIndex( x2 ) ) );
+                // Only if the flag is on
+                GlobalConfiguration::USE_COLUMN_MERGING_EQUATIONS &&
+                // Only if the equation has the correct form
+                equation.isVariableMergingEquation( x1, x2 ) &&
+                // And only if the variables are not out of bounds
+                ( !_tableau->isBasic( x1 ) ||
+                  !_tableau->basicOutOfBounds( _tableau->variableToIndex( x1 ) ) )
+                &&
+                ( !_tableau->isBasic( x2 ) ||
+                  !_tableau->basicOutOfBounds( _tableau->variableToIndex( x2 ) ) );
 
         bool columnsSuccessfullyMerged = false;
         if ( canMergeColumns )
@@ -1388,31 +1388,29 @@ void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
 
             switch ( equation._type )
             {
-            case Equation::GE:
-                bounds.append( Tightening( auxVariable, 0.0, Tightening::UB ) );
-                break;
+                case Equation::GE:
+                    bounds.append( Tightening( auxVariable, 0.0, Tightening::UB ) );
+                    break;
 
-            case Equation::LE:
-                bounds.append( Tightening( auxVariable, 0.0, Tightening::LB ) );
-                break;
+                case Equation::LE:
+                    bounds.append( Tightening( auxVariable, 0.0, Tightening::LB ) );
+                    break;
 
-            case Equation::EQ:
-                bounds.append( Tightening( auxVariable, 0.0, Tightening::LB ) );
-                bounds.append( Tightening( auxVariable, 0.0, Tightening::UB ) );
-                break;
+                case Equation::EQ:
+                    bounds.append( Tightening( auxVariable, 0.0, Tightening::LB ) );
+                    bounds.append( Tightening( auxVariable, 0.0, Tightening::UB ) );
+                    break;
 
-            default:
-                ASSERT( false );
-                break;
+                default:
+                    ASSERT( false );
+                    break;
             }
         }
     }
+}
 
-    adjustWorkMemorySize();
-
-    _rowBoundTightener->resetBounds();
-    _constraintBoundTightener->resetBounds();
-
+void Engine::tightenBounds(List<Tightening> bounds)
+{
     for ( auto &bound : bounds )
     {
         unsigned variable = _tableau->getVariableAfterMerging( bound._variable );
@@ -1430,6 +1428,25 @@ void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
     }
 
     DEBUG( _tableau->verifyInvariants() );
+}
+
+void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
+{
+    log( "" );
+    log( "Applying a split. " );
+
+    List<Tightening> bounds = split.getBoundTightenings();
+    List<Equation> equations = split.getEquations();
+
+    addEquations(equations, bounds);
+
+    adjustWorkMemorySize();
+
+    _rowBoundTightener->resetBounds();
+    _constraintBoundTightener->resetBounds();
+
+    tightenBounds(bounds);
+
     log( "Done with split\n" );
 }
 

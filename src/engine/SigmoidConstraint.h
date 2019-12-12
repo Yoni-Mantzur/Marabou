@@ -139,8 +139,9 @@ public:
     */
     unsigned getF() const { return _f; }
 
-
     double evaluateConciseFunction(double x) const { return FloatUtils::sigmoid(x); }
+
+    double evaluateDerivativeOfConciseFunction(double x) const;
 
     /*
       Check if the aux variable is in use and retrieve it
@@ -183,6 +184,7 @@ private:
     int _iter_case_splits = 0;
     int _iter_fixes = 0;
     int _iter_satisfied = 0;
+    int _restore = 0;
     void writePoint(double x, double y, bool isFix = false);
     void writeLimit(double lower, double upper, bool isB = false);
     void writeEquations(List<Equation> eqs);

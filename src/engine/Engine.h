@@ -135,6 +135,9 @@ public:
     void resetExitCode();
     void resetBoundTighteners();
 
+    void tightenBounds(List<Tightening> bounds);
+    void addEquations(List<Equation> equations, List<Tightening> bounds);
+
 private:
     enum BasisRestorationRequired {
         RESTORATION_NOT_NEEDED = 0,

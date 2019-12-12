@@ -203,6 +203,8 @@ public:
         return false;
     }
 
+    virtual void registerEngine(IEngine *engine) { _engine = engine; }
+
 protected:
     bool _constraintActive;
 	Map<unsigned, double> _assignment;
@@ -215,6 +217,7 @@ protected:
       Statistics collection
     */
     Statistics *_statistics;
+    IEngine *_engine;
 };
 
 #endif // __PiecewiseLinearConstraint_h__

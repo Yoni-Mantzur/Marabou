@@ -46,8 +46,37 @@ PiecewiseLinearConstraint *SigmoidConstraint::duplicateConstraint() const
 
 void SigmoidConstraint::restoreState( const PiecewiseLinearConstraint *state )
 {
+    DEBUG({
+              if (_logFile != nullptr) {
+                  auto *s = const_cast<SigmoidConstraint *>(this);
+                  // Equations before:
+                  s->_restore++;
+                  s->_logFile->open(IFile::MODE_WRITE_APPEND);
+                  s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num) +
+                                     "\nIteration: " +
+                                     std::to_string(s->_restore) +
+                                     " restore() was called\n");
+                  s->_logFile->close();
+                  s->_logFile->open(IFile::MODE_WRITE_APPEND);
+                  s->_logFile->write("Limits Before\n");
+                  s->_logFile->close();
+                  s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
+                  s->writeLimit(_lowerBounds[_f], _upperBounds[_f]);
+              }
+          })
     const auto *sigmoid = dynamic_cast<const SigmoidConstraint *>( state );
     *this = *sigmoid;
+
+    DEBUG({
+              if (_logFile != nullptr) {
+                  auto *s = const_cast<SigmoidConstraint *>(this);
+                  s->_logFile->open(IFile::MODE_WRITE_APPEND);
+                  s->_logFile->write("Limits after\n");
+                  s->_logFile->close();
+                  s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
+                  s->writeLimit(_lowerBounds[_f], _upperBounds[_f]);
+              }
+          })
 }
 
 void SigmoidConstraint::registerAsWatcher( ITableau *tableau )
@@ -146,14 +175,18 @@ List<unsigned> SigmoidConstraint::getParticipatingVariables() const
 
 bool SigmoidConstraint::satisfied() const
 {
+    if (_iter_satisfied == 63) {
+        int a = 3;
+        a++;
+    }
     if ( !( _assignment.exists( _b ) && _assignment.exists( _f ) ) )
         throw MarabouError( MarabouError::PARTICIPATING_VARIABLES_ABSENT );
 
     double bValue = _assignment.get( _b );
     double fValue = _assignment.get( _f );
 
-
     DEBUG({
+
         if (_logFile != nullptr) {
             auto *s = const_cast<SigmoidConstraint *>(this);
             s->_iter_satisfied++;
@@ -190,6 +223,17 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
         double sigmoidInverseValue = FloatUtils::sigmoidInverse(fValue);
         fixes.append(Fix(_b, sigmoidInverseValue ));
     }
+
+    // TODO: guided points should be append in satisfied
+    List<GuidedPoint> guidedPoints;
+    guidedPoints.append(GuidedPoint(_lowerBounds[_b], _lowerBounds[_f]));
+    guidedPoints.append(GuidedPoint(bValue, sigmoidValue));
+    guidedPoints.append(GuidedPoint(_upperBounds[_b], _upperBounds[_f]));
+
+    List<Equation> refinements = getRefinedUpperAbstraction(guidedPoints);
+    List<Tightening> auxBounds;
+    _engine->addEquations(refinements, auxBounds);
+    _engine->tightenBounds(auxBounds);
 
     DEBUG({
       if (_logFile != nullptr) {
@@ -230,8 +274,7 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
     guidedPoints.append(GuidedPoint(bValue, sigmoidValue));
     guidedPoints.append(GuidedPoint(_upperBounds[_b], _upperBounds[_f]));
 
-    List<PiecewiseLinearCaseSplit> splits = getRefinedSplits(guidedPoints);
-    // TODO: ADD UPPER EQUATIONS
+    List<PiecewiseLinearCaseSplit> splits = getRefinedLowerAbstraction(guidedPoints);
 
     DEBUG({
               if (_logFile != nullptr) {
@@ -376,6 +419,15 @@ bool SigmoidConstraint::isValueInSigmoidBounds(double value) const
     return value < 1.0 && value > -1.0;
 }
 
+double SigmoidConstraint::evaluateDerivativeOfConciseFunction(double x) const
+{
+    double sigmoidValue = FloatUtils::sigmoid(x);
+    return sigmoidValue * ( 1 - sigmoidValue );
+}
+
+
+
+/** Debuging **/
 void SigmoidConstraint::writePoint(double x, double y, bool isFix)
 {
     _logFile->open(IFile::MODE_WRITE_APPEND);

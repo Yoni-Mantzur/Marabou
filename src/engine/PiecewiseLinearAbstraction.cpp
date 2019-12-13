@@ -65,45 +65,45 @@ List<Equation> PiecewiseLinearAbstraction::getRefinedUpperAbstraction(List<Guide
 {
     List<Equation> refinements;
     auto guidedPointsIter = guidedPoints.begin();
-    auto guidedPointsIterReverse = guidedPoints.rbegin();
+//    auto guidedPointsIterReverse = guidedPoints.rbegin();
 
     GuidedPoint p1  = *guidedPointsIter;
-    GuidedPoint lowerBound = p1, upperBound = *guidedPointsIterReverse;
-    while (++guidedPointsIter != guidedPoints.end())
+//    GuidedPoint lowerBound = p1, upperBound = *guidedPointsIterReverse;
+    while (guidedPointsIter != guidedPoints.end())
     {
-        GuidedPoint p2 = *guidedPointsIter;
-
-        // We're w/o guided points, choosing one randomly
-        if (p1 == lowerBound && p2 == upperBound)
-        {
-            double x = (p1.x + p2.x) / 2;
-            double y = evaluateConciseFunction(x);
-            p2 = GuidedPoint(x, y);
-            guidedPointsIter--;
-        }
-
-        // Invalid guided points due to bounds were changed
-        if (p2 > upperBound || p2 < lowerBound)
-            continue;
-
-        // Same assignment as guided point
-        if ( p1 == p2 )
-        {
-            guidedPointsIter++;
-            double x = ((*guidedPointsIter).x + p2.x) / 2;
-            double y = evaluateConciseFunction(x);
-            p2 = GuidedPoint(x, y);
-            guidedPointsIter--;
-        }
+        p1 = *guidedPointsIter++;
+//
+//        // We're w/o guided points, choosing one randomly
+//        if (p1 == lowerBound && p2 == upperBound)
+//        {
+//            double x = (p1.x + p2.x) / 2;
+//            double y = evaluateConciseFunction(x);
+//            p2 = GuidedPoint(x, y);
+//            guidedPointsIter--;
+//        }
+//
+//        // Invalid guided points due to bounds were changed
+//        if (p2 > upperBound || p2 < lowerBound)
+//            continue;
+//
+//        // Same assignment as guided point
+//        if ( p1 == p2 )
+//        {
+//            guidedPointsIter++;
+//            double x = ((*guidedPointsIter).x + p2.x) / 2;
+//            double y = evaluateConciseFunction(x);
+//            p2 = GuidedPoint(x, y);
+//            guidedPointsIter--;
+//        }
         std::cout << ("p1: ");
         std::cout << ("(" + std::to_string(p1.x) + ", " + std::to_string(p1.y) + ")\n");
-        std::cout << ("p2: ");
-        std::cout << ("(" + std::to_string(p2.x) + ", " + std::to_string(p2.y) + ")\n");
+//        std::cout << ("p2: ");
+//        std::cout << ("(" + std::to_string(p2.x) + ", " + std::to_string(p2.y) + ")\n");
 
 
 
-        double slope = evaluateDerivativeOfConciseFunction(p2.x);
-        Equation upperEquation = getLinearEquation(p2, slope);
+        double slope = evaluateDerivativeOfConciseFunction(p1.x);
+        Equation upperEquation = getLinearEquation(p1, slope);
         upperEquation.setType(Equation::LE);
         refinements.append(upperEquation);
 
@@ -112,7 +112,7 @@ List<Equation> PiecewiseLinearAbstraction::getRefinedUpperAbstraction(List<Guide
 //            split.storeBoundTightening(tightening);
 //
 //        splits.append(split);
-        p1 = p2;
+//        p1 = *guidedPointsIter;
     }
 
     return refinements;

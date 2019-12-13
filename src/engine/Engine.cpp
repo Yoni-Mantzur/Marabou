@@ -1407,6 +1407,7 @@ void Engine::addEquations(List<Equation> equations, List<Tightening> bounds)
             }
         }
     }
+    adjustWorkMemorySize();
 }
 
 void Engine::tightenBounds(List<Tightening> bounds)
@@ -1427,6 +1428,9 @@ void Engine::tightenBounds(List<Tightening> bounds)
         }
     }
 
+    _rowBoundTightener->resetBounds();
+    _constraintBoundTightener->resetBounds();
+
     DEBUG( _tableau->verifyInvariants() );
 }
 
@@ -1439,11 +1443,6 @@ void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
     List<Equation> equations = split.getEquations();
 
     addEquations(equations, bounds);
-
-    adjustWorkMemorySize();
-
-    _rowBoundTightener->resetBounds();
-    _constraintBoundTightener->resetBounds();
 
     tightenBounds(bounds);
 

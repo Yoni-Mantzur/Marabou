@@ -175,10 +175,6 @@ List<unsigned> SigmoidConstraint::getParticipatingVariables() const
 
 bool SigmoidConstraint::satisfied() const
 {
-    if (_iter_satisfied == 63) {
-        int a = 3;
-        a++;
-    }
     if ( !( _assignment.exists( _b ) && _assignment.exists( _f ) ) )
         throw MarabouError( MarabouError::PARTICIPATING_VARIABLES_ABSENT );
 
@@ -224,31 +220,25 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
         fixes.append(Fix(_b, sigmoidInverseValue ));
     }
 
-    // TODO: guided points should be append in satisfied
-    List<GuidedPoint> guidedPoints;
-    guidedPoints.append(GuidedPoint(_lowerBounds[_b], _lowerBounds[_f]));
-    guidedPoints.append(GuidedPoint(bValue, sigmoidValue));
-    guidedPoints.append(GuidedPoint(_upperBounds[_b], _upperBounds[_f]));
-
-    List<Equation> refinements = getRefinedUpperAbstraction(guidedPoints);
-    List<Tightening> auxBounds;
-    _engine->addEquations(refinements, auxBounds);
-    _engine->tightenBounds(auxBounds);
-
-    DEBUG({
-      if (_logFile != nullptr) {
-
-          auto *s = const_cast<SigmoidConstraint *>(this);
-          // Equations before:
-          s->_iter_fixes++;
-          s->_logFile->open(IFile::MODE_WRITE_APPEND);
-          s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num) + "\nIteration: " + std::to_string(s->_iter_fixes) + " fixes() was called\n");
-          s->_logFile->close();
-          s->writePoint(bValue, sigmoidValue, true);
-          if (isValueInSigmoidBounds(fValue))
-              s->writePoint(FloatUtils::sigmoidInverse(fValue), fValue, true);
-      }
-    });
+//    DEBUG({
+//      if (_logFile != nullptr) {
+//
+//          auto *s = const_cast<SigmoidConstraint *>(this);
+//          // Equations before:
+//          s->_iter_fixes++;
+//          s->_logFile->open(IFile::MODE_WRITE_APPEND);
+//          s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num) + "\nIteration: " + std::to_string(s->_iter_fixes) + " fixes() was called\n");
+//          s->_logFile->close();
+//          s->writePoint(bValue, sigmoidValue, true);
+//          if (isValueInSigmoidBounds(fValue))
+//              s->writePoint(FloatUtils::sigmoidInverse(fValue), fValue, true);
+//          s->_logFile->open(IFile::MODE_WRITE_APPEND);
+//          s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num) + "\nUpper Bound\n");
+//          s->_logFile->close();
+//
+//          s->writeEquations(refinements);
+//      }
+//    });
     return fixes;
 }
 
@@ -269,12 +259,24 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
     double sigmoidValue = FloatUtils::sigmoid(bValue);
 
     // TODO: guided points should be append in satisfied
+    List<GuidedPoint> guidedPoints1;
+//    guidedPoints.append(GuidedPoint(_lowerBounds[_b], _lowerBounds[_f]));
+    guidedPoints1.append(GuidedPoint(bValue, sigmoidValue));
+//    guidedPoints.append(GuidedPoint(_upperBounds[_b], _upperBounds[_f]));
+
+    List<Equation> refinements = getRefinedUpperAbstraction(guidedPoints1);
+    List<Tightening> auxBounds;
+    _engine->addEquations(refinements, auxBounds);
+    _engine->tightenBounds(auxBounds);
+
+    // TODO: guided points should be append in satisfied
     List<GuidedPoint> guidedPoints;
     guidedPoints.append(GuidedPoint(_lowerBounds[_b], _lowerBounds[_f]));
     guidedPoints.append(GuidedPoint(bValue, sigmoidValue));
     guidedPoints.append(GuidedPoint(_upperBounds[_b], _upperBounds[_f]));
 
     List<PiecewiseLinearCaseSplit> splits = getRefinedLowerAbstraction(guidedPoints);
+
 
     DEBUG({
               if (_logFile != nullptr) {

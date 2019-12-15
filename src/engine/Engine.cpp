@@ -94,10 +94,9 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
     storeInitialEngineState();
 
-    // TODO: find alternative
-    for (auto plc : _plConstraints){
-        plc->registerEngine(this);
-    }
+    // TODO: refactor this
+    for (auto constraint : _plConstraints)
+        constraint->registerEngine(this);
 
     if ( _verbosity > 0 )
     {
@@ -109,6 +108,8 @@ bool Engine::solve( unsigned timeoutInSeconds )
     struct timespec mainLoopStart = TimeUtils::sampleMicro();
     while ( true )
     {
+        _tableau->dumpEquations();
+        _tableau->dumpAssignment();
         struct timespec mainLoopEnd = TimeUtils::sampleMicro();
         _statistics.addTimeMainLoop( TimeUtils::timePassed( mainLoopStart, mainLoopEnd ) );
         mainLoopStart = mainLoopEnd;
@@ -237,6 +238,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
                 // and perform any valid case splits.
                 tightenBoundsOnConstraintMatrix();
                 applyAllBoundTightenings();
+
                 // For debugging purposes
                 checkBoundCompliancyWithDebugSolution();
 
@@ -248,6 +250,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
             // We have out-of-bounds variables.
             performSimplexStep();
+            applyRefinementIfNeeded();
             continue;
         }
         catch ( const MalformedBasisException & )
@@ -1317,120 +1320,118 @@ bool Engine::attemptToMergeVariables( unsigned x1, unsigned x2 )
     return true;
 }
 
-void Engine::addEquations(List<Equation> equations, List<Tightening> bounds)
+List<Tightening> Engine::addEquation(Equation equation)
 {
     DEBUG( _tableau->verifyInvariants() );
+    List<Tightening> bounds;
+    /*
+      First, adjust the equation if any variables have been merged.
+      E.g., if the equation is x1 + x2 + x3 = 0, and x1 and x2 have been
+      merged, the equation becomes 2x1 + x3 = 0
+    */
+    for ( auto &addend : equation._addends )
+        addend._variable = _tableau->getVariableAfterMerging( addend._variable );
 
-    for ( auto &equation : equations )
+    List<Equation::Addend>::iterator addend;
+    List<Equation::Addend>::iterator otherAddend;
+
+    addend = equation._addends.begin();
+    while ( addend != equation._addends.end() )
     {
-        /*
-          First, adjust the equation if any variables have been merged.
-          E.g., if the equation is x1 + x2 + x3 = 0, and x1 and x2 have been
-          merged, the equation becomes 2x1 + x3 = 0
-        */
-        for ( auto &addend : equation._addends )
-            addend._variable = _tableau->getVariableAfterMerging( addend._variable );
+        otherAddend = addend;
+        ++otherAddend;
 
-        List<Equation::Addend>::iterator addend;
-        List<Equation::Addend>::iterator otherAddend;
-
-        addend = equation._addends.begin();
-        while ( addend != equation._addends.end() )
+        while ( otherAddend != equation._addends.end() )
         {
-            otherAddend = addend;
-            ++otherAddend;
-
-            while ( otherAddend != equation._addends.end() )
+            if ( otherAddend->_variable == addend->_variable )
             {
-                if ( otherAddend->_variable == addend->_variable )
-                {
-                    addend->_coefficient += otherAddend->_coefficient;
-                    otherAddend = equation._addends.erase( otherAddend );
-                }
-                else
-                    ++otherAddend;
+                addend->_coefficient += otherAddend->_coefficient;
+                otherAddend = equation._addends.erase( otherAddend );
             }
-
-            if ( FloatUtils::isZero( addend->_coefficient ) )
-                addend = equation._addends.erase( addend );
             else
-                ++addend;
+                ++otherAddend;
         }
 
-        /*
-          In the general case, we just add the new equation to the tableau.
-          However, we also support a very common case: equations of the form
-          x1 = x2, which are common, e.g., with ReLUs. For these equations we
-          may be able to merge two columns of the tableau.
-        */
-        unsigned x1, x2;
-        bool canMergeColumns =
-                // Only if the flag is on
-                GlobalConfiguration::USE_COLUMN_MERGING_EQUATIONS &&
-                // Only if the equation has the correct form
-                equation.isVariableMergingEquation( x1, x2 ) &&
-                // And only if the variables are not out of bounds
-                ( !_tableau->isBasic( x1 ) ||
-                  !_tableau->basicOutOfBounds( _tableau->variableToIndex( x1 ) ) )
-                &&
-                ( !_tableau->isBasic( x2 ) ||
-                  !_tableau->basicOutOfBounds( _tableau->variableToIndex( x2 ) ) );
+        if ( FloatUtils::isZero( addend->_coefficient ) )
+            addend = equation._addends.erase( addend );
+        else
+            ++addend;
+    }
 
-        bool columnsSuccessfullyMerged = false;
-        if ( canMergeColumns )
-            columnsSuccessfullyMerged = attemptToMergeVariables( x1, x2 );
+    /*
+      In the general case, we just add the new equation to the tableau.
+      However, we also support a very common case: equations of the form
+      x1 = x2, which are common, e.g., with ReLUs. For these equations we
+      may be able to merge two columns of the tableau.
+    */
+    unsigned x1, x2;
+    bool canMergeColumns =
+            // Only if the flag is on
+            GlobalConfiguration::USE_COLUMN_MERGING_EQUATIONS &&
+            // Only if the equation has the correct form
+            equation.isVariableMergingEquation( x1, x2 ) &&
+            // And only if the variables are not out of bounds
+            ( !_tableau->isBasic( x1 ) ||
+              !_tableau->basicOutOfBounds( _tableau->variableToIndex( x1 ) ) )
+            &&
+            ( !_tableau->isBasic( x2 ) ||
+              !_tableau->basicOutOfBounds( _tableau->variableToIndex( x2 ) ) );
 
-        if ( !columnsSuccessfullyMerged )
+    bool columnsSuccessfullyMerged = false;
+    if ( canMergeColumns )
+        columnsSuccessfullyMerged = attemptToMergeVariables( x1, x2 );
+
+    if ( !columnsSuccessfullyMerged )
+    {
+        // General case: add a new equation to the tableau
+        unsigned auxVariable = _tableau->addEquation( equation );
+        _activeEntryStrategy->resizeHook( _tableau );
+        adjustWorkMemorySize();
+        equation.dump();
+        switch ( equation._type )
         {
-            // General case: add a new equation to the tableau
-            unsigned auxVariable = _tableau->addEquation( equation );
-            _activeEntryStrategy->resizeHook( _tableau );
+            case Equation::GE:
+                bounds.append( Tightening( auxVariable, 0.0, Tightening::UB ) );
+                break;
 
-            switch ( equation._type )
-            {
-                case Equation::GE:
-                    bounds.append( Tightening( auxVariable, 0.0, Tightening::UB ) );
-                    break;
+            case Equation::LE:
+                bounds.append( Tightening( auxVariable, 0.0, Tightening::LB ) );
+                break;
 
-                case Equation::LE:
-                    bounds.append( Tightening( auxVariable, 0.0, Tightening::LB ) );
-                    break;
+            case Equation::EQ:
+                bounds.append( Tightening( auxVariable, 0.0, Tightening::LB ) );
+                bounds.append( Tightening( auxVariable, 0.0, Tightening::UB ) );
+                break;
 
-                case Equation::EQ:
-                    bounds.append( Tightening( auxVariable, 0.0, Tightening::LB ) );
-                    bounds.append( Tightening( auxVariable, 0.0, Tightening::UB ) );
-                    break;
-
-                default:
-                    ASSERT( false );
-                    break;
-            }
+            default:
+                ASSERT( false );
+                break;
         }
     }
-    adjustWorkMemorySize();
+    return bounds;
 }
 
-void Engine::tightenBounds(List<Tightening> bounds)
+void Engine::tightenBounds(List<Tightening> &bounds)
 {
-    for ( auto &bound : bounds )
-    {
-        unsigned variable = _tableau->getVariableAfterMerging( bound._variable );
-
-        if ( bound._type == Tightening::LB )
-        {
-            log( Stringf( "x%u: lower bound set to %.3lf", variable, bound._value ) );
-            _tableau->tightenLowerBound( variable, bound._value );
-        }
-        else
-        {
-            log( Stringf( "x%u: upper bound set to %.3lf", variable, bound._value ) );
-            _tableau->tightenUpperBound( variable, bound._value );
-        }
-    }
 
     _rowBoundTightener->resetBounds();
     _constraintBoundTightener->resetBounds();
 
+    for ( auto &bound : bounds )
+    {
+        unsigned variable = _tableau->getVariableAfterMerging(bound._variable );
+
+        if ( bound._type == Tightening::LB )
+        {
+            log( Stringf( "x%u: lower bound set to %.3lf", variable, bound._value ) );
+            _tableau->tightenLowerBound(variable, bound._value );
+        }
+        else
+        {
+            log( Stringf( "x%u: upper bound set to %.3lf", variable, bound._value ) );
+            _tableau->tightenUpperBound(variable, bound._value );
+        }
+    }
     DEBUG( _tableau->verifyInvariants() );
 }
 
@@ -1441,13 +1442,16 @@ void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
 
     List<Tightening> bounds = split.getBoundTightenings();
     List<Equation> equations = split.getEquations();
-
-    addEquations(equations, bounds);
-
+    for ( auto &equation : equations )
+    {
+        bounds.append(addEquation(equation));
+    }
+    adjustWorkMemorySize();
     tightenBounds(bounds);
 
     log( "Done with split\n" );
 }
+
 
 void Engine::applyAllRowTightenings()
 {
@@ -1937,6 +1941,12 @@ void Engine::checkOverallProgress()
             _basisRestorationRequired = Engine::STRONG_RESTORATION_NEEDED;
             _lastIterationWithProgress = currentIteration;
         }
+    }
+}
+
+void Engine::applyRefinementIfNeeded() {
+    for (PiecewiseLinearConstraint *plConstraint : _plConstraints) {
+        plConstraint->refineUpperBounds();
     }
 }
 

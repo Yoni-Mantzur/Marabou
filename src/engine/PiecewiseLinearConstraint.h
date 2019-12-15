@@ -205,6 +205,8 @@ public:
 
     virtual void registerEngine(IEngine *engine) { _engine = engine; }
 
+    virtual void refineUpperBounds() const { };
+
 protected:
     bool _constraintActive;
 	Map<unsigned, double> _assignment;

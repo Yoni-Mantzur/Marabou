@@ -40,12 +40,6 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedLowerAbstra
             p2 = GuidedPoint(x, y);
             guidedPointsIter--;
         }
-        std::cout << ("p1: ");
-        std::cout << ("(" + std::to_string(p1.x) + ", " + std::to_string(p1.y) + ")\n");
-        std::cout << ("p2: ");
-        std::cout << ("(" + std::to_string(p2.x) + ", " + std::to_string(p2.y) + ")\n");
-
-
         PiecewiseLinearCaseSplit split;
 
         Equation lowerEquation = getLinearEquation(p1, p2);
@@ -64,57 +58,14 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedLowerAbstra
 List<Equation> PiecewiseLinearAbstraction::getRefinedUpperAbstraction(List<GuidedPoint> &guidedPoints) const
 {
     List<Equation> refinements;
-    auto guidedPointsIter = guidedPoints.begin();
-//    auto guidedPointsIterReverse = guidedPoints.rbegin();
 
-    GuidedPoint p1  = *guidedPointsIter;
-//    GuidedPoint lowerBound = p1, upperBound = *guidedPointsIterReverse;
-    while (guidedPointsIter != guidedPoints.end())
+    for (GuidedPoint p : guidedPoints)
     {
-        p1 = *guidedPointsIter++;
-//
-//        // We're w/o guided points, choosing one randomly
-//        if (p1 == lowerBound && p2 == upperBound)
-//        {
-//            double x = (p1.x + p2.x) / 2;
-//            double y = evaluateConciseFunction(x);
-//            p2 = GuidedPoint(x, y);
-//            guidedPointsIter--;
-//        }
-//
-//        // Invalid guided points due to bounds were changed
-//        if (p2 > upperBound || p2 < lowerBound)
-//            continue;
-//
-//        // Same assignment as guided point
-//        if ( p1 == p2 )
-//        {
-//            guidedPointsIter++;
-//            double x = ((*guidedPointsIter).x + p2.x) / 2;
-//            double y = evaluateConciseFunction(x);
-//            p2 = GuidedPoint(x, y);
-//            guidedPointsIter--;
-//        }
-        std::cout << ("p1: ");
-        std::cout << ("(" + std::to_string(p1.x) + ", " + std::to_string(p1.y) + ")\n");
-//        std::cout << ("p2: ");
-//        std::cout << ("(" + std::to_string(p2.x) + ", " + std::to_string(p2.y) + ")\n");
-
-
-
-        double slope = evaluateDerivativeOfConciseFunction(p1.x);
-        Equation upperEquation = getLinearEquation(p1, slope);
+        double slope = evaluateDerivativeOfConciseFunction(p.x);
+        Equation upperEquation = getLinearEquation(p, slope);
         upperEquation.setType(Equation::LE);
         refinements.append(upperEquation);
-
-        //TODO: at the moment we don't splits on above
-//        for (Tightening tightening: boundVars(p1, p2))
-//            split.storeBoundTightening(tightening);
-//
-//        splits.append(split);
-//        p1 = *guidedPointsIter;
     }
-
     return refinements;
 }
 
@@ -129,11 +80,6 @@ List<Tightening> PiecewiseLinearAbstraction::boundVars(GuidedPoint p1, GuidedPoi
     // Bound f
     bounds.append(Tightening(f, p1.y, Tightening::LB));
     bounds.append(Tightening(f, p2.y, Tightening::UB));
-
-    std::cout << ("b bound: ");
-    std::cout << ("(" + std::to_string(p1.x) + ", " + std::to_string(p2.x) + ")\n");
-    std::cout << ("f bound: ");
-    std::cout << ("(" + std::to_string(p1.y) + ", " + std::to_string(p2.y) + ")\n");
 
     return bounds;
 }

@@ -135,8 +135,8 @@ public:
     void resetExitCode();
     void resetBoundTighteners();
 
-    void tightenBounds(List<Tightening> bounds);
-    void addEquations(List<Equation> equations, List<Tightening> bounds);
+    void tightenBounds(List<Tightening> &bounds);
+    List<Tightening> addEquation(Equation equation);
 
 private:
     enum BasisRestorationRequired {
@@ -454,6 +454,10 @@ private:
     double *createConstraintMatrix();
     void addAuxiliaryVariables();
     void augmentInitialBasisIfNeeded( List<unsigned> &initialBasis, const List<unsigned> &basicRows );
+
+    void tightenBounds(const List<Tightening> &bounds) const;
+
+    void applyRefinementIfNeeded();
 };
 
 #endif // __Engine_h__

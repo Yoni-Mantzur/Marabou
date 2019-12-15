@@ -14,10 +14,6 @@
 #include "Statistics.h"
 #include "TableauRow.h"
 
-#ifdef _WIN32
-#define __attribute__(x)
-#endif
-
 SigmoidConstraint::SigmoidConstraint( unsigned b, unsigned f )
         : _b ( b )
         , _f( f )
@@ -46,37 +42,14 @@ PiecewiseLinearConstraint *SigmoidConstraint::duplicateConstraint() const
 
 void SigmoidConstraint::restoreState( const PiecewiseLinearConstraint *state )
 {
-    DEBUG({
-              if (_logFile != nullptr) {
-                  auto *s = const_cast<SigmoidConstraint *>(this);
-                  // Equations before:
-                  s->_restore++;
-                  s->_logFile->open(IFile::MODE_WRITE_APPEND);
-                  s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num) +
-                                     "\nIteration: " +
-                                     std::to_string(s->_restore) +
-                                     " restore() was called\n");
-                  s->_logFile->close();
-                  s->_logFile->open(IFile::MODE_WRITE_APPEND);
-                  s->_logFile->write("Limits Before\n");
-                  s->_logFile->close();
-                  s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
-                  s->writeLimit(_lowerBounds[_f], _upperBounds[_f]);
-              }
-          })
+    // For debugging
+    dumpRestore(true);
+
     const auto *sigmoid = dynamic_cast<const SigmoidConstraint *>( state );
     *this = *sigmoid;
 
-    DEBUG({
-              if (_logFile != nullptr) {
-                  auto *s = const_cast<SigmoidConstraint *>(this);
-                  s->_logFile->open(IFile::MODE_WRITE_APPEND);
-                  s->_logFile->write("Limits after\n");
-                  s->_logFile->close();
-                  s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
-                  s->writeLimit(_lowerBounds[_f], _upperBounds[_f]);
-              }
-          })
+    // For debugging
+    dumpRestore(false);
 }
 
 void SigmoidConstraint::registerAsWatcher( ITableau *tableau )
@@ -99,8 +72,8 @@ void SigmoidConstraint::notifyVariableValue( unsigned variable, double value )
     _assignment[variable] = value;
 }
 
-void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound ) {
-    printf("variable %u bound %f\n", variable, bound);
+void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound )
+{
     if (_statistics)
         _statistics->incNumBoundNotificationsPlConstraints();
 
@@ -111,7 +84,6 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound ) {
         bound = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
 
     _lowerBounds[variable] = bound;
-    printf("variable %u lower bound %f\n", variable, _lowerBounds[variable]);
 
     if (variable == _b && _constraintBoundTightener)
     {
@@ -130,7 +102,6 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound ) {
 
 void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
 {
-    printf("variable %u bound %f\n", variable, bound);
     if ( _statistics )
         _statistics->incNumBoundNotificationsPlConstraints();
 
@@ -141,7 +112,6 @@ void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
         bound = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
 
     _upperBounds[variable] = bound;
-    printf("variable %u upper bound %f\n", variable, _upperBounds[variable]);
 
     if (variable == _b && _constraintBoundTightener)
     {
@@ -181,27 +151,16 @@ bool SigmoidConstraint::satisfied() const
     double bValue = _assignment.get( _b );
     double fValue = _assignment.get( _f );
 
-    DEBUG({
+    // Debugging
+    dumpAssignment(bValue, fValue);
 
-        if (_logFile != nullptr) {
-            auto *s = const_cast<SigmoidConstraint *>(this);
-            s->_iter_satisfied++;
-            s->_logFile->open(IFile::MODE_WRITE_APPEND);
-            s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num)  + "\nIteration: " + std::to_string(s->_iter_satisfied) + " satisfied() was called\n");
-            s->_logFile->close();
-            s->writePoint(bValue, fValue);
-            s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
-            s->writeLimit(_lowerBounds[_f], _upperBounds[_f]);
-        }
-      });
+    return FloatUtils::areEqual(FloatUtils::sigmoid(bValue), fValue,
+            GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE);
 
-    return FloatUtils::areEqual( FloatUtils::sigmoid(bValue), fValue,
-            GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE );
 }
 
 List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
 {
-    ASSERT(!satisfied());
     ASSERT(_assignment.exists(_b));
     ASSERT(_assignment.exists(_f));
 
@@ -220,26 +179,31 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
         fixes.append(Fix(_b, sigmoidInverseValue ));
     }
 
-//    DEBUG({
-//      if (_logFile != nullptr) {
-//
-//          auto *s = const_cast<SigmoidConstraint *>(this);
-//          // Equations before:
-//          s->_iter_fixes++;
-//          s->_logFile->open(IFile::MODE_WRITE_APPEND);
-//          s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num) + "\nIteration: " + std::to_string(s->_iter_fixes) + " fixes() was called\n");
-//          s->_logFile->close();
-//          s->writePoint(bValue, sigmoidValue, true);
-//          if (isValueInSigmoidBounds(fValue))
-//              s->writePoint(FloatUtils::sigmoidInverse(fValue), fValue, true);
-//          s->_logFile->open(IFile::MODE_WRITE_APPEND);
-//          s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num) + "\nUpper Bound\n");
-//          s->_logFile->close();
-//
-//          s->writeEquations(refinements);
-//      }
-//    });
+    // Upper bound refinement
+//    refineUpperBounds(bValue, sigmoidValue);
+
+    // Debugging
+    dumpFixes(bValue, fValue, sigmoidValue);
+
     return fixes;
+}
+
+void SigmoidConstraint::refineBounds() const {
+    ASSERT(_assignment.exists(_b));
+    double bValue = _assignment.get(_b);
+    double sigmoidValue = FloatUtils::sigmoid(bValue);
+
+    List<GuidedPoint> guidedPoints;
+    guidedPoints.append(GuidedPoint(bValue, sigmoidValue));
+    List<Equation> refinements = getRefinedUpperAbstraction(guidedPoints);
+
+    for (Equation equation : refinements) {
+        List<Tightening> auxBounds = _engine->addEquation(equation);
+        _engine->tightenBounds(auxBounds);
+    }
+
+    // Debugging
+    dumpUpperBound(refinements);
 }
 
 List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getSmartFixes(__attribute__((unused)) ITableau *tableau ) const
@@ -258,16 +222,6 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
     double bValue = _assignment.get(_b);
     double sigmoidValue = FloatUtils::sigmoid(bValue);
 
-    // TODO: guided points should be append in satisfied
-    List<GuidedPoint> guidedPoints1;
-//    guidedPoints.append(GuidedPoint(_lowerBounds[_b], _lowerBounds[_f]));
-    guidedPoints1.append(GuidedPoint(bValue, sigmoidValue));
-//    guidedPoints.append(GuidedPoint(_upperBounds[_b], _upperBounds[_f]));
-
-    List<Equation> refinements = getRefinedUpperAbstraction(guidedPoints1);
-    List<Tightening> auxBounds;
-    _engine->addEquations(refinements, auxBounds);
-    _engine->tightenBounds(auxBounds);
 
     // TODO: guided points should be append in satisfied
     List<GuidedPoint> guidedPoints;
@@ -277,37 +231,8 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
 
     List<PiecewiseLinearCaseSplit> splits = getRefinedLowerAbstraction(guidedPoints);
 
-
-    DEBUG({
-              if (_logFile != nullptr) {
-
-                  auto *s = const_cast<SigmoidConstraint *>(this);
-                  s->_iter_case_splits++;
-                  s->_logFile->open(IFile::MODE_WRITE_APPEND);
-                  s->_logFile->write("\nSigmoid " + std::to_string(sigmoid_num) + "\nIteration: " + std::to_string(s->_iter_case_splits) + " case_splits() was called\n");
-                  s->_logFile->close();
-                  for (PiecewiseLinearCaseSplit split : splits) {
-                      s->writeEquations(split.getEquations());
-                      List<Tightening> b = split.getBoundTightenings();
-                      double bounds[4] = {0};
-                      for (Tightening bound : b) {
-                          if (bound._variable == _b) {
-                              if (bound._type == bound.LB)
-                                  bounds[0] = bound._value;
-                              else
-                                  bounds[1] = bound._value;
-                          } else if (bound._variable == _f){
-                              if (bound._type == bound.LB)
-                                  bounds[2] = bound._value;
-                              else
-                                  bounds[3] = bound._value;
-                          }
-                      }
-                      s->writeLimit(bounds[0], bounds[1], true);
-                      s->writeLimit(bounds[2], bounds[3], false);
-                  }
-              }
-          });
+    // Debugging
+    dumpSplits(splits);
 
     return splits;
 }
@@ -383,10 +308,10 @@ void SigmoidConstraint::getEntailedTightenings(List<Tightening> &tightenings ) c
 
     if (FloatUtils::lt(bLowerBound, sigmoidInversefLowerBound))
         tightenings.append(Tightening(_b, sigmoidInversefLowerBound, Tightening::LB));
-    
+
     if (FloatUtils::lt(fLowerBound, sigmoidbLowerBound))
         tightenings.append(Tightening(_f, sigmoidbLowerBound, Tightening::LB));
-    
+
     if (FloatUtils::gt(bUpperBound, sigmoidInversefUpperBound))
         tightenings.append(Tightening(_b, sigmoidInversefUpperBound, Tightening::UB));
 
@@ -429,7 +354,17 @@ double SigmoidConstraint::evaluateDerivativeOfConciseFunction(double x) const
 
 
 
+
+
+
+
+
+
+
+
+
 /** Debuging **/
+
 void SigmoidConstraint::writePoint(double x, double y, bool isFix)
 {
     _logFile->open(IFile::MODE_WRITE_APPEND);
@@ -483,4 +418,115 @@ void SigmoidConstraint::writeEquations(List<Equation> eqs)
         _logFile->write("\n");
     }
     _logFile->close();
+}
+
+
+void SigmoidConstraint::dumpSplits(const List<PiecewiseLinearCaseSplit> &splits) const {
+    if (_logFile != nullptr) {
+
+        auto *s = const_cast<SigmoidConstraint *>(this);
+        s->_iter_case_splits++;
+        s->_logFile->open(IFile::MODE_WRITE_APPEND);
+        s->_logFile->write("\nSigmoid " + std::__cxx11::to_string(
+                sigmoid_num) + "\nIteration: "
+                           + std::__cxx11::to_string(s->_iter_case_splits)
+                           + " case_splits() was called\n");
+        s->_logFile->close();
+        for (PiecewiseLinearCaseSplit split : splits) {
+            s->writeEquations(split.getEquations());
+            List<Tightening> b = split.getBoundTightenings();
+            double bounds[4] = {0};
+            for (Tightening bound : b) {
+                if (bound._variable == _b) {
+                    if (bound._type == bound.LB)
+                        bounds[0] = bound._value;
+                    else
+                        bounds[1] = bound._value;
+                } else if (bound._variable == _f){
+                    if (bound._type == bound.LB)
+                        bounds[2] = bound._value;
+                    else
+                        bounds[3] = bound._value;
+                }
+            }
+            s->writeLimit(bounds[0], bounds[1], true);
+            s->writeLimit(bounds[2], bounds[3], false);
+        }
+    }
+}
+
+void SigmoidConstraint::dumpUpperBound(const List<Equation> &refinements) const {
+    if (_logFile != nullptr) {
+
+        auto *s = const_cast<SigmoidConstraint *>(this);
+
+        s->_logFile->open(IFile::MODE_WRITE_APPEND);
+        s->_logFile->write("\nSigmoid " + std::__cxx11::to_string(
+                sigmoid_num) +
+                           "\nUpper Bound\n");
+        s->_logFile->close();
+        s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
+        s->writeEquations(refinements);
+    }
+}
+
+void SigmoidConstraint::dumpAssignment(double bValue, double fValue) const {
+    if (_logFile != nullptr) {
+        auto *s = const_cast<SigmoidConstraint *>(this);
+        s->_iter_satisfied++;
+        s->_logFile->open(IFile::MODE_WRITE_APPEND);
+        s->_logFile->write("\nSigmoid " + std::__cxx11::to_string(sigmoid_num) +
+                           "\nIteration: " + std::__cxx11::to_string(s->_iter_satisfied)
+                           + " satisfied() was called\n");
+        s->_logFile->close();
+        s->writePoint(bValue, fValue);
+        s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
+        s->writeLimit(_lowerBounds[_f], _upperBounds[_f]);
+    }
+}
+
+void SigmoidConstraint::dumpFixes(double bValue, double fValue,
+                                  double sigmoidValue) const {
+    if (_logFile != nullptr) {
+
+        auto *s = const_cast<SigmoidConstraint *>(this);
+        // Equations before:
+        s->_iter_fixes++;
+        s->_logFile->open(IFile::MODE_WRITE_APPEND);
+        s->_logFile->write("\nSigmoid " + std::__cxx11::to_string(sigmoid_num)
+        + "\nIteration: " + std::__cxx11::to_string(s->_iter_fixes)
+        + " fixes() was called\n");
+        s->_logFile->close();
+        s->writePoint(bValue, sigmoidValue, true);
+        if (isValueInSigmoidBounds(fValue))
+            s->writePoint(FloatUtils::sigmoidInverse(fValue), fValue, true);
+    }
+}
+
+void SigmoidConstraint::dumpRestore(bool isBefore) const {
+    if (_logFile != nullptr) {
+        auto *s = const_cast<SigmoidConstraint *>(this);
+        if (isBefore) {
+            // Equations before:
+            s->_restore++;
+            s->_logFile->open(IFile::MODE_WRITE_APPEND);
+            s->_logFile->write("\nSigmoid " + std::__cxx11::to_string(
+                    sigmoid_num) +
+                               "\nIteration: " +
+                               std::__cxx11::to_string(s->_restore) +
+                               " restore() was called\n");
+            s->_logFile->close();
+            s->_logFile->open(IFile::MODE_WRITE_APPEND);
+            s->_logFile->write("Limits Before\n");
+            s->_logFile->close();
+            s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
+            s->writeLimit(_lowerBounds[_f], _upperBounds[_f]);
+        } else {
+            s->_logFile->open(IFile::MODE_WRITE_APPEND);
+            s->_logFile->write("Limits after\n");
+            s->_logFile->close();
+            s->writeLimit(_lowerBounds[_b], _upperBounds[_b], true);
+            s->writeLimit(_lowerBounds[_f], _upperBounds[_f]);
+        }
+    }
 }

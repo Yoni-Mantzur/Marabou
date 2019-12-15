@@ -130,13 +130,9 @@ public:
     String serializeToString() const;
 
     /*
-      Get the index of the B variable.
+      Get the index of the B or F variable.
     */
     unsigned getB() const { return _b; }
-
-    /*
-        Get the index of the B variable.
-    */
     unsigned getF() const { return _f; }
 
     double evaluateConciseFunction(double x) const { return FloatUtils::sigmoid(x); }
@@ -158,14 +154,13 @@ public:
     /*
      * The constraint is active even if splited
      */
-    virtual bool isActive() const
-    {
-        return true;
-    }
+    virtual bool isActive() const {return true; }
 
     /* For debugging propose */
     void setLogFile(File *file = nullptr) { _logFile = file; };
     void setSigmoidNum (int sigmoidNum) { sigmoid_num = sigmoidNum; };
+
+    void refineUpperBounds() const;
 
 private:
 
@@ -176,8 +171,8 @@ private:
     /*
       Return true iff b or f are out of bounds.
     */
-    bool haveOutOfBoundVariables() const;
     bool isValueInSigmoidBounds(double value) const;
+
 
     /* For debugging propose */
     IFile *_logFile = nullptr;
@@ -189,6 +184,11 @@ private:
     void writeLimit(double lower, double upper, bool isB = false);
     void writeEquations(List<Equation> eqs);
     int sigmoid_num;
+    void dumpAssignment(double bValue, double fValue) const;
+    void dumpUpperBound(const List<Equation> &refinements) const;
+    void dumpSplits(const List<PiecewiseLinearCaseSplit> &splits) const;
+    void dumpFixes(double bValue, double fValue, double sigmoidValue) const;
+    void dumpRestore(bool isBefore) const;
 };
 
 

@@ -176,6 +176,11 @@ public:
         return _container != other._container;
     }
 
+    void sort()
+    {
+        _container.sort();
+    }
+
 protected:
     Super _container;
 };

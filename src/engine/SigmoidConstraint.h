@@ -14,7 +14,7 @@ class SigmoidConstraint : public PiecewiseLinearConstraint, PiecewiseLinearAbstr
 {
 public:
     SigmoidConstraint( unsigned b, unsigned f );
-    SigmoidConstraint( const String &serializedRelu );
+    SigmoidConstraint( const String &serializedSigmoid );
 
     /*
       Return a clone of the constraint.
@@ -39,6 +39,12 @@ public:
     void notifyVariableValue( unsigned variable, double value );
     void notifyLowerBound( unsigned variable, double bound );
     void notifyUpperBound( unsigned variable, double bound );
+
+    /*
+     * Notification when broken assignment is invoked
+     */
+    void notifyBrokenAssignment();
+
 
     /*
       Returns true iff the variable participates in this piecewise
@@ -77,16 +83,13 @@ public:
     /*
       Check if the constraint's phase has been fixed.
     */
-    bool phaseFixed() const {
-        return false;
-    }
+    bool phaseFixed() const { return false; }
 
     /*
       If the constraint's phase has been fixed, get the (valid) case split.
+      Not relevant for Sigmoid, should not call it phase isn't fixed.
     */
-    PiecewiseLinearCaseSplit getValidCaseSplit() const {
-        return PiecewiseLinearCaseSplit();  // Not implemented
-    }
+    PiecewiseLinearCaseSplit getValidCaseSplit() const { throw "Not implemented function"; }
 
     /*
       Preprocessing related functions, to inform that a variable has been eliminated completely
@@ -125,7 +128,7 @@ public:
     virtual void getCostFunctionComponent( Map<unsigned, double> &cost ) const;
 
     /*
-      Returns string with shape: relu, _f, _b
+      Returns string with shape: sigmoid, _f, _b
     */
     String serializeToString() const;
 
@@ -135,9 +138,31 @@ public:
     unsigned getB() const { return _b; }
     unsigned getF() const { return _f; }
 
-    double evaluateConciseFunction(double x) const { return FloatUtils::sigmoid(x); }
+    /*
+     * Get the current bounds of the participant variables in the constraint
+     */
+    Point getLowerParticipantVariablesBounds() const;
+    Point getUpperParticipantVariablesBounds() const;
 
+    /*
+     * Return list of equations that can help bound more efficiently the constraint;
+     */
+    List<Equation> getBoundEquations();
+
+    /*
+     * Evaluate the concise function given point in the range
+     */
+    double evaluateConciseFunction(double x) const { return FloatUtils::sigmoid(x); };
+
+    /*
+     * Evaluate the derivative of the concise function given point in the range
+     */
     double evaluateDerivativeOfConciseFunction(double x) const;
+
+    /*
+     * Check if the concise function is convex function
+    */
+    virtual bool isConvex() const;
 
     /*
       Check if the aux variable is in use and retrieve it
@@ -154,13 +179,16 @@ public:
     /*
      * The constraint is active even if splited
      */
-    virtual bool isActive() const {return true; }
+    virtual bool isActive() const { return true; }
+
+
+
+
+
 
     /* For debugging propose */
     void setLogFile(File *file = nullptr) { _logFile = file; };
     void setSigmoidNum (int sigmoidNum) { sigmoid_num = sigmoidNum; };
-
-    void refineUpperBounds() const;
 
 private:
 

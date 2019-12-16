@@ -28,12 +28,22 @@ public:
 
         bool operator<(Point other)
         {
-            return (x < other.x || y < other.y);
+            return (x < other.x);
         }
 
         bool operator>(Point other)
         {
-            return (x > other.x || y > other.y);
+            return (x > other.x);
+        }
+
+        bool operator<=(Point other)
+        {
+            return (x <= other.x);
+        }
+
+        bool operator>=(Point other)
+        {
+            return (x <= other.x);
         }
     };
 
@@ -81,12 +91,6 @@ public:
      */
     virtual bool isConvex() const = 0;
 
-    /*
-     * Remove existing guided points
-     */
-    void clearAbstractionEquations() { _pointsForAbstractedBounds.clear(); }
-    void clearSplitsEquations() { _pointsForSplits.clear(); }
-
 private:
     /*
      * Build linear equation
@@ -106,6 +110,8 @@ private:
     List<Point> _pointsForAbstractedBounds;
 
     Point extractPointInSegment(double x1, double x2) const;
+
+    const static unsigned _SPURIOUS_POINTS_TS = 1;
 };
 
 

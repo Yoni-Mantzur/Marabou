@@ -457,7 +457,7 @@ private:
 
     void tightenBounds(const List<Tightening> &bounds) const;
 
-    void applyRefinementIfNeeded();
+    void addEquationsForBoundsIfNeeded();
 };
 
 #endif // __Engine_h__

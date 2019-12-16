@@ -94,10 +94,6 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
     storeInitialEngineState();
 
-    // TODO: refactor this
-    for (auto constraint : _plConstraints)
-        constraint->registerEngine(this);
-
     if ( _verbosity > 0 )
     {
         printf( "\nEngine::solve: Initial statistics\n" );
@@ -250,7 +246,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
             // We have out-of-bounds variables.
             performSimplexStep();
-            applyRefinementIfNeeded();
+            addEquationsForBoundsIfNeeded();
             continue;
         }
         catch ( const MalformedBasisException & )
@@ -1148,8 +1144,11 @@ void Engine::collectViolatedPlConstraints()
     _violatedPlConstraints.clear();
     for ( const auto &constraint : _plConstraints )
     {
-        if ( constraint->isActive() && !constraint->satisfied() )
-            _violatedPlConstraints.append( constraint );
+        if (constraint->isActive() && !constraint->satisfied())
+        {
+            _violatedPlConstraints.append(constraint);
+            constraint->notifyBrokenAssignment();
+        }
     }
 }
 
@@ -1944,9 +1943,13 @@ void Engine::checkOverallProgress()
     }
 }
 
-void Engine::applyRefinementIfNeeded() {
-    for (PiecewiseLinearConstraint *plConstraint : _plConstraints) {
-        plConstraint->refineUpperBounds();
+void Engine::addEquationsForBoundsIfNeeded() {
+    for (PiecewiseLinearConstraint *plConstraint : _violatedPlConstraints) {
+        for (auto equation : plConstraint->getBoundEquations())
+        {
+            List<Tightening> bounds = addEquation(equation);
+            tightenBounds(bounds);
+        }
     }
 }
 

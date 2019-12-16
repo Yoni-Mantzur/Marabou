@@ -14,7 +14,7 @@
 #include "Statistics.h"
 #include "TableauRow.h"
 
-SigmoidConstraint::SigmoidConstraint( unsigned b, unsigned f )
+SigmoidConstraint::SigmoidConstraint(unsigned b, unsigned f )
         : _b ( b )
         , _f( f )
 {
@@ -128,6 +128,14 @@ void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
     }
 }
 
+
+void SigmoidConstraint::notifyBrokenAssignment()
+{
+    ASSERT(_assignment.exists(_b) && _assignment.exists(_f))
+
+    addSpuriousPoint( { _assignment[_b], _assignment[_f] });
+}
+
 bool SigmoidConstraint::participatingVariable( unsigned variable ) const
 {
     return ( variable == _b ||  variable == _f );
@@ -179,28 +187,20 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
         fixes.append(Fix(_b, sigmoidInverseValue ));
     }
 
-    // Upper bound refinement
-//    refineUpperBounds(bValue, sigmoidValue);
-
     // Debugging
     dumpFixes(bValue, fValue, sigmoidValue);
 
     return fixes;
 }
 
-void SigmoidConstraint::refineUpperBounds() const {
+List<Equation> SigmoidConstraint::getBoundEquations() {
     ASSERT(_assignment.exists(_b));
-    double bValue = _assignment.get(_b);
-    double sigmoidValue = FloatUtils::sigmoid(bValue);
-
-    List<Point> guidedPoints;
-    guidedPoints.append(Point(bValue, sigmoidValue));
-    List<Equation> refinements = getRefinedUpperAbstraction(guidedPoints);
-
-
+    List<Equation> refinements = getEquationsAbstraction();
 
     // Debugging
     dumpUpperBound(refinements);
+
+    return  refinements;
 }
 
 List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getSmartFixes(__attribute__((unused)) ITableau *tableau ) const
@@ -216,17 +216,7 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
     ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f));
     ASSERT(_upperBounds.exists(_b) && _upperBounds.exists(_f));
 
-    double bValue = _assignment.get(_b);
-    double sigmoidValue = FloatUtils::sigmoid(bValue);
-
-
-    // TODO: guided points should be append in satisfied
-    List<Point> guidedPoints;
-    guidedPoints.append(Point(_lowerBounds[_b], _lowerBounds[_f]));
-    guidedPoints.append(Point(bValue, sigmoidValue));
-    guidedPoints.append(Point(_upperBounds[_b], _upperBounds[_f]));
-
-    List<PiecewiseLinearCaseSplit> splits = getRefinedBoundAbstraction(guidedPoints);
+    List<PiecewiseLinearCaseSplit> splits = getSplitsAbstraction();
 
     // Debugging
     dumpSplits(splits);
@@ -350,6 +340,26 @@ double SigmoidConstraint::evaluateDerivativeOfConciseFunction(double x) const
 }
 
 
+SigmoidConstraint::Point SigmoidConstraint::getLowerParticipantVariablesBounds() const
+{
+    ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f))
+
+    return { _lowerBounds[_b], _lowerBounds[_f] };
+}
+
+SigmoidConstraint::Point SigmoidConstraint::getUpperParticipantVariablesBounds() const
+{
+    ASSERT(_upperBounds.exists(_b) && _upperBounds.exists(_f))
+
+    return { _upperBounds[_b], _upperBounds[_f] };
+}
+
+bool SigmoidConstraint::isConvex() const
+{
+    ASSERT(_lowerBounds.exists(_b) && _upperBounds[_b])
+    ASSERT((_lowerBounds[_b] >= 0 && _upperBounds[_b] >= 0) || (_lowerBounds[_b] <= 0 && _upperBounds[_b] <= 0) )
+    return _lowerBounds[_b] < 0;
+}
 
 
 

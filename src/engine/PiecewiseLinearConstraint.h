@@ -86,6 +86,11 @@ public:
     virtual void notifyUpperBound( unsigned /* variable */, double /* bound */ ) {}
 
     /*
+     * Notification when broken assignment is invoked
+     */
+    virtual void notifyBrokenAssignment() {}
+
+    /*
       Turn the constraint on/off.
     */
     virtual void setActiveConstraint( bool active )
@@ -207,7 +212,7 @@ public:
     /*
      * Return list of equations that can help bound more efficiently the constraint;
      */
-    virtual List<Equation> getEquationsForBounderies() const
+    virtual List<Equation> getBoundEquations()
     {
         return List<Equation>();
     }

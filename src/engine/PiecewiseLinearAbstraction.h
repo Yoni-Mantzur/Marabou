@@ -14,43 +14,96 @@ class PiecewiseLinearAbstraction
 {
 public:
 
-    class GuidedPoint
+    class Point
     {
     public:
-        GuidedPoint(double x, double y) :  x(x), y(y) {}
+        Point(double x, double y) :  x(x), y(y) {}
         double x;
         double y;
 
-        bool operator==(GuidedPoint other)
+        bool operator==(Point other)
         {
             return (x == other.x && y == other.y);
         }
 
-        bool operator<(GuidedPoint other)
+        bool operator<(Point other)
         {
             return (x < other.x || y < other.y);
         }
 
-        bool operator>(GuidedPoint other)
+        bool operator>(Point other)
         {
             return (x > other.x || y > other.y);
         }
     };
-    List<Equation> getRefinedUpperAbstraction(List<GuidedPoint> &guidedPoints) const;
-    List<PiecewiseLinearCaseSplit> getRefinedLowerAbstraction(List<GuidedPoint> &guidedPoints) const;
 
+    /*
+     * Get splits abstraction
+     */
+    List<PiecewiseLinearCaseSplit> getSplitsAbstraction() const;
+
+    /*
+     * Get equations abstraction
+     */
+    List<Equation> getEquationsAbstraction() const;
+
+    /*
+     * Add spurious example
+     * NOTE: the example should no on the concise function by definition, o.w. undefined behavior
+     */
+    void addSpuriousPoint(Point p);
+
+    /*
+     * Get participant variables in the constraint
+     */
     virtual unsigned getB() const = 0;
     virtual unsigned getF() const = 0;
+
+    /*
+     * Get the current bounds of the participant variables in the constraint
+     */
+    virtual Point getLowerParticipantVariablesBounds() const = 0;
+    virtual Point getUpperParticipantVariablesBounds() const = 0;
+
+
+    /*
+     * Evaluate the concise function given point in the range
+     */
     virtual double evaluateConciseFunction(double x) const = 0;
+
+    /*
+     * Evaluate the derivative of the concise function given point in the range
+     */
     virtual double evaluateDerivativeOfConciseFunction(double x) const = 0;
+
+    /*
+     * Check if the concise function is convex function
+     */
+    virtual bool isConvex() const { return _isConvex; }
+    virtual void setConvex() { _isConvex = true; }
 
 
 private:
-    Equation getLinearEquation(GuidedPoint p, double slope) const;
-    Equation getLinearEquation(GuidedPoint p1, GuidedPoint p2) const;
+    /*
+     * Build linear equation
+     */
+    Equation getLinearEquation(Point p, double slope) const;
+    Equation getLinearEquation(Point p1, Point p2) const;
 
+    /*
+     * Get list of bounds on b and f given bounding box (defined by two points)
+     */
+    List<Tightening> boundVars(Point p1, Point p2) const;
 
-    List<Tightening> boundVars(GuidedPoint p1, GuidedPoint p2) const;
+    /*
+     * List of spurious points from above and beneath
+     */
+    List<Point> _pointsForSplits;
+    List<Point> _pointsForAbstractedBounds;
+
+    bool _isConvex = false;
+
+    Point extractPointInSegment(double x1, double x2) const;
 };
 
 

@@ -6,26 +6,31 @@
 #include "PiecewiseLinearAbstraction.h"
 
 
-List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedLowerAbstraction(List<GuidedPoint> &guidedPoints) const
+List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction() const
 {
+    List<Point> guidedPoints;
     List<PiecewiseLinearCaseSplit> splits;
-    auto guidedPointsIter = guidedPoints.begin();
-    auto guidedPointsIterReverse = guidedPoints.rbegin();
 
-    GuidedPoint p1  = *guidedPointsIter;
-    GuidedPoint lowerBound = p1, upperBound = *guidedPointsIterReverse;
+    List<Point> spuriousPoints = isConvex() ? _pointsForSplits : _pointsFromBeneath;
+    Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
+
+    // Guided point will be from lower bound to upper bound
+    guidedPoints.append(lowerBound);
+
+    // If no spurious points, pick one in the middle
+    if (spuriousPoints.empty())
+        spuriousPoints.append(extractPointInSegment(lowerBound.x, upperBound.x));
+
+    guidedPoints.append(spuriousPoints);
+    guidedPoints.append(upperBound);
+
+
+    auto guidedPointsIter = guidedPoints.begin();
+
+    Point p1  = *guidedPointsIter;
     while (++guidedPointsIter != guidedPoints.end())
     {
-        GuidedPoint p2 = *guidedPointsIter;
-
-        // We're w/o guided points, choosing one randomly
-        if (p1 == lowerBound && p2 == upperBound)
-        {
-            double x = (p1.x + p2.x) / 2;
-            double y = evaluateConciseFunction(x);
-            p2 = GuidedPoint(x, y);
-            guidedPointsIter--;
-        }
+        Point p2 = *guidedPointsIter;
 
         // Invalid guided points due to bounds were changed
         if (p2 > upperBound || p2 < lowerBound)
@@ -35,16 +40,15 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedLowerAbstra
         if ( p1 == p2 )
         {
             guidedPointsIter++;
-            double x = ((*guidedPointsIter).x + p2.x) / 2;
-            double y = evaluateConciseFunction(x);
-            p2 = GuidedPoint(x, y);
+            extractPointInSegment(p1.x, p2.x);
             guidedPointsIter--;
         }
         PiecewiseLinearCaseSplit split;
 
-        Equation lowerEquation = getLinearEquation(p1, p2);
-        lowerEquation.setType(Equation::GE);
-        split.addEquation(lowerEquation);
+        Equation abstractedEquation = getLinearEquation(p1, p2);
+        Equation::EquationType equationType = isConvex()? Equation::LE : Equation::GE;
+        abstractedEquation.setType(equationType);
+        split.addEquation(abstractedEquation);
         for (Tightening tightening: boundVars(p1, p2))
             split.storeBoundTightening(tightening);
 
@@ -55,22 +59,40 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getRefinedLowerAbstra
     return splits;
 }
 
-List<Equation> PiecewiseLinearAbstraction::getRefinedUpperAbstraction(List<GuidedPoint> &guidedPoints) const
+
+List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction() const
 {
+    List<Point> guidedPoints = _pointsForAbstractedBounds;
     List<Equation> refinements;
 
-    for (GuidedPoint p : guidedPoints)
+    for (Point p : guidedPoints)
     {
         double slope = evaluateDerivativeOfConciseFunction(p.x);
-        Equation upperEquation = getLinearEquation(p, slope);
-        upperEquation.setType(Equation::LE);
-        refinements.append(upperEquation);
+        Equation abstractedEquation = getLinearEquation(p, slope);
+        Equation::EquationType equationType = isConvex()? Equation::GE : Equation::LE;
+        abstractedEquation.setType(equationType);
+        refinements.append(abstractedEquation);
     }
+
+    // The problematic equation (isConvex? fromAbove : fromBeneath)
+    Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
+    Equation equation = getLinearEquation(lowerBound, upperBound);
+    refinements.append(equation);
     return refinements;
 }
 
-List<Tightening> PiecewiseLinearAbstraction::boundVars(GuidedPoint p1, GuidedPoint p2) const{
-        List<Tightening> bounds;
+void PiecewiseLinearAbstraction::addSpuriousPoint(Point p)
+{
+    double fixed_point = evaluateConciseFunction(p.x);
+    if ( ((p.y >=  fixed_point) && isConvex()) || ((p.y <  fixed_point) && !isConvex()))
+            _pointsForSplits.append(p);
+
+    else
+        _pointsForAbstractedBounds.append(p);
+}
+
+List<Tightening> PiecewiseLinearAbstraction::boundVars(Point p1, Point p2) const{
+    List<Tightening> bounds;
     unsigned b = getB(), f = getF();
 
     // Bound b
@@ -85,7 +107,7 @@ List<Tightening> PiecewiseLinearAbstraction::boundVars(GuidedPoint p1, GuidedPoi
 }
 
 
-Equation PiecewiseLinearAbstraction::getLinearEquation(GuidedPoint p, double slope) const
+Equation PiecewiseLinearAbstraction::getLinearEquation(Point p, double slope) const
 {
     unsigned b = getB(), f = getF();
     double x0 = p.x, y0 = p.y;
@@ -97,11 +119,16 @@ Equation PiecewiseLinearAbstraction::getLinearEquation(GuidedPoint p, double slo
     return equation;
 }
 
-Equation PiecewiseLinearAbstraction::getLinearEquation(GuidedPoint p1, GuidedPoint p2) const
+Equation PiecewiseLinearAbstraction::getLinearEquation(Point p1, Point p2) const
 {
     double x0 = p1.x, y0 = p1.y, x1 = p2.x, y1 = p2.y;
     double slope = (y1 - y0) / (x1 - x0);
 
-    return getLinearEquation(GuidedPoint(x0, y0), slope);
+    return getLinearEquation(Point(x0, y0), slope);
 }
 
+PiecewiseLinearAbstraction::Point PiecewiseLinearAbstraction::extractPointInSegment(double x1, double x2) const {
+    double x = (x1 + x2) / 2;
+    double y = evaluateConciseFunction(x);
+    return {x, y};
+}

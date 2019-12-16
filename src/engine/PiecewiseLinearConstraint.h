@@ -203,9 +203,14 @@ public:
         return false;
     }
 
-    virtual void registerEngine(IEngine *engine) { _engine = engine; }
 
-    virtual void refineUpperBounds() const { };
+    /*
+     * Return list of equations that can help bound more efficiently the constraint;
+     */
+    virtual List<Equation> getEquationsForBounderies() const
+    {
+        return List<Equation>();
+    }
 
 protected:
     bool _constraintActive;
@@ -219,7 +224,6 @@ protected:
       Statistics collection
     */
     Statistics *_statistics;
-    IEngine *_engine;
 };
 
 #endif // __PiecewiseLinearConstraint_h__

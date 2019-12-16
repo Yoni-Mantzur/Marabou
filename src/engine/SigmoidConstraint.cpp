@@ -193,14 +193,11 @@ void SigmoidConstraint::refineUpperBounds() const {
     double bValue = _assignment.get(_b);
     double sigmoidValue = FloatUtils::sigmoid(bValue);
 
-    List<GuidedPoint> guidedPoints;
-    guidedPoints.append(GuidedPoint(bValue, sigmoidValue));
+    List<Point> guidedPoints;
+    guidedPoints.append(Point(bValue, sigmoidValue));
     List<Equation> refinements = getRefinedUpperAbstraction(guidedPoints);
 
-    for (Equation equation : refinements) {
-        List<Tightening> auxBounds = _engine->addEquation(equation);
-        _engine->tightenBounds(auxBounds);
-    }
+
 
     // Debugging
     dumpUpperBound(refinements);
@@ -224,12 +221,12 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
 
 
     // TODO: guided points should be append in satisfied
-    List<GuidedPoint> guidedPoints;
-    guidedPoints.append(GuidedPoint(_lowerBounds[_b], _lowerBounds[_f]));
-    guidedPoints.append(GuidedPoint(bValue, sigmoidValue));
-    guidedPoints.append(GuidedPoint(_upperBounds[_b], _upperBounds[_f]));
+    List<Point> guidedPoints;
+    guidedPoints.append(Point(_lowerBounds[_b], _lowerBounds[_f]));
+    guidedPoints.append(Point(bValue, sigmoidValue));
+    guidedPoints.append(Point(_upperBounds[_b], _upperBounds[_f]));
 
-    List<PiecewiseLinearCaseSplit> splits = getRefinedLowerAbstraction(guidedPoints);
+    List<PiecewiseLinearCaseSplit> splits = getRefinedBoundAbstraction(guidedPoints);
 
     // Debugging
     dumpSplits(splits);
@@ -351,6 +348,13 @@ double SigmoidConstraint::evaluateDerivativeOfConciseFunction(double x) const
     double sigmoidValue = FloatUtils::sigmoid(x);
     return sigmoidValue * ( 1 - sigmoidValue );
 }
+
+
+
+
+
+
+
 
 
 

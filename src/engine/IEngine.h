@@ -25,7 +25,6 @@
 class EngineState;
 class Equation;
 class PiecewiseLinearCaseSplit;
-class Tightening;
 
 class IEngine
 {
@@ -70,9 +69,6 @@ public:
     */
     virtual void reset() = 0;
     virtual List<unsigned> getInputVariables() const = 0;
-
-    virtual void tightenBounds(List<Tightening> &bounds) = 0;
-    virtual List<Tightening> addEquation(Equation equation) = 0;
 };
 
 #endif // __IEngine_h__

@@ -79,9 +79,13 @@ public:
     /*
      * Check if the concise function is convex function
      */
-    virtual bool isConvex() const { return _isConvex; }
-    virtual void setConvex() { _isConvex = true; }
+    virtual bool isConvex() const = 0;
 
+    /*
+     * Remove existing guided points
+     */
+    void clearAbstractionEquations() { _pointsForAbstractedBounds.clear(); }
+    void clearSplitsEquations() { _pointsForSplits.clear(); }
 
 private:
     /*
@@ -100,8 +104,6 @@ private:
      */
     List<Point> _pointsForSplits;
     List<Point> _pointsForAbstractedBounds;
-
-    bool _isConvex = false;
 
     Point extractPointInSegment(double x1, double x2) const;
 };

@@ -11,7 +11,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
     List<Point> guidedPoints;
     List<PiecewiseLinearCaseSplit> splits;
 
-    List<Point> spuriousPoints = isConvex() ? _pointsForSplits : _pointsFromBeneath;
+    List<Point> spuriousPoints = _pointsForSplits;
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
 
     // Guided point will be from lower bound to upper bound
@@ -78,6 +78,7 @@ List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction() const
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
     Equation equation = getLinearEquation(lowerBound, upperBound);
     refinements.append(equation);
+
     return refinements;
 }
 

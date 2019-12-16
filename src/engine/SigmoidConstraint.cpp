@@ -188,7 +188,7 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
     return fixes;
 }
 
-void SigmoidConstraint::refineBounds() const {
+void SigmoidConstraint::refineUpperBounds() const {
     ASSERT(_assignment.exists(_b));
     double bValue = _assignment.get(_b);
     double sigmoidValue = FloatUtils::sigmoid(bValue);

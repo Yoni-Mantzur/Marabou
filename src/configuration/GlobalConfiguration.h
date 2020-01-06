@@ -131,7 +131,6 @@ public:
     static const double RELU_CONSTRAINT_COMPARISON_TOLERANCE;
 
     // The tolerance for checking whether f = Sigmoid( b ), to determine a Sigmoid's statisfaction
-    static const double SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE;
     static const double SIGMOID_DEFAULT_LOWER_BOUND;
     static const double SIGMOID_DEFAULT_UPPER_BOUND;
 

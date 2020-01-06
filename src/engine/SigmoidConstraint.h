@@ -162,7 +162,7 @@ public:
     /*
      * Check if the concise function is convex function
     */
-    virtual bool isConvex() const;
+    virtual ConvexType getConvexType() const;
 
     /*
       Check if the aux variable is in use and retrieve it

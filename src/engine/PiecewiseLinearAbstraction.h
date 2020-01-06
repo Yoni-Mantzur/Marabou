@@ -47,6 +47,11 @@ public:
         }
     };
 
+    enum ConvexType{
+        CONVEX,
+        CONCAVE,
+        UNKNOWN
+    };
     /*
      * Get splits abstraction
      */
@@ -89,7 +94,7 @@ public:
     /*
      * Check if the concise function is convex function
      */
-    virtual bool isConvex() const = 0;
+    virtual ConvexType getConvexType() const = 0;
 
 private:
     /*

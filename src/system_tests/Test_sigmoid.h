@@ -643,9 +643,9 @@ public:
         double output_upper = 0.844;
 
         double input_1_lower = 0.5;
-        double input_1_upper = 24.0;
+        double input_1_upper = 1.0;
         double input_2_lower = 0.5;
-        double input_2_upper = 12.5;
+        double input_2_upper = 1.5;
 
         InputQuery inputQuery;
         inputQuery.setNumberOfVariables( 8 );

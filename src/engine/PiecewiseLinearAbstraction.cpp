@@ -22,9 +22,8 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
     if (spuriousPoints.empty()){
         std::cout << "EMPTY" << std::endl;
         guidedPoints.append(extractPointInSegment(lowerBound.x, upperBound.x));
-    }
-
-    guidedPoints.append(spuriousPoints);
+    } else
+        guidedPoints.append(spuriousPoints);
     guidedPoints.append(upperBound);
 //    spuriousPoints.sort();
 
@@ -88,7 +87,7 @@ List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction() const
             Equation abstractedEquation = getLinearEquation(p, slope);
             Equation::EquationType equationType = getConvexType() == CONVEX ? Equation::GE : Equation::LE;
             abstractedEquation.setType(equationType);
-//            refinements.append(abstractedEquation);
+//            refinements.append(abstractedEq~uation);
         }
     }
 
@@ -107,14 +106,14 @@ void PiecewiseLinearAbstraction::addSpuriousPoint(Point p)
     double fixed_point = evaluateConciseFunction(p.x);
     _pointsForSplits.clear();
     _pointsForAbstractedBounds.clear();
-    Point concisePoint = Point(p.x, fixed_point);
+//    Point concisePoint = Point(p.x, fixed_point);
     ConvexType convexType = getConvexType();
     ASSERT(convexType != UNKNOWN)
     if (convexType == UNKNOWN)
         return;
 
     if (((p.y >=  fixed_point) && (convexType == CONVEX)) || ((p.y <= fixed_point) && (convexType == CONCAVE)))
-        _pointsForSplits.append(concisePoint);
+        _pointsForSplits.append(p);
 //    else
 //        _pointsForAbstractedBounds.append(concisePoint);
 }

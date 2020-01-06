@@ -77,8 +77,7 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound )
     if (_statistics)
         _statistics->incNumBoundNotificationsPlConstraints();
 
-    if ((_lowerBounds.exists(variable) && !FloatUtils::gt(bound, _lowerBounds[variable])))// ||
-//            (_upperBounds.exists(variable) && FloatUtils::gt(bound, _upperBounds[variable])))
+    if ((_lowerBounds.exists(variable) && !FloatUtils::gt(bound, _lowerBounds[variable])))
         return;
 
     if (variable == _f && !isValueInSigmoidBounds(bound))
@@ -98,14 +97,23 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound )
             double sigmoidBound = FloatUtils::sigmoid(bound);
             if ((!_lowerBounds.exists(_f) || FloatUtils::gt(sigmoidBound, _lowerBounds[_f]))) {
                 _constraintBoundTightener->registerTighterLowerBound(_f, sigmoidBound);
+                std::cout << "variable:" << std::endl;
+                std::cout << std::to_string(_f) << std::endl;
+                std::cout << "notifyUpperBound lower bound correction:" << std::endl;
+                std::cout << std::to_string(sigmoidBound) << std::endl;
             }
+
         }
 
         else if (variable == _f)
         {
             double sigmoidInverseBound = FloatUtils::sigmoidInverse(bound);
-            if ((!_lowerBounds.exists(_b) || FloatUtils::gt(sigmoidInverseBound, _lowerBounds[_b]))){
+            if ((!_lowerBounds.exists(_b) || FloatUtils::gt(sigmoidInverseBound, _lowerBounds[_b]))) {
                 _constraintBoundTightener->registerTighterLowerBound(_b, sigmoidInverseBound);
+                std::cout << "variable:" << std::endl;
+                std::cout << std::to_string(_b) << std::endl;
+                std::cout << "notifyUpperBound lower bound correction:" << std::endl;
+                std::cout << std::to_string(sigmoidInverseBound) << std::endl;
             }
         }
     }
@@ -117,13 +125,13 @@ void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
         _statistics->incNumBoundNotificationsPlConstraints();
 
     if ( (_upperBounds.exists( variable ) && !FloatUtils::lt( bound, _upperBounds[variable] )))
-//        || (_lowerBounds.exists(variable) && FloatUtils::lt(bound, _lowerBounds[variable])))
         return;
 
     if (variable == _f && !isValueInSigmoidBounds(bound))
         bound = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
 
     _upperBounds[variable] = bound;
+
     std::cout << "variable:" << std::endl;
     std::cout << std::to_string(variable) << std::endl;
     std::cout << "notify upper bound:" << std::endl;
@@ -133,15 +141,23 @@ void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
     {
         if (variable == _b) {
             double sigmoidBound = FloatUtils::sigmoid(bound);
-            if ((!_upperBounds.exists(_f) || FloatUtils::lt(sigmoidBound, _upperBounds[_f])))
-            {
+            if ((!_upperBounds.exists(_f) || FloatUtils::lt(sigmoidBound, _upperBounds[_f]))) {
                 _constraintBoundTightener->registerTighterUpperBound(_f, sigmoidBound);
+                std::cout << "variable:" << std::endl;
+                std::cout << std::to_string(_f) << std::endl;
+                std::cout << "notifyUpperBound upper bound correction:" << std::endl;
+                std::cout << std::to_string(sigmoidBound) << std::endl;
             }
 
         } else if (variable == _f) {
             double sigmoidInverseBound = FloatUtils::sigmoidInverse(bound);
-            if ((!_upperBounds.exists(_b) || FloatUtils::lt(sigmoidInverseBound, _upperBounds[_b])))
+            if ((!_upperBounds.exists(_b) || FloatUtils::lt(sigmoidInverseBound, _upperBounds[_b]))) {
                 _constraintBoundTightener->registerTighterUpperBound(_b, sigmoidInverseBound);
+                std::cout << "variable:" << std::endl;
+                std::cout << std::to_string(_b) << std::endl;
+                std::cout << "notifyUpperBound upper bound correction:" << std::endl;
+                std::cout << std::to_string(sigmoidInverseBound) << std::endl;
+            }
         }
     }
 }
@@ -199,12 +215,8 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
 
     fixes.append(Fix(_f, sigmoidValue ));
 
-    // If fValue is out of bounds, can fix it
-    if (isValueInSigmoidBounds(fValue) )
-    {
-        double sigmoidInverseValue = FloatUtils::sigmoidInverse(fValue);
-        fixes.append(Fix(_b, sigmoidInverseValue ));
-    }
+    double sigmoidInverseValue = FloatUtils::sigmoidInverse(fValue);
+    fixes.append(Fix(_b, sigmoidInverseValue ));
 
     // Debugging
     dumpFixes(bValue, fValue, sigmoidValue);
@@ -304,28 +316,41 @@ void SigmoidConstraint::getEntailedTightenings(List<Tightening> &tightenings ) c
 {
     ASSERT( _lowerBounds.exists( _b ) && _lowerBounds.exists( _f ) &&
             _upperBounds.exists( _b ) && _upperBounds.exists( _f ) );
-//    double bLowerBound = _lowerBounds[_b];
-    double fLowerBound = _lowerBounds[_f];
 
-//    double bUpperBound = _upperBounds[_b];
-    double fUpperBound = _upperBounds[_f];
+    double bLowerBound = _lowerBounds[_b], sigmoidbLowerBound = FloatUtils::sigmoid(bLowerBound);
+    double fLowerBound = _lowerBounds[_f], sigmoidInversefLowerBound = FloatUtils::sigmoidInverse(fLowerBound);
 
+    double bUpperBound = _upperBounds[_b], sigmoidbUpperBound = FloatUtils::sigmoid(bUpperBound);
+    double fUpperBound = _upperBounds[_f], sigmoidInversefUpperBound = FloatUtils::sigmoidInverse( fUpperBound );
 
-    double sigmoidInversefLowerBound = FloatUtils::sigmoidInverse(fLowerBound);
     tightenings.append(Tightening(_b, sigmoidInversefLowerBound, Tightening::LB));
 
-    double sigmoidInversefUpperBound = FloatUtils::sigmoidInverse( fUpperBound );
+    std::cout << "variable:" << std::endl;
+    std::cout << std::to_string(_b) << std::endl;
+    std::cout << "getEntailedTightenings lower bound:" << std::endl;
+    std::cout << std::to_string(sigmoidbLowerBound) << std::endl;
+
     tightenings.append(Tightening(_b, sigmoidInversefUpperBound, Tightening::UB));
 
-    ASSERT(FloatUtils::lte(sigmoidInversefLowerBound, sigmoidInversefUpperBound))
+    std::cout << "variable:" << std::endl;
+    std::cout << std::to_string(_b) << std::endl;
+    std::cout << "getEntailedTightenings upper bound:" << std::endl;
+    std::cout << std::to_string(sigmoidInversefUpperBound) << std::endl;
 
-//    double sigmoidbLowerBound = FloatUtils::sigmoid(FloatUtils::max(bLowerBound, sigmoidInversefLowerBound));
-//    tightenings.append(Tightening(_f, sigmoidbLowerBound, Tightening::LB));
-//
-//    double  sigmoidbUpperBound = FloatUtils::sigmoid(FloatUtils::min(bUpperBound, sigmoidInversefUpperBound));
-//    tightenings.append(Tightening(_f, sigmoidbUpperBound, Tightening::UB));
-//
-//    ASSERT(FloatUtils::lte(sigmoidbLowerBound, sigmoidbUpperBound))
+    tightenings.append(Tightening(_f, sigmoidbLowerBound, Tightening::LB));
+
+    std::cout << "variable:" << std::endl;
+    std::cout << std::to_string(_f) << std::endl;
+    std::cout << "getEntailedTightenings upper bound:" << std::endl;
+    std::cout << std::to_string(sigmoidbLowerBound) << std::endl;
+
+    tightenings.append(Tightening(_f, sigmoidbUpperBound, Tightening::UB));
+
+    std::cout << "variable:" << std::endl;
+    std::cout << std::to_string(_f) << std::endl;
+    std::cout << "getEntailedTightenings upper bound:" << std::endl;
+    std::cout << std::to_string(sigmoidbUpperBound) << std::endl;
+
 
 }
 

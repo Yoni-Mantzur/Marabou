@@ -63,6 +63,7 @@ const double GlobalConfiguration::PSE_GAMMA_ERROR_THRESHOLD = 0.001;
 const double GlobalConfiguration::PSE_GAMMA_UPDATE_TOLERANCE = 0.000000001;
 
 const double GlobalConfiguration::RELU_CONSTRAINT_COMPARISON_TOLERANCE = 0.001;
+
 const double GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND = 1.0 - DEFAULT_EPSILON_FOR_COMPARISONS;
 const double GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND = DEFAULT_EPSILON_FOR_COMPARISONS;
 

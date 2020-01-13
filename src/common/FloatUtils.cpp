@@ -144,24 +144,14 @@ bool FloatUtils::isInf( double x )
     return isinf( x );
 }
 
-
-double FloatUtils::setPrecision( double number, unsigned precisionFactor )
+double FloatUtils::sigmoid( double x )
 {
-    double decimalPart;
-    double fracPart = modf(number, &decimalPart);
-    return decimalPart + round(fracPart * pow(10, precisionFactor)) / pow(10, precisionFactor);
+    return 1.0 / ( 1.0 + exp( -x ) );
 }
 
-double FloatUtils::sigmoid( double x, unsigned precisionFactor )
+double FloatUtils::sigmoidInverse( double x )
 {
-    double sigmoidVal = 1 / ( 1 + exp( -x ) );
-    return setPrecision(sigmoidVal, precisionFactor);
-}
-
-double FloatUtils::sigmoidInverse( double x, unsigned accuracyFactor )
-{
-    double sigmoidInverseValue = log ( x / ( 1 - x ) );
-    return setPrecision(sigmoidInverseValue, accuracyFactor);
+    return log ( x / ( 1.0 - x ) );
 }
 
 //

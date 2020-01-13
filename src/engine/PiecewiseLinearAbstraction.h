@@ -111,10 +111,8 @@ private:
     /*
      * List of spurious points from above and beneath
      */
-    List<Point> _pointsForSplits;
-    List<Point> _pointsForAbstractedBounds;
-
-    Point extractPointInSegment(double x1, double x2) const;
+    List<double> _pointsForSplits;
+    List<double> _pointsForAbstractedBounds;
 
     const static unsigned _SPURIOUS_POINTS_TS = 1;
 };

@@ -9,49 +9,36 @@
 
 List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction() const
 {
-    List<Point> guidedPoints;
+    List<double> guidedPoints;
     List<PiecewiseLinearCaseSplit> splits;
 
-    List<Point> spuriousPoints = _pointsForSplits;
+    List<double> spuriousPoints = _pointsForSplits;
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
 
     // Guided point will be from lower bound to upper bound
-    guidedPoints.append(lowerBound);
+    guidedPoints.append(lowerBound.x);
 
-    // If no spurious points, pick one in the middle
-    if (spuriousPoints.empty()){
-        std::cout << "EMPTY" << std::endl;
-        guidedPoints.append(extractPointInSegment(lowerBound.x, upperBound.x));
-    } else
-        guidedPoints.append(spuriousPoints);
-    guidedPoints.append(upperBound);
-//    spuriousPoints.sort();
+    if (spuriousPoints.empty())
+        spuriousPoints.append((lowerBound.x + upperBound.x) / 2);
+    guidedPoints.append(spuriousPoints);
+
+    guidedPoints.append(upperBound.x);
 
     auto guidedPointsIter = guidedPoints.begin();
 
-    Point p1  = *guidedPointsIter;
-    std::cout << "split++:" << std::endl;
+    double x1  = *guidedPointsIter;
     while (++guidedPointsIter != guidedPoints.end())
     {
-        Point p2 = *guidedPointsIter;
+        double x2 = *guidedPointsIter;
 
         // Invalid guided points due to bounds were changed
-        if (p2 > upperBound || p2 < lowerBound)  {
-            p2 = extractPointInSegment(p1.x, upperBound.x);
-            std::cout << "NOT IN SEGMENT" << std::endl;
-        }
+        if (FloatUtils::gt(x2, upperBound.x) || FloatUtils::lt(x2, lowerBound.x))
+            x2 = (x1 + x2) / 2;
 
         PiecewiseLinearCaseSplit split;
 
-        p1 = {p1.x, evaluateConciseFunction(p1.x)};
-        p2 = {p2.x, evaluateConciseFunction(p2.x)};
-
-        std::cout << "p1:" << std::endl;
-        std::cout << std::to_string(p1.x) << std::endl;
-        std::cout << std::to_string(p1.y) << std::endl;
-        std::cout << "p2:" << std::endl;
-        std::cout << std::to_string(p2.x) << std::endl;
-        std::cout << std::to_string(p2.y) << std::endl;
+        Point p1 = {x1, evaluateConciseFunction(x1)};
+        Point p2 = {x2, evaluateConciseFunction(x2)};
 
         Equation abstractedEquation = getLinearEquation(p1, p2);
         Equation::EquationType equationType = getConvexType() == CONVEX ? Equation::LE : Equation::GE;
@@ -61,7 +48,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
             split.storeBoundTightening(tightening);
 
         splits.append(split);
-        p1 = p2;
+        x1 = x2;
     }
     return splits;
 }
@@ -70,28 +57,23 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
 List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction() const
 {
     ASSERT(getConvexType() != UNKNOWN )
-    List<Point> guidedPoints = _pointsForAbstractedBounds;
+    List<double> guidedPoints = _pointsForAbstractedBounds;
     List<Equation> refinements;
 
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
-    for (Point p : guidedPoints)
+    for (double x : guidedPoints)
     {
-        if (p >= lowerBound && p <= upperBound)
+        if (FloatUtils::lt(x, lowerBound.x) ||  FloatUtils::gt(x, upperBound.x))
         {
-            std::cout << "p:" << std::endl;
-            std::cout << std::to_string(p.x) << std::endl;
-            std::cout << std::to_string(p.y) << std::endl;
-            double slope = evaluateDerivativeOfConciseFunction(p.x);
-            std::cout << "slope:" << std::endl;
-            std::cout << std::to_string(slope) << std::endl;
+            double slope = evaluateDerivativeOfConciseFunction(x);
+            Point p = {x, evaluateConciseFunction(x)};
             Equation abstractedEquation = getLinearEquation(p, slope);
             Equation::EquationType equationType = getConvexType() == CONVEX ? Equation::GE : Equation::LE;
             abstractedEquation.setType(equationType);
-//            refinements.append(abstractedEq~uation);
+            refinements.append(abstractedEquation);
         }
     }
 
-    // The problematic equation (getConvexType? fromAbove : fromBeneath)
     // TODO: need to think how to remove old equations as well (and not call after c.s)
 //    Equation equation = getLinearEquation(lowerBound, upperBound);
 //    Equation::EquationType equationType = getConvexType()? Equation::LE : Equation::GE;
@@ -104,18 +86,18 @@ List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction() const
 void PiecewiseLinearAbstraction::addSpuriousPoint(Point p)
 {
     double fixed_point = evaluateConciseFunction(p.x);
+
     _pointsForSplits.clear();
     _pointsForAbstractedBounds.clear();
-//    Point concisePoint = Point(p.x, fixed_point);
+
     ConvexType convexType = getConvexType();
-    ASSERT(convexType != UNKNOWN)
     if (convexType == UNKNOWN)
         return;
 
-    if (((p.y >=  fixed_point) && (convexType == CONVEX)) || ((p.y <= fixed_point) && (convexType == CONCAVE)))
-        _pointsForSplits.append(p);
-//    else
-//        _pointsForAbstractedBounds.append(concisePoint);
+    if ((FloatUtils::gte(p.y, fixed_point) && (convexType == CONVEX)) || (FloatUtils::lte(p.y, fixed_point) && (convexType == CONCAVE)))
+        _pointsForSplits.append(p.x);
+    else
+        _pointsForAbstractedBounds.append(p.x);
 }
 
 List<Tightening> PiecewiseLinearAbstraction::boundVars(Point p1, Point p2) const{
@@ -131,14 +113,6 @@ List<Tightening> PiecewiseLinearAbstraction::boundVars(Point p1, Point p2) const
     ASSERT(FloatUtils::lte(p1.y, p2.y))
     bounds.append(Tightening(f, p1.y, Tightening::LB));
     bounds.append(Tightening(f, p2.y, Tightening::UB));
-
-    std::cout << "b bound on split:" << std::endl;
-    std::cout << std::to_string(p1.x) << std::endl;
-    std::cout << std::to_string(p2.x) << std::endl;
-
-    std::cout << "f bound on split:" << std::endl;
-    std::cout << std::to_string(p1.y) << std::endl;
-    std::cout << std::to_string(p2.y) << std::endl;
 
     return bounds;
 }
@@ -162,10 +136,4 @@ Equation PiecewiseLinearAbstraction::getLinearEquation(Point p1, Point p2) const
     double slope = (y1 - y0) / (x1 - x0);
 
     return getLinearEquation(Point(x0, y0), slope);
-}
-
-PiecewiseLinearAbstraction::Point PiecewiseLinearAbstraction::extractPointInSegment(double x1, double x2) const {
-    double x = (x1 + x2) / 2;
-    double y = evaluateConciseFunction(x);
-    return {x, y};
 }

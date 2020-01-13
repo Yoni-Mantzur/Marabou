@@ -102,6 +102,8 @@ bool Engine::solve( unsigned timeoutInSeconds )
     }
 
     struct timespec mainLoopStart = TimeUtils::sampleMicro();
+    _tableau->dumpEquations();
+    _tableau->dumpAssignment();
     while ( true )
     {
         struct timespec mainLoopEnd = TimeUtils::sampleMicro();
@@ -187,6 +189,8 @@ bool Engine::solve( unsigned timeoutInSeconds )
                     performSymbolicBoundTightening();
                 }
                 while ( applyAllValidConstraintCaseSplits() );
+                _tableau->dumpEquations();
+                _tableau->dumpAssignment();
                 continue;
             }
 
@@ -278,6 +282,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
         {
             // The current query is unsat, and we need to pop.
             // If we're at level 0, the whole query is unsat.
+            printf( "\n======Back Tracking====/n" );
             if ( !_smtCore.popSplit() )
             {
                 if ( _verbosity > 0 )

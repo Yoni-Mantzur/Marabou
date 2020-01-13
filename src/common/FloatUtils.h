@@ -52,10 +52,9 @@ public:
     static bool wellFormed( double x );
     static bool isNan( double x );
     static bool isInf( double x );
-
-    static double setPrecision( double number, unsigned precisionFactor );
-    static double sigmoid( double x, unsigned precisionFactor = 12 );
-    static double sigmoidInverse( double x, unsigned accuracyFactor = 12);
+    ;
+    static double sigmoid( double x );
+    static double sigmoidInverse( double x );
 };
 
 #endif // __FloatUtils_h__

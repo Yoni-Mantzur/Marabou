@@ -33,7 +33,10 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
 
         // Invalid guided points due to bounds were changed
         if (FloatUtils::gt(x2, upperBound.x) || FloatUtils::lt(x2, lowerBound.x))
-            x2 = (x1 + x2) / 2;
+        {
+            x2 = (x1 + *(++guidedPointsIter)) / 2;
+            guidedPointsIter--;
+        }
 
         PiecewiseLinearCaseSplit split;
 
@@ -94,6 +97,7 @@ void PiecewiseLinearAbstraction::addSpuriousPoint(Point p)
     if (convexType == UNKNOWN)
         return;
 
+    _pointsForSplits.append(getLowerParticipantVariablesBounds().x/2 + getUpperParticipantVariablesBounds().x/2);
     if ((FloatUtils::gte(p.y, fixed_point) && (convexType == CONVEX)) || (FloatUtils::lte(p.y, fixed_point) && (convexType == CONCAVE)))
         _pointsForSplits.append(p.x);
     else

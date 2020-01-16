@@ -97,7 +97,6 @@ void PiecewiseLinearAbstraction::addSpuriousPoint(Point p)
     if (convexType == UNKNOWN)
         return;
 
-    _pointsForSplits.append(getLowerParticipantVariablesBounds().x/2 + getUpperParticipantVariablesBounds().x/2);
     if ((FloatUtils::gte(p.y, fixed_point) && (convexType == CONVEX)) || (FloatUtils::lte(p.y, fixed_point) && (convexType == CONCAVE)))
         _pointsForSplits.append(p.x);
     else

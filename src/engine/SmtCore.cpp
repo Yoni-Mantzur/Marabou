@@ -277,6 +277,7 @@ bool SmtCore::checkSkewFromDebuggingSolution()
     {
         if ( !splitAllowsStoredSolution( split, error ) )
         {
+            std::cout << error << std::endl;
             printf( "Error with one of the splits implied at root level:\n\t%s\n", error.ascii() );
             throw MarabouError( MarabouError::DEBUGGING_ERROR );
         }
@@ -290,12 +291,14 @@ bool SmtCore::checkSkewFromDebuggingSolution()
         {
             if ( stackEntry->_alternativeSplits.empty() )
             {
+                std::cout << error << std::endl;
                 printf( "Error! Have a split that is non-compliant with the stored solution, "
                         "without alternatives:\n\t%s\n", error.ascii() );
                 throw MarabouError( MarabouError::DEBUGGING_ERROR );
             }
 
             // Active split is non-compliant but this is fine, because there are alternatives. We're done.
+            std::cout << error << std::endl;
             return false;
         }
 
@@ -304,6 +307,7 @@ bool SmtCore::checkSkewFromDebuggingSolution()
         {
             if ( !splitAllowsStoredSolution( split, error ) )
             {
+                std::cout << error << std::endl;
                 printf( "Error with one of the splits implied at this stack level:\n\t%s\n",
                         error.ascii() );
                 throw MarabouError( MarabouError::DEBUGGING_ERROR );

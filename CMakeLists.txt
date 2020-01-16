@@ -92,7 +92,7 @@ endif()
 
 if (NOT MSVC)
     set(COMPILE_FLAGS  -Wall -Wextra  -Werror -MMD) #-Wno-deprecated
-    set(RELEASE_FLAGS -O3) #-Wno-deprecated
+    set(RELEASE_FLAGS) #-Wno-deprecated
 endif()
 
 if (RUN_MEMORY_TEST)
@@ -116,7 +116,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif()
 
 if (NOT MSVC)
-    set(RELEASE_FLAGS  ${COMPILE_FLAGS} -O3)
+    set(RELEASE_FLAGS  ${COMPILE_FLAGS})
 endif()
 
 
@@ -222,9 +222,10 @@ if(CXXTEST_FOUND)
     enable_testing()
 endif()
 
+
 target_link_libraries(${MARABOU_TEST_LIB} ${LIBS})
 target_include_directories(${MARABOU_TEST_LIB} PRIVATE ${LIBS_INCLUDES})
-target_compile_options(${MARABOU_TEST_LIB} PRIVATE ${CXXTEST_FLAGS})
+target_compile_options(${MARABOU_TEST_LIB} PRIVATE ${CXXTEST_FLAGS} -O0)
 
 
 

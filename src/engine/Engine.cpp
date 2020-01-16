@@ -191,6 +191,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
                 while ( applyAllValidConstraintCaseSplits() );
                 _tableau->dumpEquations();
                 _tableau->dumpAssignment();
+                checkBoundCompliancyWithDebugSolution();
                 continue;
             }
 
@@ -240,6 +241,11 @@ bool Engine::solve( unsigned timeoutInSeconds )
                 // For debugging purposes
                 checkBoundCompliancyWithDebugSolution();
 
+                if ( _verbosity > 0 ){
+                    _tableau->dumpEquations();
+                    _tableau->dumpAssignment();
+                }
+
                 while ( applyAllValidConstraintCaseSplits() )
                     performSymbolicBoundTightening();
 
@@ -248,7 +254,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
             // We have out-of-bounds variables.
             performSimplexStep();
-            addEquationsForBoundsIfNeeded();
+//            addEquationsForBoundsIfNeeded();
             continue;
         }
         catch ( const MalformedBasisException & )
@@ -295,6 +301,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
             }
             _tableau->dumpEquations();
             _tableau->dumpAssignment();
+            checkBoundCompliancyWithDebugSolution();
         }
         catch ( ... )
         {
@@ -1390,7 +1397,6 @@ List<Tightening> Engine::addEquation(Equation equation)
         // General case: add a new equation to the tableau
         unsigned auxVariable = _tableau->addEquation( equation );
         _activeEntryStrategy->resizeHook( _tableau );
-        adjustWorkMemorySize();
         equation.dump();
         switch ( equation._type )
         {
@@ -1688,7 +1694,7 @@ void Engine::checkBoundCompliancyWithDebugSolution()
         // The stack is compliant, we should not have learned any non-compliant bounds
         for ( const auto &var : _preprocessedQuery._debuggingSolution )
         {
-            // printf( "Looking at var %u\n", var.first );
+             printf( "Looking at var %u\n", var.first );
 
             if ( FloatUtils::gt( _tableau->getLowerBound( var.first ), var.second, 1e-5 ) )
             {

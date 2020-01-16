@@ -636,130 +636,277 @@ public:
 //        TS_ASSERT ( correctSolution );
 //    }
 
-    void test_sigmoid_6()
-    {
-
-        double output_lower = 0.833;
-        double output_upper = 0.844;
-
-        double input_1_lower = 0.5;
-        double input_1_upper = 1.0;
-        double input_2_lower = 0.5;
-        double input_2_upper = 1.0;
-
-        InputQuery inputQuery;
-        inputQuery.setNumberOfVariables( 8 );
-
-        inputQuery.setLowerBound( 0, input_1_lower );
-        inputQuery.setUpperBound( 0, input_1_upper );
-
-        inputQuery.setLowerBound( 1, input_2_lower );
-        inputQuery.setUpperBound( 1, input_2_upper );
-
-        inputQuery.setLowerBound( 7, output_lower);
-        inputQuery.setUpperBound( 7,  output_upper);
-
-        // X0+X1-X2=0
-        Equation equation1;
-        equation1.addAddend( 1, 0 );
-        equation1.addAddend( 1, 1 );
-        equation1.addAddend( -1, 2 );
-        equation1.setScalar( 0 );
-        inputQuery.addEquation( equation1 );
-
-        // X0+X1-X3=0
-        Equation equation2;
-        equation2.addAddend( 1, 0 );
-        equation2.addAddend( 1, 1 );
-        equation2.addAddend( -1, 3 );
-        equation2.setScalar( 0 );
-        inputQuery.addEquation( equation2 );
-
-
-        // X4+X5-X6=0
-        Equation equation6;
-        equation6.addAddend( 1, 4 );
-        equation6.addAddend( 1, 5 );
-        equation6.addAddend( -1, 6 );
-        equation6.setScalar( 0 );
-        inputQuery.addEquation( equation6 );
-
-
-
-        auto *sigmoid1 = new SigmoidConstraint( 2, 4 );
-        auto *sigmoid2 = new SigmoidConstraint( 3, 5 );
-        auto *sigmoid3 = new SigmoidConstraint( 6, 7 );
-
-
-        inputQuery.addPiecewiseLinearConstraint( sigmoid1 );
-        inputQuery.addPiecewiseLinearConstraint( sigmoid2 );
-        inputQuery.addPiecewiseLinearConstraint( sigmoid3 );
-
-
-        Engine engine;
-        TS_ASSERT_THROWS_NOTHING( engine.processInputQuery( inputQuery ) );
-
-        TS_ASSERT_THROWS_NOTHING ( engine.solve() );
-
-
-        engine.extractSolution( inputQuery );
-
-        bool correctSolution = true;
-        // Sanity test
-
-        double value_x0 = inputQuery.getSolutionValue( 0 );
-        double value_x1 = inputQuery.getSolutionValue( 1 );
-        double value_x2b = inputQuery.getSolutionValue( 2 );
-        double value_x3b = inputQuery.getSolutionValue( 3 );
-        double value_x2f = inputQuery.getSolutionValue( 4 );
-        double value_x3f = inputQuery.getSolutionValue( 5 );
-        double value_x4b = inputQuery.getSolutionValue( 6 );
-        double value_x4f = inputQuery.getSolutionValue( 7 );
-
-        if ( !FloatUtils::areEqual( value_x0 + value_x1, value_x2b ) )
-            correctSolution = false;
-
-        if ( !FloatUtils::areEqual( value_x0 + value_x1, value_x3b ) )
-            correctSolution = false;
-
-        if ( !FloatUtils::areEqual( value_x3f + value_x2f, value_x4b ) )
-            correctSolution = false;
-
-
-        if ( FloatUtils::lt( value_x0, input_1_lower) || FloatUtils::gt( value_x0, input_1_upper ) ||
-             FloatUtils::lt( value_x1, input_2_lower) || FloatUtils::gt( value_x1, input_2_upper ) ||
-             FloatUtils::lt( value_x2b, input_1_lower+input_2_lower ) || FloatUtils::gt( value_x2b, input_1_upper+input_2_upper ) ||
-             FloatUtils::lt( value_x3b, input_1_lower+input_2_lower ) || FloatUtils::gt( value_x3b, input_1_upper+input_2_upper ) ||
-             FloatUtils::lt( value_x2f, FloatUtils::sigmoid(input_1_lower+input_2_lower) ) ||
-             FloatUtils::gt( value_x2f, FloatUtils::sigmoid(input_1_upper+input_2_upper) )  ||
-             FloatUtils::lt( value_x3f, FloatUtils::sigmoid(input_1_lower+input_2_lower) ) ||
-             FloatUtils::gt( value_x3f, FloatUtils::sigmoid(input_1_upper+input_2_upper) ) ||
-             FloatUtils::lt( value_x4b, 2*FloatUtils::sigmoid(input_1_lower+input_2_lower) ) ||
-             FloatUtils::gt( value_x4b, 2*FloatUtils::sigmoid(input_1_upper+input_2_upper) )   ||
-             FloatUtils::lt( value_x4f, output_lower ) ||
-             FloatUtils::gt( value_x4f, output_upper ) )
-        {
-            correctSolution = false;
-        }
-
-        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b)))
-        {
-            correctSolution = false;
-        }
-
-        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b)))
-        {
-            correctSolution = false;
-        }
-
-        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b)) )
-        {
-            correctSolution = false;
-        }
-
-        TS_ASSERT ( correctSolution );
-    }
-
+//    void test_sigmoid_6()
+//    {
+//
+//        double output_lower = 0.833;
+//        double output_upper = 0.844;
+//
+//        double input_1_lower = 0.5;
+//        double input_1_upper = 1.0;
+//        double input_2_lower = 0.5;
+//        double input_2_upper = 1.0;
+//
+//        InputQuery inputQuery;
+//        inputQuery.setNumberOfVariables( 8 );
+//
+//        inputQuery.setLowerBound( 0, input_1_lower );
+//        inputQuery.setUpperBound( 0, input_1_upper );
+//
+//        inputQuery.setLowerBound( 1, input_2_lower );
+//        inputQuery.setUpperBound( 1, input_2_upper );
+//
+//        inputQuery.setLowerBound( 7, output_lower);
+//        inputQuery.setUpperBound( 7,  output_upper);
+//
+//        // X0+X1-X2=0
+//        Equation equation1;
+//        equation1.addAddend( 1, 0 );
+//        equation1.addAddend( 1, 1 );
+//        equation1.addAddend( -1, 2 );
+//        equation1.setScalar( 0 );
+//        inputQuery.addEquation( equation1 );
+//
+//        // X0+X1-X3=0
+//        Equation equation2;
+//        equation2.addAddend( 1, 0 );
+//        equation2.addAddend( 1, 1 );
+//        equation2.addAddend( -1, 3 );
+//        equation2.setScalar( 0 );
+//        inputQuery.addEquation( equation2 );
+//
+//
+//        // X4+X5-X6=0
+//        Equation equation6;
+//        equation6.addAddend( 1, 4 );
+//        equation6.addAddend( 1, 5 );
+//        equation6.addAddend( -1, 6 );
+//        equation6.setScalar( 0 );
+//        inputQuery.addEquation( equation6 );
+//
+//
+//
+//        auto *sigmoid1 = new SigmoidConstraint( 2, 4 );
+//        auto *sigmoid2 = new SigmoidConstraint( 3, 5 );
+//        auto *sigmoid3 = new SigmoidConstraint( 6, 7 );
+//
+//
+//        inputQuery.addPiecewiseLinearConstraint( sigmoid1 );
+//        inputQuery.addPiecewiseLinearConstraint( sigmoid2 );
+//        inputQuery.addPiecewiseLinearConstraint( sigmoid3 );
+//
+//
+//        Engine engine;
+//        TS_ASSERT_THROWS_NOTHING( engine.processInputQuery( inputQuery ) );
+//
+//        TS_ASSERT_THROWS_NOTHING ( engine.solve() );
+//
+//
+//        engine.extractSolution( inputQuery );
+//
+//        bool correctSolution = true;
+//        // Sanity test
+//
+//        double value_x0 = inputQuery.getSolutionValue( 0 );
+//        printf("x0: %f\n", value_x0);
+//        double value_x1 = inputQuery.getSolutionValue( 1 );
+//        printf("x1: %f\n", value_x1);
+//        double value_x2b = inputQuery.getSolutionValue( 2 );
+//        printf("x2: %f\n", value_x2b);
+//        double value_x3b = inputQuery.getSolutionValue( 3 );
+//        printf("x3: %f\n", value_x3b);
+//        double value_x2f = inputQuery.getSolutionValue( 4 );
+//        printf("x4: %f\n", value_x2f);
+//        double value_x3f = inputQuery.getSolutionValue( 5 );
+//        printf("x5: %f\n", value_x3f);
+//        double value_x4b = inputQuery.getSolutionValue( 6 );
+//        printf("x6: %f\n", value_x4b);
+//        double value_x4f = inputQuery.getSolutionValue( 7 );
+//        printf("x7: %f\n", value_x4f);
+//
+//        if ( !FloatUtils::areEqual( value_x0 + value_x1, value_x2b ) )
+//            correctSolution = false;
+//
+//        if ( !FloatUtils::areEqual( value_x0 + value_x1, value_x3b ) )
+//            correctSolution = false;
+//
+//        if ( !FloatUtils::areEqual( value_x3f + value_x2f, value_x4b ) )
+//            correctSolution = false;
+//
+//
+//        if ( FloatUtils::lt( value_x0, input_1_lower) || FloatUtils::gt( value_x0, input_1_upper ) ||
+//             FloatUtils::lt( value_x1, input_2_lower) || FloatUtils::gt( value_x1, input_2_upper ) ||
+//             FloatUtils::lt( value_x2b, input_1_lower+input_2_lower ) || FloatUtils::gt( value_x2b, input_1_upper+input_2_upper ) ||
+//             FloatUtils::lt( value_x3b, input_1_lower+input_2_lower ) || FloatUtils::gt( value_x3b, input_1_upper+input_2_upper ) ||
+//             FloatUtils::lt( value_x2f, FloatUtils::sigmoid(input_1_lower+input_2_lower) ) ||
+//             FloatUtils::gt( value_x2f, FloatUtils::sigmoid(input_1_upper+input_2_upper) )  ||
+//             FloatUtils::lt( value_x3f, FloatUtils::sigmoid(input_1_lower+input_2_lower) ) ||
+//             FloatUtils::gt( value_x3f, FloatUtils::sigmoid(input_1_upper+input_2_upper) ) ||
+//             FloatUtils::lt( value_x4b, 2*FloatUtils::sigmoid(input_1_lower+input_2_lower) ) ||
+//             FloatUtils::gt( value_x4b, 2*FloatUtils::sigmoid(input_1_upper+input_2_upper) )   ||
+//             FloatUtils::lt( value_x4f, output_lower ) ||
+//             FloatUtils::gt( value_x4f, output_upper ) )
+//        {
+//            correctSolution = false;
+//        }
+//
+//        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b)))
+//        {
+//            correctSolution = false;
+//        }
+//
+//        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b)))
+//        {
+//            correctSolution = false;
+//        }
+//
+//        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b)) )
+//        {
+//            correctSolution = false;
+//        }
+//
+//        TS_ASSERT ( correctSolution );
+//    }
+//    void test_sigmoid_6()
+//    {
+//
+//        double output_lower = 0.833;
+//        double output_upper = 0.844;
+//
+//        double input_1_lower = 0.5;
+//        double input_1_upper = 1.0;
+//        double input_2_lower = 0.5;
+//        double input_2_upper = 1.0;
+//
+//        InputQuery inputQuery;
+//        inputQuery.setNumberOfVariables( 8 );
+//
+//        inputQuery.setLowerBound( 0, input_1_lower );
+//        inputQuery.setUpperBound( 0, input_1_upper );
+//
+//        inputQuery.setLowerBound( 1, input_2_lower );
+//        inputQuery.setUpperBound( 1, input_2_upper );
+//
+//        inputQuery.setLowerBound( 7, output_lower);
+//        inputQuery.setUpperBound( 7,  output_upper);
+//
+//        // X0+X1-X2=0
+//        Equation equation1;
+//        equation1.addAddend( 1, 0 );
+//        equation1.addAddend( 1, 1 );
+//        equation1.addAddend( -1, 2 );
+//        equation1.setScalar( 0 );
+//        inputQuery.addEquation( equation1 );
+//
+//        // X0+X1-X3=0
+//        Equation equation2;
+//        equation2.addAddend( 1, 0 );
+//        equation2.addAddend( 1, 1 );
+//        equation2.addAddend( -1, 3 );
+//        equation2.setScalar( 0 );
+//        inputQuery.addEquation( equation2 );
+//
+//
+//        // X4+X5-X6=0
+//        Equation equation6;
+//        equation6.addAddend( 1, 4 );
+//        equation6.addAddend( 1, 5 );
+//        equation6.addAddend( -1, 6 );
+//        equation6.setScalar( 0 );
+//        inputQuery.addEquation( equation6 );
+//
+//
+//
+//        auto *sigmoid1 = new SigmoidConstraint( 2, 4 );
+//        auto *sigmoid2 = new SigmoidConstraint( 3, 5 );
+//        auto *sigmoid3 = new SigmoidConstraint( 6, 7 );
+//
+//
+//        inputQuery.addPiecewiseLinearConstraint( sigmoid1 );
+//        inputQuery.addPiecewiseLinearConstraint( sigmoid2 );
+//        inputQuery.addPiecewiseLinearConstraint( sigmoid3 );
+//
+////        inputQuery.storeDebuggingSolution(0, 1);
+////        inputQuery.storeDebuggingSolution(1, 0.5);
+////        inputQuery.storeDebuggingSolution(2, 1.5);
+////        inputQuery.storeDebuggingSolution(3, 1.5);
+////        inputQuery.storeDebuggingSolution(4, FloatUtils::sigmoid(1.5));
+////        inputQuery.storeDebuggingSolution(5, FloatUtils::sigmoid(1.5));
+////        inputQuery.storeDebuggingSolution(6, 2*FloatUtils::sigmoid(1.5));
+////        inputQuery.storeDebuggingSolution(7, FloatUtils::sigmoid(2*FloatUtils::sigmoid(1.5)));
+//
+//
+//        Engine engine;
+//        TS_ASSERT_THROWS_NOTHING( engine.processInputQuery( inputQuery ) );
+//
+//        TS_ASSERT_THROWS_NOTHING ( engine.solve() );
+//
+//
+//        engine.extractSolution( inputQuery );
+//
+//        bool correctSolution = true;
+//        // Sanity test
+//
+//        double value_x0 = inputQuery.getSolutionValue( 0 );
+//        printf("x0: %f\n", value_x0);
+//        double value_x1 = inputQuery.getSolutionValue( 1 );
+//        printf("x1: %f\n", value_x1);
+//        double value_x2b = inputQuery.getSolutionValue( 2 );
+//        printf("x2: %f\n", value_x2b);
+//        double value_x3b = inputQuery.getSolutionValue( 3 );
+//        printf("x3: %f\n", value_x3b);
+//        double value_x2f = inputQuery.getSolutionValue( 4 );
+//        printf("x4: %f\n", value_x2f);
+//        double value_x3f = inputQuery.getSolutionValue( 5 );
+//        printf("x5: %f\n", value_x3f);
+//        double value_x4b = inputQuery.getSolutionValue( 6 );
+//        printf("x6: %f\n", value_x4b);
+//        double value_x4f = inputQuery.getSolutionValue( 7 );
+//        printf("x7: %f\n", value_x4f);
+//
+//        if ( !FloatUtils::areEqual( value_x0 + value_x1, value_x2b ) )
+//            correctSolution = false;
+//
+//        if ( !FloatUtils::areEqual( value_x0 + value_x1, value_x3b ) )
+//            correctSolution = false;
+//
+//        if ( !FloatUtils::areEqual( value_x3f + value_x2f, value_x4b ) )
+//            correctSolution = false;
+//
+//
+//        if ( FloatUtils::lt( value_x0, input_1_lower) || FloatUtils::gt( value_x0, input_1_upper ) ||
+//             FloatUtils::lt( value_x1, input_2_lower) || FloatUtils::gt( value_x1, input_2_upper ) ||
+//             FloatUtils::lt( value_x2b, input_1_lower+input_2_lower ) || FloatUtils::gt( value_x2b, input_1_upper+input_2_upper ) ||
+//             FloatUtils::lt( value_x3b, input_1_lower+input_2_lower ) || FloatUtils::gt( value_x3b, input_1_upper+input_2_upper ) ||
+//             FloatUtils::lt( value_x2f, FloatUtils::sigmoid(input_1_lower+input_2_lower) ) ||
+//             FloatUtils::gt( value_x2f, FloatUtils::sigmoid(input_1_upper+input_2_upper) )  ||
+//             FloatUtils::lt( value_x3f, FloatUtils::sigmoid(input_1_lower+input_2_lower) ) ||
+//             FloatUtils::gt( value_x3f, FloatUtils::sigmoid(input_1_upper+input_2_upper) ) ||
+//             FloatUtils::lt( value_x4b, 2*FloatUtils::sigmoid(input_1_lower+input_2_lower) ) ||
+//             FloatUtils::gt( value_x4b, 2*FloatUtils::sigmoid(input_1_upper+input_2_upper) )   ||
+//             FloatUtils::lt( value_x4f, output_lower ) ||
+//             FloatUtils::gt( value_x4f, output_upper ) )
+//        {
+//            correctSolution = false;
+//        }
+//
+//        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b)))
+//        {
+//            correctSolution = false;
+//        }
+//
+//        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b)))
+//        {
+//            correctSolution = false;
+//        }
+//
+//        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b)) )
+//        {
+//            correctSolution = false;
+//        }
+//
+//        TS_ASSERT ( correctSolution );
+//    }
     void test_sigmoid_7()
     {
 
@@ -819,6 +966,15 @@ public:
         inputQuery.addPiecewiseLinearConstraint( sigmoid2 );
         inputQuery.addPiecewiseLinearConstraint( sigmoid3 );
 
+        inputQuery.storeDebuggingSolution(0, 1);
+        inputQuery.storeDebuggingSolution(1, 0.5);
+        inputQuery.storeDebuggingSolution(2, 1.5);
+        inputQuery.storeDebuggingSolution(3, 1.5);
+        inputQuery.storeDebuggingSolution(4, FloatUtils::sigmoid(1.5));
+        inputQuery.storeDebuggingSolution(5, FloatUtils::sigmoid(1.5));
+        inputQuery.storeDebuggingSolution(6, 2*FloatUtils::sigmoid(1.5));
+        inputQuery.storeDebuggingSolution(7, FloatUtils::sigmoid(2*FloatUtils::sigmoid(1.5)));
+
 
         Engine engine;
         TS_ASSERT_THROWS_NOTHING( engine.processInputQuery( inputQuery ) );
@@ -832,13 +988,21 @@ public:
         // Sanity test
 
         double value_x0 = inputQuery.getSolutionValue( 0 );
+        printf("x0: %f\n", value_x0);
         double value_x1 = inputQuery.getSolutionValue( 1 );
+        printf("x1: %f\n", value_x1);
         double value_x2b = inputQuery.getSolutionValue( 2 );
+        printf("x2: %f\n", value_x2b);
         double value_x3b = inputQuery.getSolutionValue( 3 );
+        printf("x3: %f\n", value_x3b);
         double value_x2f = inputQuery.getSolutionValue( 4 );
+        printf("x4: %f\n", value_x2f);
         double value_x3f = inputQuery.getSolutionValue( 5 );
+        printf("x5: %f\n", value_x3f);
         double value_x4b = inputQuery.getSolutionValue( 6 );
+        printf("x6: %f\n", value_x4b);
         double value_x4f = inputQuery.getSolutionValue( 7 );
+        printf("x7: %f\n", value_x4f);
 
         if ( !FloatUtils::areEqual( value_x0 + value_x1, value_x2b ) )
             correctSolution = false;

@@ -375,7 +375,7 @@ unsigned RowBoundTightener::tightenOnSingleInvertedBasisRow( const TableauRow &r
     }
 
     if ( FloatUtils::gt( _lowerBounds[y], _upperBounds[y] ) )
-        throw InfeasibleQueryException();
+            throw InfeasibleQueryException();
 
     // Next, do a pass for each of the rhs variables.
     // For this, we wish to logically transform the equation into:

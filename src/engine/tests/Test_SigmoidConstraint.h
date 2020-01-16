@@ -130,14 +130,16 @@ public:
 
 
         sigmoid.notifyVariableValue(b, 0);
-        sigmoid.notifyVariableValue(f, 2);
+        sigmoid.notifyVariableValue(f, 0.7);
 
         TS_ASSERT(!sigmoid.satisfied());
 
         fixes = sigmoid.getPossibleFixes();
         it = fixes.begin();
         TS_ASSERT_EQUALS(it->_variable, f);
-        TS_ASSERT_EQUALS(it->_value, 0.5);
+        TS_ASSERT(FloatUtils::areEqual(it->_value, FloatUtils::sigmoid(0)));
+        TS_ASSERT_EQUALS((++it)->_variable, b);
+        TS_ASSERT(FloatUtils::areEqual(it->_value, FloatUtils::sigmoidInverse(0.7)));
     }
 
 

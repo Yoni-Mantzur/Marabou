@@ -23,27 +23,27 @@ public:
 
         bool operator==(Point other)
         {
-            return (x == other.x && y == other.y);
+            return FloatUtils::areEqual(x, other.x);
         }
 
         bool operator<(Point other)
         {
-            return (x < other.x);
+            return FloatUtils::lt(x, other.x);
         }
 
         bool operator>(Point other)
         {
-            return (x > other.x);
+            return FloatUtils::gt(x, other.x);
         }
 
         bool operator<=(Point other)
         {
-            return (x <= other.x);
+            return FloatUtils::lte(x, other.x);
         }
 
         bool operator>=(Point other)
         {
-            return (x <= other.x);
+            return FloatUtils::gte(x, other.x);
         }
     };
 

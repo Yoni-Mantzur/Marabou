@@ -258,18 +258,6 @@ void SigmoidConstraint::updateVariableIndex( unsigned oldIndex, unsigned newInde
         _f = newIndex;
 }
 
-void SigmoidConstraint::eliminateVariable( __attribute__((unused)) unsigned variable,
-                                           __attribute__((unused)) double fixedValue )
-{
-    //TODO: implement this
-}
-
-bool SigmoidConstraint::constraintObsolete() const
-{
-    //TODO: implement this
-    return false;
-}
-
 void SigmoidConstraint::getEntailedTightenings(List<Tightening> &tightenings ) const
 {
     ASSERT( _lowerBounds.exists( _b ) && _lowerBounds.exists( _f ) &&
@@ -287,26 +275,24 @@ void SigmoidConstraint::getEntailedTightenings(List<Tightening> &tightenings ) c
     tightenings.append(Tightening(_f, sigmoidbUpperBound, Tightening::UB));
 }
 
-void SigmoidConstraint::addAuxiliaryEquations(__attribute__((unused)) InputQuery &inputQuery )
-{
-    //TODO: implement this
+void SigmoidConstraint::addAuxiliaryEquations(InputQuery &inputQuery ) {
+    ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f) && _upperBounds.exists(_b) && _upperBounds.exists(_b))
+    // TODO: call this function only after tighten bounds
+    if (false) {
+        Point lowerBound = {_lowerBounds[_b], _lowerBounds[_f]}, upperBound = {_upperBounds[_b], _upperBounds[_f]};
+        inputQuery.addEquation(refineCurrentSplit(lowerBound, upperBound));
+    }
 }
 
 void SigmoidConstraint::getCostFunctionComponent(__attribute__((unused)) Map<unsigned, double> &cost ) const
 {
-    //TODO: implement this
+    //TODO: LEARN ABOUT THIS
 }
 
 String SigmoidConstraint::serializeToString() const
 {
     // Output format is: sigmoid,f,b
     return Stringf( "sigmoid,%u,%u", _f, _b );
-}
-
-bool SigmoidConstraint::supportsSymbolicBoundTightening() const
-{
-    //TODO: implement this
-    return false;
 }
 
 double SigmoidConstraint::evaluateDerivativeOfConciseFunction(double x) const

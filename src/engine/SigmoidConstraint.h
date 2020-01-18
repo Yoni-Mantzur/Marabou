@@ -14,63 +14,62 @@ class SigmoidConstraint : public PiecewiseLinearConstraint, PiecewiseLinearAbstr
 {
 public:
     SigmoidConstraint( unsigned b, unsigned f );
-    SigmoidConstraint( const String &serializedSigmoid );
+    explicit SigmoidConstraint( const String &serializedSigmoid );
 
     /*
       Return a clone of the constraint.
     */
-    PiecewiseLinearConstraint *duplicateConstraint() const;
+    PiecewiseLinearConstraint *duplicateConstraint() const override;
 
     /*
       Restore the state of this constraint from the given one.
     */
-    void restoreState( const PiecewiseLinearConstraint *state );
+    void restoreState( const PiecewiseLinearConstraint *state ) override;
 
     /*
       Register/unregister the constraint with a talbeau.
      */
-    void registerAsWatcher( ITableau *tableau );
-    void unregisterAsWatcher( ITableau *tableau );
+    void registerAsWatcher( ITableau *tableau ) override;
+    void unregisterAsWatcher( ITableau *tableau ) override;
 
     /*
       These callbacks are invoked when a watched variable's value
       changes, or when its bounds change.
     */
-    void notifyVariableValue( unsigned variable, double value );
-    void notifyLowerBound( unsigned variable, double bound );
-    void notifyUpperBound( unsigned variable, double bound );
+    void notifyVariableValue( unsigned variable, double value ) override;
+    void notifyLowerBound( unsigned variable, double bound ) override;
+    void notifyUpperBound( unsigned variable, double bound ) override;
 
     /*
      * Notification when broken assignment is invoked
      */
-    void notifyBrokenAssignment();
-
+    void notifyBrokenAssignment() override;
 
     /*
       Returns true iff the variable participates in this piecewise
       linear constraint
     */
-    bool participatingVariable( unsigned variable ) const;
+    bool participatingVariable( unsigned variable ) const override;
 
     /*
       Get the list of variables participating in this constraint.
     */
-    List<unsigned> getParticipatingVariables() const;
+    List<unsigned> getParticipatingVariables() const override;
 
     /*
       Returns true iff the assignment satisfies the constraint
     */
-    bool satisfied() const;
+    bool satisfied() const override;
 
     /*
       Returns a list of possible fixes for the violated constraint.
     */
-    List<PiecewiseLinearConstraint::Fix> getPossibleFixes() const;
+    List<PiecewiseLinearConstraint::Fix> getPossibleFixes() const override;
 
     /*
       Return a list of smart fixes for violated constraint.
     */
-    List<PiecewiseLinearConstraint::Fix> getSmartFixes( ITableau *tableau ) const;
+    List<PiecewiseLinearConstraint::Fix> getSmartFixes( ITableau *tableau ) const override;
 
     /*
       Returns the list of case splits that this piecewise linear
@@ -78,18 +77,18 @@ public:
       i.e. if the list is {l1, l2, ..., ln-1, ln},
       then ~l1 /\ ~l2 /\ ... /\ ~ln-1 --> ln.
      */
-    List<PiecewiseLinearCaseSplit> getCaseSplits() const;
+    List<PiecewiseLinearCaseSplit> getCaseSplits() const override;
 
     /*
       Check if the constraint's phase has been fixed.
     */
-    bool phaseFixed() const { return false; }
+    bool phaseFixed() const override { return false; }
 
     /*
       If the constraint's phase has been fixed, get the (valid) case split.
       Not relevant for Sigmoid, should not call it phase isn't fixed.
     */
-    PiecewiseLinearCaseSplit getValidCaseSplit() const { throw "Not implemented function"; }
+    PiecewiseLinearCaseSplit getValidCaseSplit() const override { throw "Not implemented function"; }
 
     /*
       Preprocessing related functions, to inform that a variable has been eliminated completely
@@ -97,19 +96,20 @@ public:
       called x2). constraintObsolete() returns true iff and the constraint has become obsolote
       as a result of variable eliminations.
     */
-    void eliminateVariable( unsigned variable, double fixedValue );
-    void updateVariableIndex( unsigned oldIndex, unsigned newIndex );
-    bool constraintObsolete() const;
+    // TODO: Ensure that those function irrelevant to sigmoid
+    void eliminateVariable( unsigned /* variable */, double /* fixedValue */ ) override {};
+    void updateVariableIndex( unsigned oldIndex, unsigned newIndex ) override;
+    bool constraintObsolete() const override { return false; };
 
     /*
       Get the tightenings entailed by the constraint.
     */
-    void getEntailedTightenings( List<Tightening> &tightenings ) const;
+    void getEntailedTightenings( List<Tightening> &tightenings ) const override;
 
     /*
       Dump the current state of the constraint.
     */
-    void dump( String &output ) const;
+    void dump( String &output ) const override;
 
     /*
       For preprocessing: get any auxiliary equations that this
@@ -117,7 +117,7 @@ public:
       case, this is an equation of the form aux = f - b, where aux is
       non-negative.
     */
-    void addAuxiliaryEquations( InputQuery &inputQuery );
+    void addAuxiliaryEquations( InputQuery &inputQuery ) override;
 
     /*
       Ask the piecewise linear constraint to contribute a component to the cost
@@ -125,61 +125,52 @@ public:
       satisfied or inactive, and should be non-empty otherwise. Minimizing the returned
       equation should then lead to the constraint being "closer to satisfied".
     */
-    virtual void getCostFunctionComponent( Map<unsigned, double> &cost ) const;
+    void getCostFunctionComponent( Map<unsigned, double> &cost ) const override;
 
     /*
       Returns string with shape: sigmoid, _f, _b
     */
-    String serializeToString() const;
+    String serializeToString() const override;
 
     /*
-      Get the index of the B or F variable.
+      Get the index of the B or F variable and their bounds
     */
-    unsigned getB() const { return _b; }
-    unsigned getF() const { return _f; }
+    unsigned getB() const override { return _b; }
+    unsigned getF() const override { return _f; }
+    Point getLowerParticipantVariablesBounds() const override;
+    Point getUpperParticipantVariablesBounds() const override;
 
-    /*
-     * Get the current bounds of the participant variables in the constraint
-     */
-    Point getLowerParticipantVariablesBounds() const;
-    Point getUpperParticipantVariablesBounds() const;
 
     /*
      * Return list of equations that can help bound more efficiently the constraint;
      */
-    List<Equation> getBoundEquations();
+    List<Equation> getBoundEquations() override;
 
     /*
      * Evaluate the concise function given point in the range
      */
-    double evaluateConciseFunction(double x) const { return FloatUtils::sigmoid(x); };
+    double evaluateConciseFunction(double x) const override { return FloatUtils::sigmoid(x); };
 
     /*
      * Evaluate the derivative of the concise function given point in the range
      */
-    double evaluateDerivativeOfConciseFunction(double x) const;
+    double evaluateDerivativeOfConciseFunction(double x) const override;
 
     /*
      * Check if the concise function is convex function
     */
-    virtual ConvexType getConvexType() const;
-
-    /*
-      Check if the aux variable is in use and retrieve it
-    */
-    bool auxVariableInUse() const;
-    unsigned getAux() const;
+    ConvexType getConvexType() const override;
 
     /*
       Return true if and only if this piecewise linear constraint supports
       symbolic bound tightening.
     */
-    bool supportsSymbolicBoundTightening() const;
+    bool supportsSymbolicBoundTightening() const override { return false; };
 
     /*
      * The constraint is active even if splited
      */
-    virtual bool isActive() const { return true; }
+    bool isActive() const override { return true; }
 
 
 
@@ -195,11 +186,6 @@ private:
     unsigned _b, _f;
 
     bool _haveEliminatedVariables;
-
-    /*
-      Return true iff b or f are out of bounds.
-    */
-    bool isValueInSigmoidBounds(double value) const;
 
 
     /* For debugging propose */

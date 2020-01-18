@@ -23,7 +23,7 @@ public:
 
         bool operator==(Point other)
         {
-            return FloatUtils::areEqual(x, other.x);
+            return FloatUtils::areEqual(x, other.x) && FloatUtils::areEqual(y, other.y);
         }
 
         bool operator<(Point other)
@@ -61,6 +61,11 @@ public:
      * Get equations abstraction
      */
     List<Equation> getEquationsAbstraction() const;
+
+    /*
+     * Refine the current split guided the new bounds are given
+     */
+    Equation refineCurrentSplit(const Point &lowerBound, const Point &upperBound) const;
 
     /*
      * Add spurious example
@@ -113,8 +118,6 @@ private:
      */
     List<double> _pointsForSplits;
     List<double> _pointsForAbstractedBounds;
-
-    const static unsigned _SPURIOUS_POINTS_TS = 1;
 };
 
 

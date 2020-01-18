@@ -231,8 +231,9 @@ bool Engine::solve( unsigned timeoutInSeconds )
                 }
 
                 // We have violated piecewise-linear constraints.
-                performConstraintFixingStep();
+                addEquationsForBoundsIfNeeded();
 
+                performConstraintFixingStep();
                 // Finally, take this opporunity to tighten any bounds
                 // and perform any valid case splits.
                 tightenBoundsOnConstraintMatrix();
@@ -254,7 +255,6 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
             // We have out-of-bounds variables.
             performSimplexStep();
-//            addEquationsForBoundsIfNeeded();
             continue;
         }
         catch ( const MalformedBasisException & )
@@ -343,6 +343,7 @@ void Engine::performConstraintFixingStep()
 
     // Select a violated constraint as the target
     selectViolatedPlConstraint();
+
 
     // Report the violated constraint to the SMT engine
     reportPlViolation();
@@ -1396,8 +1397,8 @@ List<Tightening> Engine::addEquation(Equation equation)
     {
         // General case: add a new equation to the tableau
         unsigned auxVariable = _tableau->addEquation( equation );
+        adjustWorkMemorySize();
         _activeEntryStrategy->resizeHook( _tableau );
-        equation.dump();
         switch ( equation._type )
         {
             case Equation::GE:
@@ -1423,10 +1424,6 @@ List<Tightening> Engine::addEquation(Equation equation)
 
 void Engine::tightenBounds(List<Tightening> &bounds)
 {
-
-    _rowBoundTightener->resetBounds();
-    _constraintBoundTightener->resetBounds();
-
     for ( auto &bound : bounds )
     {
         unsigned variable = _tableau->getVariableAfterMerging(bound._variable );
@@ -1457,6 +1454,10 @@ void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
         bounds.append(addEquation(equation));
     }
     adjustWorkMemorySize();
+
+    _rowBoundTightener->resetBounds();
+    _constraintBoundTightener->resetBounds();
+
     tightenBounds(bounds);
 
     log( "Done with split\n" );
@@ -1956,7 +1957,7 @@ void Engine::checkOverallProgress()
 
 void Engine::addEquationsForBoundsIfNeeded() {
     for (PiecewiseLinearConstraint *plConstraint : _violatedPlConstraints) {
-        for (auto equation : plConstraint->getBoundEquations())
+        for (const auto& equation : plConstraint->getBoundEquations())
         {
             List<Tightening> bounds = addEquation(equation);
             tightenBounds(bounds);

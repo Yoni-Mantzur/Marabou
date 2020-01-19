@@ -117,7 +117,7 @@ public:
       case, this is an equation of the form aux = f - b, where aux is
       non-negative.
     */
-    void addAuxiliaryEquations( InputQuery &inputQuery ) override;
+    void addAuxiliaryEquations( InputQuery & /* inputQuery */ ) override {}
 
     /*
       Ask the piecewise linear constraint to contribute a component to the cost
@@ -139,7 +139,6 @@ public:
     unsigned getF() const override { return _f; }
     Point getLowerParticipantVariablesBounds() const override;
     Point getUpperParticipantVariablesBounds() const override;
-
 
     /*
      * Return list of equations that can help bound more efficiently the constraint;
@@ -172,11 +171,6 @@ public:
      */
     bool isActive() const override { return true; }
 
-
-
-
-
-
     /* For debugging propose */
     void setLogFile(File *file = nullptr) { _logFile = file; };
     void setSigmoidNum (int sigmoidNum) { sigmoid_num = sigmoidNum; };
@@ -184,9 +178,6 @@ public:
 private:
 
     unsigned _b, _f;
-
-    bool _haveEliminatedVariables;
-
 
     /* For debugging propose */
     IFile *_logFile = nullptr;

@@ -230,9 +230,9 @@ bool Engine::solve( unsigned timeoutInSeconds )
                     return true;
                 }
 
-                // We have violated piecewise-linear constraints.
                 addEquationsForBoundsIfNeeded();
 
+                // We have violated piecewise-linear constraints.
                 performConstraintFixingStep();
                 // Finally, take this opporunity to tighten any bounds
                 // and perform any valid case splits.

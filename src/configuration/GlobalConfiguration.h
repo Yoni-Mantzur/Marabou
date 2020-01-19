@@ -197,6 +197,12 @@ public:
     static const BasisFactorizationType BASIS_FACTORIZATION_TYPE;
 
     /*
+      Sigmoid refinement options
+     */
+    static const bool ADD_ABSTRACTION_EQUATIONS;
+    static const bool REFINE_CURRENT_SPLIT_EQUATION;
+
+    /*
       Logging options
     */
     static const bool DNC_MANAGER_LOGGING;

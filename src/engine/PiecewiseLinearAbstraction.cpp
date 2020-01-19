@@ -87,11 +87,13 @@ List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction() const
     return refinements;
 }
 
-Equation PiecewiseLinearAbstraction::refineCurrentSplit(const Point &lowerBound, const Point &upperBound) const
+Equation PiecewiseLinearAbstraction::refineCurrentSplit() const
 {
     // TODO: need to think how to remove old equations as well (and not call after c.s)
-    Equation equation = this->getLinearEquation(lowerBound, upperBound);
-    Equation::EquationType equationType = this->getConvexType() ? Equation::LE : Equation::GE;
+
+    Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
+    Equation equation = getLinearEquation(lowerBound, upperBound);
+    Equation::EquationType equationType = getConvexType() == CONVEX ? Equation::LE : Equation::GE;
     equation.setType(equationType);
     return equation;
 }
@@ -105,16 +107,13 @@ void PiecewiseLinearAbstraction::addSpuriousPoint(Point p)
     _pointsForAbstractedBounds.clear();
 
     ConvexType convexType = getConvexType();
-    if (convexType == UNKNOWN)
-        return;
 
-    if ((FloatUtils::gte(p.y, fixed_point) && (convexType == CONVEX)) || (FloatUtils::lte(p.y, fixed_point) && (convexType == CONCAVE)))
+    if ((convexType == UNKNOWN) || (FloatUtils::gte(p.y, fixed_point) && (convexType == CONVEX))
+        || (FloatUtils::lte(p.y, fixed_point) && (convexType == CONCAVE)))
     {
-        if (!_pointsForSplits.exists(p.x))
-            _pointsForSplits.append(p.x);
+        _pointsForSplits.append(p.x);
     } else {
-        if (!_pointsForAbstractedBounds.exists(p.x))
-            _pointsForAbstractedBounds.append(p.x);
+        _pointsForAbstractedBounds.append(p.x);
     }
 }
 

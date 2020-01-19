@@ -65,7 +65,7 @@ public:
     /*
      * Refine the current split guided the new bounds are given
      */
-    Equation refineCurrentSplit(const Point &lowerBound, const Point &upperBound) const;
+    Equation refineCurrentSplit() const;
 
     /*
      * Add spurious example

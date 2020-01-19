@@ -39,7 +39,6 @@ PiecewiseLinearConstraint *SigmoidConstraint::duplicateConstraint() const
     return clone;
 }
 
-
 void SigmoidConstraint::restoreState( const PiecewiseLinearConstraint *state )
 {
     const auto *sigmoid = dynamic_cast<const SigmoidConstraint *>( state );
@@ -113,7 +112,7 @@ void SigmoidConstraint::notifyBrokenAssignment()
 {
     ASSERT(_assignment.exists(_b) && _assignment.exists(_f))
 
-    if (_lowerBounds[_b] < 0 && _upperBounds[_b] > 0 )
+    if (FloatUtils::lt(_lowerBounds[_b], 0) && FloatUtils::gt(_upperBounds[_b], 0) )
         addSpuriousPoint( { 0, 0.5 });
     else
         addSpuriousPoint( { _assignment[_b], _assignment[_f] });
@@ -166,10 +165,10 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
 }
 
 List<Equation> SigmoidConstraint::getBoundEquations() {
-    ASSERT(_assignment.exists(_b));
-    List<Equation> refinements = getEquationsAbstraction();
-
-    return  refinements;
+    List<Equation> refinements;
+    if (GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS)
+        refinements.append(getEquationsAbstraction());
+    return refinements;
 }
 
 List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getSmartFixes(__attribute__((unused)) ITableau *tableau ) const
@@ -273,15 +272,6 @@ void SigmoidConstraint::getEntailedTightenings(List<Tightening> &tightenings ) c
     tightenings.append(Tightening(_b, sigmoidInversefUpperBound, Tightening::UB));
     tightenings.append(Tightening(_f, sigmoidbLowerBound, Tightening::LB));
     tightenings.append(Tightening(_f, sigmoidbUpperBound, Tightening::UB));
-}
-
-void SigmoidConstraint::addAuxiliaryEquations(InputQuery &inputQuery ) {
-    ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f) && _upperBounds.exists(_b) && _upperBounds.exists(_b))
-    // TODO: call this function only after tighten bounds
-    if (false) {
-        Point lowerBound = {_lowerBounds[_b], _lowerBounds[_f]}, upperBound = {_upperBounds[_b], _upperBounds[_f]};
-        inputQuery.addEquation(refineCurrentSplit(lowerBound, upperBound));
-    }
 }
 
 void SigmoidConstraint::getCostFunctionComponent(__attribute__((unused)) Map<unsigned, double> &cost ) const

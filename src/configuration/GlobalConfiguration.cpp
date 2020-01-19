@@ -92,6 +92,9 @@ const bool GlobalConfiguration::SYMBOLIC_BOUND_TIGHTENER_LOGGING = false;
 const bool GlobalConfiguration::USE_SMART_FIX = false;
 const bool GlobalConfiguration::USE_LEAST_FIX = false;
 
+const bool GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS = true;
+const bool GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION = true;
+
 void GlobalConfiguration::print()
 {
     printf( "****************************\n" );

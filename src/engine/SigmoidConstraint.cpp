@@ -308,7 +308,7 @@ SigmoidConstraint::Point SigmoidConstraint::getUpperParticipantVariablesBounds()
 
 SigmoidConstraint::ConvexType SigmoidConstraint::getConvexType() const
 {
-    ASSERT(_lowerBounds.exists(_b) && _upperBounds[_b])
+    ASSERT(_lowerBounds.exists(_b) && _upperBounds.exists(_b))
 
     if (FloatUtils::lte(_lowerBounds[_b], 0.0) && FloatUtils::lte(_upperBounds[_b], 0.0))
         return CONVEX;

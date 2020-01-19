@@ -65,7 +65,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
 
 List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction() const
 {
-    ASSERT(getConvexType() != UNKNOWN )
+
     List<double> guidedPoints = _pointsForAbstractedBounds;
     List<Equation> refinements;
 

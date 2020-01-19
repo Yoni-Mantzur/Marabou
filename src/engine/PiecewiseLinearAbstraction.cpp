@@ -103,17 +103,19 @@ void PiecewiseLinearAbstraction::addSpuriousPoint(Point p)
     double fixed_point = evaluateConciseFunction(p.x);
 
     // TODO: has a bug when list is more then one
-    _pointsForSplits.clear();
-    _pointsForAbstractedBounds.clear();
+//    _pointsForSplits.clear();
+//    _pointsForAbstractedBounds.clear();
 
     ConvexType convexType = getConvexType();
 
     if ((convexType == UNKNOWN) || (FloatUtils::gte(p.y, fixed_point) && (convexType == CONVEX))
         || (FloatUtils::lte(p.y, fixed_point) && (convexType == CONCAVE)))
     {
-        _pointsForSplits.append(p.x);
+        if (!_pointsForSplits.exists(p.x))
+            _pointsForSplits.append(p.x);
     } else {
-        _pointsForAbstractedBounds.append(p.x);
+        if (!_pointsForAbstractedBounds.exists(p.x))
+            _pointsForAbstractedBounds.append(p.x);
     }
 }
 

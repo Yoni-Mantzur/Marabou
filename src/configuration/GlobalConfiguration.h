@@ -201,6 +201,12 @@ public:
      */
     static const bool ADD_ABSTRACTION_EQUATIONS;
     static const bool REFINE_CURRENT_SPLIT_EQUATION;
+    static const bool PREPROCESSOR_PL_CONSTRAINTS_ADD_ABSTRACTION;
+
+    static const unsigned int GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH;
+    static const unsigned int GUIDED_POINTS_FOR_SPLIT_SEGMENTS_TH;
+
+
 
     /*
       Logging options

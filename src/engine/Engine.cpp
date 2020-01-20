@@ -1396,6 +1396,7 @@ List<Tightening> Engine::addEquation(Equation equation)
     if ( !columnsSuccessfullyMerged )
     {
         // General case: add a new equation to the tableau
+        equation.dump();
         unsigned auxVariable = _tableau->addEquation( equation );
         adjustWorkMemorySize();
         _activeEntryStrategy->resizeHook( _tableau );

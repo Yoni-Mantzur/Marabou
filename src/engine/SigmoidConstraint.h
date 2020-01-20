@@ -117,7 +117,7 @@ public:
       case, this is an equation of the form aux = f - b, where aux is
       non-negative.
     */
-    void addAuxiliaryEquations( InputQuery & /* inputQuery */ ) override {}
+    void addAuxiliaryEquations( InputQuery & inputQuery ) override;
 
     /*
       Ask the piecewise linear constraint to contribute a component to the cost
@@ -158,7 +158,7 @@ public:
     /*
      * Check if the concise function is convex function
     */
-    ConvexType getConvexType() const override;
+    ConvexType getConvexTypeInSegment(double x0, double x1) const override;
 
     /*
       Return true if and only if this piecewise linear constraint supports
@@ -178,6 +178,7 @@ public:
 private:
 
     unsigned _b, _f;
+    bool _isBoundWereChanged;
 
     /* For debugging propose */
     IFile *_logFile = nullptr;

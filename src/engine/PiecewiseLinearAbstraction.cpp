@@ -7,21 +7,29 @@
 #include "PiecewiseLinearAbstraction.h"
 
 
-List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction() const
+List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction()
 {
     List<double> guidedPoints;
-    List<double > insertedPoints;
     List<PiecewiseLinearCaseSplit> splits;
 
-    List<double> spuriousPoints = _pointsForSplits;
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
+    ASSERT(!FloatUtils::areEqual(lowerBound.x, upperBound.x))
 
     // Guided point will be from lower bound to upper bound
+    _pointsForSplits.sort();
+
+    if (_pointsForSplits.exists(upperBound.x))
+        _pointsForSplits.popBack();
+
+    if (_pointsForSplits.exists(lowerBound.x))
+        _pointsForSplits.popFront();
+
     guidedPoints.append(lowerBound.x);
 
-    if (spuriousPoints.empty())
-        spuriousPoints.append((lowerBound.x + upperBound.x) / 2);
-    guidedPoints.append(spuriousPoints);
+    if (_pointsForSplits.empty())
+        _pointsForSplits.append((lowerBound.x + upperBound.x) / 2);
+
+    guidedPoints.append(_pointsForSplits);
 
     guidedPoints.append(upperBound.x);
 
@@ -33,7 +41,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
         double x2 = *guidedPointsIter;
 
         // Invalid guided points due to bounds were changed
-        if (FloatUtils::gt(x2, upperBound.x) || FloatUtils::lt(x2, lowerBound.x))
+        if (FloatUtils::gt(x2, upperBound.x) || FloatUtils::lt(x2, lowerBound.x) || FloatUtils::areEqual(x1, x2))
         {
             x2 = (x1 + *(++guidedPointsIter)) / 2;
             guidedPointsIter--;
@@ -44,26 +52,24 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
         Point p1 = {x1, evaluateConciseFunction(x1)};
         Point p2 = {x2, evaluateConciseFunction(x2)};
 
-        if (!insertedPoints.exists(x1))
-        {
-            insertedPoints.append(x1);
-            Equation abstractedEquation = getLinearEquation(p1, p2);
-            Equation::EquationType equationType = getConvexType() == CONVEX ? Equation::LE : Equation::GE;
-            abstractedEquation.setType(equationType);
-            split.addEquation(abstractedEquation);
+        _registeredPointsForCurrentSplit.append({x1, x2});
 
-            for (Tightening tightening: boundVars(p1, p2))
-                split.storeBoundTightening(tightening);
+        Equation abstractedEquation = getLinearEquation(p1, p2);
+        setEquationTypeForSplitAbstraction(&abstractedEquation, p1.x, p2.x);
+        split.addEquation(abstractedEquation);
+        abstractedEquation.dump();
+        for (Tightening tightening: boundVars(p1, p2))
+            split.storeBoundTightening(tightening);
 
-            splits.append(split);
-        }
+        splits.append(split);
+
         x1 = x2;
     }
+    _pointsForSplits.clear();
     return splits;
 }
 
-
-List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction() const
+List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction()
 {
 
     List<double> guidedPoints = _pointsForAbstractedBounds;
@@ -73,49 +79,70 @@ List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction() const
     for (double x : guidedPoints)
     {
         // Invalid guided points due to bounds were changed
-        if (FloatUtils::gte(x, upperBound.x) || FloatUtils::lte(x, lowerBound.x))
+        if (FloatUtils::gte(x, upperBound.x) || FloatUtils::lte(x, lowerBound.x) ||
+                                                _registeredPointsForAbstraction.exists(x))
             continue;
+
+        _registeredPointsForAbstraction.append(x);
 
         double slope = evaluateDerivativeOfConciseFunction(x);
         Point p = {x, evaluateConciseFunction(x)};
         Equation abstractedEquation = getLinearEquation(p, slope);
-        Equation::EquationType equationType = getConvexType() == CONVEX ? Equation::GE : Equation::LE;
-        abstractedEquation.setType(equationType);
+        setEquationTypeForAbstraction(&abstractedEquation, lowerBound.x, upperBound.x);
         refinements.append(abstractedEquation);
 
     }
+    _pointsForAbstractedBounds.clear();
     return refinements;
 }
 
-Equation PiecewiseLinearAbstraction::refineCurrentSplit() const
+Equation PiecewiseLinearAbstraction::refineCurrentSplit()
 {
-    // TODO: need to think how to remove old equations as well (and not call after c.s)
-
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
+    Point p = {lowerBound.x, upperBound.x};
+    if (_registeredPointsForCurrentSplit.exists(p))
+        throw 0;
+
+    _registeredPointsForCurrentSplit.append(p);
+
+    if (getConvexTypeInSegment(lowerBound.x, upperBound.x) == UNKNOWN)
+    {
+        // TODO: add equation for the general case
+        throw 0;
+    }
+
+
     Equation equation = getLinearEquation(lowerBound, upperBound);
-    Equation::EquationType equationType = getConvexType() == CONVEX ? Equation::LE : Equation::GE;
-    equation.setType(equationType);
+    setEquationTypeForSplitAbstraction(&equation, lowerBound.x, upperBound.x);
     return equation;
+
 }
 
 void PiecewiseLinearAbstraction::addSpuriousPoint(Point p)
 {
     double fixed_point = evaluateConciseFunction(p.x);
 
-    // TODO: has a bug when list is more then one
-//    _pointsForSplits.clear();
-//    _pointsForAbstractedBounds.clear();
-
-    ConvexType convexType = getConvexType();
+    Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
+    ConvexType convexType = getConvexTypeInSegment(lowerBound.x, upperBound.x);
 
     if ((convexType == UNKNOWN) || (FloatUtils::gte(p.y, fixed_point) && (convexType == CONVEX))
         || (FloatUtils::lte(p.y, fixed_point) && (convexType == CONCAVE)))
     {
         if (!_pointsForSplits.exists(p.x))
+        {
+            if (_pointsForSplits.size() == GlobalConfiguration::GUIDED_POINTS_FOR_SPLIT_SEGMENTS_TH)
+                _pointsForSplits.popFront();
+
             _pointsForSplits.append(p.x);
+        }
     } else {
         if (!_pointsForAbstractedBounds.exists(p.x))
+        {
+            if (_pointsForAbstractedBounds.size() == GlobalConfiguration::GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH)
+                _pointsForAbstractedBounds.popFront();
+
             _pointsForAbstractedBounds.append(p.x);
+        }
     }
 }
 
@@ -152,7 +179,40 @@ Equation PiecewiseLinearAbstraction::getLinearEquation(Point p, double slope) co
 Equation PiecewiseLinearAbstraction::getLinearEquation(Point p1, Point p2) const
 {
     double x0 = p1.x, y0 = p1.y, x1 = p2.x, y1 = p2.y;
+    ASSERT(! FloatUtils::areEqual(x1, x0))
     double slope = (y1 - y0) / (x1 - x0);
 
     return getLinearEquation(Point(x0, y0), slope);
 }
+
+void PiecewiseLinearAbstraction::setEquationType(Equation *equation, double x0, double x1, bool isForSplitCase)
+{
+    ConvexType convexType = getConvexTypeInSegment(x0, x1);
+    Equation::EquationType equationType;
+
+    switch (convexType)
+    {
+        case CONCAVE:
+            equationType = isForSplitCase? Equation::GE : Equation::LE;
+            break;
+
+        case CONVEX:
+            equationType = isForSplitCase? Equation::LE : Equation::GE;
+            break;
+
+        default:
+            throw;
+    }
+    equation->setType(equationType);
+}
+
+void PiecewiseLinearAbstraction::setEquationTypeForSplitAbstraction(Equation *equation, double x0, double x1)
+{
+    setEquationType(equation, x0, x1, true);
+}
+
+void PiecewiseLinearAbstraction::setEquationTypeForAbstraction(Equation *equation, double x0, double x1)
+{
+    setEquationType(equation, x0, x1, false);
+}
+

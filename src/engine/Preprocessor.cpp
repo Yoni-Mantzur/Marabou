@@ -82,7 +82,7 @@ InputQuery Preprocessor::preprocess( const InputQuery &query, bool attemptVariab
 
     if ( attemptVariableElimination )
         eliminateVariables();
-
+    
     return _preprocessed;
 }
 

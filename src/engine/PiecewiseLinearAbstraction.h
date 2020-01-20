@@ -21,27 +21,27 @@ public:
         double x;
         double y;
 
-        bool operator==(Point other)
+        bool operator==(Point other) const
         {
             return FloatUtils::areEqual(x, other.x) && FloatUtils::areEqual(y, other.y);
         }
 
-        bool operator<(Point other)
+        bool operator<(Point other) const
         {
             return FloatUtils::lt(x, other.x);
         }
 
-        bool operator>(Point other)
+        bool operator>(Point other) const
         {
             return FloatUtils::gt(x, other.x);
         }
 
-        bool operator<=(Point other)
+        bool operator<=(Point other) const
         {
             return FloatUtils::lte(x, other.x);
         }
 
-        bool operator>=(Point other)
+        bool operator>=(Point other) const
         {
             return FloatUtils::gte(x, other.x);
         }
@@ -55,17 +55,17 @@ public:
     /*
      * Get splits abstraction
      */
-    List<PiecewiseLinearCaseSplit> getSplitsAbstraction() const;
+    List<PiecewiseLinearCaseSplit> getSplitsAbstraction();
 
     /*
      * Get equations abstraction
      */
-    List<Equation> getEquationsAbstraction() const;
+    List<Equation> getEquationsAbstraction();
 
     /*
      * Refine the current split guided the new bounds are given
      */
-    Equation refineCurrentSplit() const;
+    Equation refineCurrentSplit();
 
     /*
      * Add spurious example
@@ -99,9 +99,18 @@ public:
     /*
      * Check if the concise function is convex function
      */
-    virtual ConvexType getConvexType() const = 0;
+    virtual ConvexType getConvexTypeInSegment(double x0, double x1) const = 0;
 
 private:
+    /*
+    * List of spurious points from above and beneath
+    */
+    List<double> _pointsForSplits;
+    List<double> _pointsForAbstractedBounds;
+
+    List<double> _registeredPointsForAbstraction;
+    List<Point> _registeredPointsForCurrentSplit;
+
     /*
      * Build linear equation
      */
@@ -114,10 +123,12 @@ private:
     List<Tightening> boundVars(Point p1, Point p2) const;
 
     /*
-     * List of spurious points from above and beneath
+     * Get the equation type, given the convex type we're
      */
-    List<double> _pointsForSplits;
-    List<double> _pointsForAbstractedBounds;
+    void setEquationType(Equation *equation, double x0, double x1, bool forSplitAbstraction);
+    void setEquationTypeForSplitAbstraction(Equation *equation, double x0, double x1);
+    void setEquationTypeForAbstraction(Equation *equation, double x0, double x1);
+
 };
 
 

@@ -17,10 +17,12 @@
 SigmoidConstraint::SigmoidConstraint(unsigned b, unsigned f )
         : _b ( b )
         , _f( f )
+        , _isBoundWereChanged(false)
 {
 }
 
 SigmoidConstraint::SigmoidConstraint( const String &serializedSigmoid )
+        : _isBoundWereChanged(false)
 {
     String constraintType = serializedSigmoid.substring(0, 7);
     ASSERT(constraintType == String("sigmoid"));
@@ -71,6 +73,7 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound )
         _statistics->incNumBoundNotificationsPlConstraints();
 
     _lowerBounds[variable] = bound;
+    _isBoundWereChanged = true;
 
     if (_constraintBoundTightener)
     {
@@ -94,6 +97,7 @@ void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
         _statistics->incNumBoundNotificationsPlConstraints();
 
     _upperBounds[variable] = bound;
+    _isBoundWereChanged = true;
 
     if (_constraintBoundTightener)
     {
@@ -168,6 +172,18 @@ List<Equation> SigmoidConstraint::getBoundEquations() {
     List<Equation> refinements;
     if (GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS)
         refinements.append(getEquationsAbstraction());
+
+    if (GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION) {
+        if (_isBoundWereChanged) {
+
+            try {
+                refinements.append(refineCurrentSplit());
+            } catch (...) {
+                printf("Equation already was inserted");
+            }
+            _isBoundWereChanged = false;
+        }
+    }
     return refinements;
 }
 
@@ -184,31 +200,7 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
     ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f));
     ASSERT(_upperBounds.exists(_b) && _upperBounds.exists(_f));
 
-    List<PiecewiseLinearCaseSplit> splits = getSplitsAbstraction();
-    int i =0;
-    for (auto split : splits) {
-        std::cout << "split: " << i << std::endl;
-        for (auto eq : split.getEquations()) {
-            for (Equation::Addend addend : eq._addends) {
-                std::cout << addend._coefficient;
-                if (addend._variable == _b)
-                    std::cout << "b(" + std::to_string(_b) + ")";
-                else
-                    std::cout << "f(" << _f << ")";
-            }
-
-            if (eq._type == Equation::EquationType::GE)
-                std::cout << (">=");
-
-            else if (eq._type == Equation::EquationType::LE)
-                std::cout << ("<=");
-
-            else
-                std::cout << ("=");
-
-            std::cout << eq._scalar << std::endl;
-        }
-    }
+    List<PiecewiseLinearCaseSplit> splits = const_cast<SigmoidConstraint*>(this)->getSplitsAbstraction();
     return splits;
 }
 
@@ -223,6 +215,15 @@ void SigmoidConstraint::dump( String &output ) const
     output += Stringf( "f in [%s, %s]",
                        _lowerBounds.exists( _f ) ? Stringf( "%lf", _lowerBounds[_f] ).ascii() : "-inf",
                        _upperBounds.exists( _f ) ? Stringf( "%lf", _upperBounds[_f] ).ascii() : "inf" );
+}
+
+void SigmoidConstraint::addAuxiliaryEquations( InputQuery & inputQuery )
+{
+    try {
+        inputQuery.addEquation((refineCurrentSplit()));
+    } catch (...) {
+        printf("Equation already was inserted");
+    }
 }
 
 void SigmoidConstraint::updateVariableIndex( unsigned oldIndex, unsigned newIndex )
@@ -306,24 +307,16 @@ SigmoidConstraint::Point SigmoidConstraint::getUpperParticipantVariablesBounds()
     return { _upperBounds[_b], _upperBounds[_f] };
 }
 
-SigmoidConstraint::ConvexType SigmoidConstraint::getConvexType() const
+SigmoidConstraint::ConvexType SigmoidConstraint::getConvexTypeInSegment(double x0, double x1) const
 {
-    ASSERT(_lowerBounds.exists(_b) && _upperBounds.exists(_b))
-
-    if (FloatUtils::lte(_lowerBounds[_b], 0.0) && FloatUtils::lte(_upperBounds[_b], 0.0))
+    if (FloatUtils::lte(x0, 0.0) && FloatUtils::lte(x1, 0.0))
         return CONVEX;
 
-    else if( FloatUtils::gte(_lowerBounds[_b], 0.0) &&  FloatUtils::gte(_upperBounds[_b], 0.0))
+    else if( FloatUtils::gte(x0, 0.0) &&  FloatUtils::gte(x1, 0.0))
         return CONCAVE;
 
     return UNKNOWN;
 }
-
-
-
-
-
-
 
 
 

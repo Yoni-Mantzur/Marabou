@@ -190,6 +190,7 @@ if (${BUILD_PYTHON})
         # If the default didn't work just find any python version
         find_package(PythonInterp REQUIRED)
     endif()
+    message("python path - ${PythonInterp}")
 
     if (NOT EXISTS ${PYBIND11_DIR})
         message("didnt find pybind, getting it")

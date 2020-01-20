@@ -209,7 +209,7 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
             return tensor_util.MakeNdarray(tproto)
         ### END operations not requiring new variables ###
 
-        if op.node_def.op in ['MatMul', 'BiasAdd', 'Add', 'Sub', 'Relu', 'MaxPool', 'Conv2D', 'Placeholder']:
+        if op.node_def.op in ['MatMul', 'BiasAdd', 'Add', 'Sub', 'Relu', 'Sigmoid', 'MaxPool', 'Conv2D', 'Placeholder']:
             # need to create variables for these
             return self.opToVarArray(op)
 
@@ -452,6 +452,31 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
         for f in cur:
             self.setLowerBound(f, 0.0)
 
+
+    def sigmoidEquations(self, op):
+        """
+        Function to generate equations corresponding to pointwise Sigmoid
+        Arguments:
+            op: (tf.op) representing Sigmoid operation
+        """
+
+        ### Get variables and constants of inputs ###
+        input_ops = [i.op for i in op.inputs]
+        prevValues = [self.getValues(i) for i in input_ops]
+        curValues = self.getValues(op)
+        prev = prevValues[0].reshape(-1)
+        cur = curValues.reshape(-1)
+        assert len(prev) == len(cur)
+        ### END getting inputs ###
+
+        ### Generate actual equations ###
+        for i in range(len(prev)):
+            self.addSigmoid(prev[i], cur[i])
+        for f in cur:
+            self.setLowerBound(f, 0.0)
+            self.setUpperBound(f, 1.0)
+
+
     def maxpoolEquations(self, op):
         """
         Function to generate maxpooling equations
@@ -498,6 +523,8 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
             self.conv2DEquations(op)
         elif op.node_def.op == 'Relu':
             self.reluEquations(op)
+        elif op.node_def.op == 'Sigmoid':
+            self.sigmoidEquations(op)
         elif op.node_def.op == 'MaxPool':
             self.maxpoolEquations(op)
         else:

@@ -37,6 +37,7 @@ class MarabouNetwork:
         self.numVars = 0
         self.equList = []
         self.reluList = []
+        self.sigmoidList = []
         self.maxList = []
         self.varsParticipatingInConstraints = set()
         self.lowerBounds = dict()
@@ -88,6 +89,17 @@ class MarabouNetwork:
             v2: (int) variable representing output of Relu
         """
         self.reluList += [(v1, v2)]
+        self.varsParticipatingInConstraints.add(v1)
+        self.varsParticipatingInConstraints.add(v2)
+
+    def addSigmoid(self, v1, v2):
+        """
+        Function to add a new Sigmoid constraint
+        Arguments:
+            v1: (int) variable representing input of Sigmoid
+            v2: (int) variable representing output of Sigmoid
+        """
+        self.sigmoidList += [(v1, v2)]
         self.varsParticipatingInConstraints.add(v1)
         self.varsParticipatingInConstraints.add(v2)
 

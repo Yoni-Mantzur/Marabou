@@ -36,6 +36,7 @@
 #include "PropertyParser.h"
 #include "QueryLoader.h"
 #include "ReluConstraint.h"
+#include "SigmoidConstraint.h"
 #include "Set.h"
 
 #ifdef _WIN32
@@ -85,6 +86,11 @@ void restoreOutputStream(int outputStream)
 
 void addReluConstraint(InputQuery& ipq, unsigned var1, unsigned var2){
     PiecewiseLinearConstraint* r = new ReluConstraint(var1, var2);
+    ipq.addPiecewiseLinearConstraint(r);
+}
+
+void addSigmoidConstraint(InputQuery& ipq, unsigned var1, unsigned var2){
+    PiecewiseLinearConstraint* r = new SigmoidConstraint(var1, var2);
     ipq.addPiecewiseLinearConstraint(r);
 }
 
@@ -219,6 +225,7 @@ PYBIND11_MODULE(MarabouCore, m) {
     m.def("saveQuery", &saveQuery, "Serializes the inputQuery in the given filename");
     m.def("loadQuery", &loadQuery, "Loads and returns a serialized inputQuery from the given filename");
     m.def("addReluConstraint", &addReluConstraint, "Add a Relu constraint to the InputQuery");
+    m.def("addSigmoidConstraint", &addSigmoidConstraint, "Add a Relu constraint to the InputQuery");
     m.def("addMaxConstraint", &addMaxConstraint, "Add a Max constraint to the InputQuery");
     py::class_<InputQuery>(m, "InputQuery")
         .def(py::init())

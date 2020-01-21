@@ -172,6 +172,10 @@ class MarabouNetwork:
             assert r[1] < self.numVars and r[0] < self.numVars
             MarabouCore.addReluConstraint(ipq, r[0], r[1])
 
+        for r in self.sigmoidList:
+            assert r[1] < self.numVars and r[0] < self.numVars
+            MarabouCore.addSigmoidConstraint(ipq, r[0], r[1])
+
         for m in self.maxList:
             assert m[1] < self.numVars
             for e in m[0]:

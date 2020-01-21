@@ -96,10 +96,9 @@ public:
       called x2). constraintObsolete() returns true iff and the constraint has become obsolote
       as a result of variable eliminations.
     */
-    // TODO: Ensure that those function irrelevant to sigmoid
-    void eliminateVariable( unsigned /* variable */, double /* fixedValue */ ) override {};
+    void eliminateVariable( unsigned variable, double fixedValue ) override;
     void updateVariableIndex( unsigned oldIndex, unsigned newIndex ) override;
-    bool constraintObsolete() const override { return false; };
+    bool constraintObsolete() const override;
 
     /*
       Get the tightenings entailed by the constraint.
@@ -179,6 +178,7 @@ private:
 
     unsigned _b, _f;
     bool _isBoundWereChanged;
+    bool _haveEliminatedVariables;
 
     /* For debugging propose */
     IFile *_logFile = nullptr;

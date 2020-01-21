@@ -18,11 +18,13 @@ SigmoidConstraint::SigmoidConstraint(unsigned b, unsigned f )
         : _b ( b )
         , _f( f )
         , _isBoundWereChanged(false)
+        , _haveEliminatedVariables(false)
 {
 }
 
 SigmoidConstraint::SigmoidConstraint( const String &serializedSigmoid )
         : _isBoundWereChanged(false)
+        , _haveEliminatedVariables(false)
 {
     String constraintType = serializedSigmoid.substring(0, 7);
     ASSERT(constraintType == String("sigmoid"));
@@ -224,6 +226,31 @@ void SigmoidConstraint::addAuxiliaryEquations( InputQuery & inputQuery )
     } catch (...) {
         printf("Equation already was inserted");
     }
+}
+
+void SigmoidConstraint::eliminateVariable( unsigned variable, double fixedValue)
+{
+    _haveEliminatedVariables = true;
+
+    // This should be redundant
+    if (_constraintBoundTightener)
+    {
+        if (variable == _b) {
+            double sigmoidBound = FloatUtils::sigmoid(fixedValue);
+            _constraintBoundTightener->registerTighterUpperBound(_f, sigmoidBound);
+            _constraintBoundTightener->registerTighterLowerBound(_f, sigmoidBound);
+
+        } else if (variable == _f) {
+            double sigmoidInverseBound = FloatUtils::sigmoidInverse(fixedValue);
+            _constraintBoundTightener->registerTighterUpperBound(_b, sigmoidInverseBound);
+            _constraintBoundTightener->registerTighterLowerBound(_b, sigmoidInverseBound);
+        }
+    }
+}
+
+bool SigmoidConstraint::constraintObsolete() const
+{
+    return _haveEliminatedVariables;
 }
 
 void SigmoidConstraint::updateVariableIndex( unsigned oldIndex, unsigned newIndex )

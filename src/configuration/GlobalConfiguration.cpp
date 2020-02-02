@@ -17,7 +17,7 @@
 #include "MString.h"
 #include <cstdio>
 
-const double GlobalConfiguration::DEFAULT_EPSILON_FOR_COMPARISONS = 0.0000000001;
+const double GlobalConfiguration::DEFAULT_EPSILON_FOR_COMPARISONS = 0.0000001;
 const unsigned GlobalConfiguration::DEFAULT_DOUBLE_TO_STRING_PRECISION = 10;
 const unsigned GlobalConfiguration::STATISTICS_PRINTING_FREQUENCY = 10000;
 const double GlobalConfiguration::BOUND_COMPARISON_ADDITIVE_TOLERANCE = 0.0000001;
@@ -35,7 +35,7 @@ const double GlobalConfiguration::SPARSE_FORREST_TOMLIN_DIAGONAL_ELEMENT_TOLERAN
 const unsigned GlobalConfiguration::DEGRADATION_CHECKING_FREQUENCY = 100;
 const double GlobalConfiguration::DEGRADATION_THRESHOLD = 0.1;
 const double GlobalConfiguration::ACCEPTABLE_SIMPLEX_PIVOT_THRESHOLD = 0.0001;
-const bool GlobalConfiguration::USE_COLUMN_MERGING_EQUATIONS = false;
+const bool GlobalConfiguration::USE_COLUMN_MERGING_EQUATIONS = true;
 const double GlobalConfiguration::GAUSSIAN_ELIMINATION_PIVOT_SCALE_THRESHOLD = 0.1;
 const unsigned GlobalConfiguration::MAX_SIMPLEX_PIVOT_SEARCH_ITERATIONS = 5;
 const unsigned GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD = 20;
@@ -86,7 +86,7 @@ const bool GlobalConfiguration::DANTZIGS_RULE_LOGGING = false;
 const bool GlobalConfiguration::BASIS_FACTORIZATION_LOGGING = false;
 const bool GlobalConfiguration::PROJECTED_STEEPEST_EDGE_LOGGING = false;
 const bool GlobalConfiguration::GAUSSIAN_ELIMINATION_LOGGING = false;
-const bool GlobalConfiguration::QUERY_LOADER_LOGGING = false;
+const bool GlobalConfiguration::QUERY_LOADER_LOGGING = true;
 const bool GlobalConfiguration::SYMBOLIC_BOUND_TIGHTENER_LOGGING = false;
 
 const bool GlobalConfiguration::USE_SMART_FIX = false;
@@ -96,7 +96,7 @@ const bool GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS = true;
 const bool GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION = false;
 const bool GlobalConfiguration::PREPROCESSOR_PL_CONSTRAINTS_ADD_ABSTRACTION = true;
 
-const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH = 3;
+const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH = 1;
 const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_SPLIT_SEGMENTS_TH = 1;
 
 

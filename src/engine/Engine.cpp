@@ -242,11 +242,6 @@ bool Engine::solve( unsigned timeoutInSeconds )
                 // For debugging purposes
                 checkBoundCompliancyWithDebugSolution();
 
-                if ( _verbosity > 0 ){
-                    _tableau->dumpEquations();
-                    _tableau->dumpAssignment();
-                }
-
                 while ( applyAllValidConstraintCaseSplits() )
                     performSymbolicBoundTightening();
 
@@ -1396,10 +1391,9 @@ List<Tightening> Engine::addEquation(Equation equation)
     if ( !columnsSuccessfullyMerged )
     {
         // General case: add a new equation to the tableau
-        equation.dump();
         unsigned auxVariable = _tableau->addEquation( equation );
-        adjustWorkMemorySize();
         _activeEntryStrategy->resizeHook( _tableau );
+
         switch ( equation._type )
         {
             case Equation::GE:
@@ -1420,11 +1414,15 @@ List<Tightening> Engine::addEquation(Equation equation)
                 break;
         }
     }
+    adjustWorkMemorySize();
     return bounds;
 }
 
 void Engine::tightenBounds(List<Tightening> &bounds)
 {
+    _rowBoundTightener->resetBounds();
+    _constraintBoundTightener->resetBounds();
+
     for ( auto &bound : bounds )
     {
         unsigned variable = _tableau->getVariableAfterMerging(bound._variable );
@@ -1454,10 +1452,6 @@ void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
     {
         bounds.append(addEquation(equation));
     }
-    adjustWorkMemorySize();
-
-    _rowBoundTightener->resetBounds();
-    _constraintBoundTightener->resetBounds();
 
     tightenBounds(bounds);
 
@@ -1962,10 +1956,21 @@ void Engine::addEquationsForBoundsIfNeeded() {
         {
             List<Tightening> bounds = addEquation(equation);
             tightenBounds(bounds);
+            _boundEquations.append(equation);
         }
     }
 }
 
+void Engine::restoreBoundedEquations(List<Equation> equations)
+{
+    for (Equation equation : equations)
+    {
+        List<Tightening> bounds = addEquation(equation);
+        tightenBounds(bounds);
+        if (!_boundEquations.exists(equation))
+            _boundEquations.append(equation);
+    }
+}
 //
 // Local Variables:
 // compile-command: "make -C ../.. "

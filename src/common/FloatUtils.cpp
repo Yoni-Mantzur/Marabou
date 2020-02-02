@@ -146,6 +146,7 @@ bool FloatUtils::isInf( double x )
 
 double FloatUtils::sigmoid( double x )
 {
+    ASSERT(x <= GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND && x <= GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND)
     return 1.0 / ( 1.0 + exp( -x ) );
 }
 

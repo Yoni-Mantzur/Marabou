@@ -24,6 +24,7 @@
 #include "MaxConstraint.h"
 #include "QueryLoader.h"
 #include "ReluConstraint.h"
+#include "SigmoidConstraint.h"
 
 InputQuery QueryLoader::loadQuery( const String &fileName )
 {
@@ -208,6 +209,10 @@ InputQuery QueryLoader::loadQuery( const String &fileName )
         else if ( coType == "max" )
         {
             constraint = new MaxConstraint( serializeConstraint );
+        }
+        else if ( coType == "sigmoid" )
+        {
+            constraint = new SigmoidConstraint( serializeConstraint );
         }
         else
         {

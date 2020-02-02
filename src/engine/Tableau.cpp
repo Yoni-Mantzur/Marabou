@@ -1815,9 +1815,7 @@ unsigned Tableau::addEquation( const Equation &equation )
     setUpperBound( auxVariable, ub );
 
     // Populate the new row of b
-    _b[_m - 1] = equation._scalar;
-    if ( !FloatUtils::isZero( _b[_m - 1] ) )
-        _rhsIsAllZeros = false;
+    setRightHandSide(_m - 1, equation._scalar);
 
     /*
       Attempt to make the auxiliary variable the new basic variable.

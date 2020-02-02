@@ -57,7 +57,6 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
         Equation abstractedEquation = getLinearEquation(p1, p2);
         setEquationTypeForSplitAbstraction(&abstractedEquation, p1.x, p2.x);
         split.addEquation(abstractedEquation);
-        abstractedEquation.dump();
         for (Tightening tightening: boundVars(p1, p2))
             split.storeBoundTightening(tightening);
 

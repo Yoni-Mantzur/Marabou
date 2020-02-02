@@ -26,14 +26,24 @@ SigmoidConstraint::SigmoidConstraint( const String &serializedSigmoid )
         : _isBoundWereChanged(false)
         , _haveEliminatedVariables(false)
 {
-    String constraintType = serializedSigmoid.substring(0, 7);
-    ASSERT(constraintType == String("sigmoid"));
+    const String &sigmoid = String("sigmoid" );
+    String constraintType = serializedSigmoid.substring( 0, sigmoid.length() );
+    ASSERT(constraintType == sigmoid);
 
     // remove the constraint type in serialized form
-    String serializedValues = serializedSigmoid.substring(5, serializedSigmoid.length()-7);
+    String serializedValues = serializedSigmoid.substring( sigmoid.length()+1, serializedSigmoid.length() - 5 );
     List<String> values = serializedValues.tokenize( "," );
-    _b = atoi( values.back().ascii() );
-    _f = atoi( values.front().ascii() );
+
+    ASSERT( values.size() == 2);
+
+    auto var = values.begin();
+    _f = atoi( var->ascii() );
+    ++var;
+    _b = atoi( var->ascii() );
+
+    ASSERT(_b < _f)
+    printf("b is: %d and _f is %d\n", _b, _f);
+
 }
 
 PiecewiseLinearConstraint *SigmoidConstraint::duplicateConstraint() const
@@ -63,8 +73,14 @@ void SigmoidConstraint::unregisterAsWatcher( ITableau *tableau )
 
 void SigmoidConstraint::notifyVariableValue( unsigned variable, double value )
 {
-    if ( FloatUtils::isZero(value) )
-        value = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
+    if ( variable == _f )
+    {
+        if (FloatUtils::isZero(value))
+            value = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
+
+        if (FloatUtils::isZero(1.0 - value))
+            value = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
+    }
 
     _assignment[variable] = value;
 }
@@ -73,6 +89,15 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound )
 {
     if (_statistics)
         _statistics->incNumBoundNotificationsPlConstraints();
+
+    if ( variable == _f )
+    {
+        if (FloatUtils::isZero(bound))
+            bound = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
+
+        if (FloatUtils::isZero(1.0 - bound))
+            bound = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
+    }
 
     _lowerBounds[variable] = bound;
     _isBoundWereChanged = true;
@@ -98,6 +123,15 @@ void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
     if ( _statistics )
         _statistics->incNumBoundNotificationsPlConstraints();
 
+    if ( variable == _f )
+    {
+        if (FloatUtils::isZero(bound))
+            bound = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
+
+        if (FloatUtils::isZero(1.0 - bound))
+            bound = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
+    }
+
     _upperBounds[variable] = bound;
     _isBoundWereChanged = true;
 
@@ -119,7 +153,7 @@ void SigmoidConstraint::notifyBrokenAssignment()
     ASSERT(_assignment.exists(_b) && _assignment.exists(_f))
 
     if (FloatUtils::lt(_lowerBounds[_b], 0) && FloatUtils::gt(_upperBounds[_b], 0) )
-        addSpuriousPoint( { 0, 0.5 });
+        addSpuriousPoint( { 0.0, 0.5 });
     else
         addSpuriousPoint( { _assignment[_b], _assignment[_f] });
 }
@@ -147,7 +181,8 @@ bool SigmoidConstraint::satisfied() const
     double bValue = _assignment.get( _b );
     double fValue = _assignment.get( _f );
 
-    return FloatUtils::areEqual(FloatUtils::sigmoid(bValue), fValue);
+    return FloatUtils::areEqual(FloatUtils::sigmoid(bValue), fValue) || 
+           FloatUtils::areEqual(bValue, FloatUtils::sigmoidInverse(fValue));
 
 }
 
@@ -228,24 +263,9 @@ void SigmoidConstraint::addAuxiliaryEquations( InputQuery & inputQuery )
     }
 }
 
-void SigmoidConstraint::eliminateVariable( unsigned variable, double fixedValue)
+void SigmoidConstraint::eliminateVariable( unsigned /* variable */, double /* fixedValue */)
 {
     _haveEliminatedVariables = true;
-
-    // This should be redundant
-    if (_constraintBoundTightener)
-    {
-        if (variable == _b) {
-            double sigmoidBound = FloatUtils::sigmoid(fixedValue);
-            _constraintBoundTightener->registerTighterUpperBound(_f, sigmoidBound);
-            _constraintBoundTightener->registerTighterLowerBound(_f, sigmoidBound);
-
-        } else if (variable == _f) {
-            double sigmoidInverseBound = FloatUtils::sigmoidInverse(fixedValue);
-            _constraintBoundTightener->registerTighterUpperBound(_b, sigmoidInverseBound);
-            _constraintBoundTightener->registerTighterLowerBound(_b, sigmoidInverseBound);
-        }
-    }
 }
 
 bool SigmoidConstraint::constraintObsolete() const

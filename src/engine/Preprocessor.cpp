@@ -405,6 +405,7 @@ bool Preprocessor::processConstraints()
 		{
 			constraint->notifyLowerBound( variable, _preprocessed.getLowerBound( variable ) );
 			constraint->notifyUpperBound( variable, _preprocessed.getUpperBound( variable ) );
+			ASSERT(FloatUtils::areEqual(_preprocessed.getLowerBound( variable ), _preprocessed.getUpperBounds( variable )))
 		}
 
         List<Tightening> tightenings;

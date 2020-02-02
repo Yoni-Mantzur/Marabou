@@ -472,10 +472,6 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
         ### Generate actual equations ###
         for i in range(len(prev)):
             self.addSigmoid(prev[i], cur[i])
-        for f in cur:
-            self.setLowerBound(f, 0.0)
-            self.setUpperBound(f, 1.0)
-
 
     def maxpoolEquations(self, op):
         """

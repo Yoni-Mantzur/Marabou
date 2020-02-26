@@ -73,15 +73,6 @@ void SigmoidConstraint::unregisterAsWatcher( ITableau *tableau )
 
 void SigmoidConstraint::notifyVariableValue( unsigned variable, double value )
 {
-    if ( variable == _f )
-    {
-        if (FloatUtils::isZero(value))
-            value = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
-
-        if (FloatUtils::isZero(1.0 - value))
-            value = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
-    }
-
     _assignment[variable] = value;
 }
 
@@ -89,15 +80,6 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound )
 {
     if (_statistics)
         _statistics->incNumBoundNotificationsPlConstraints();
-
-    if ( variable == _f )
-    {
-        if (FloatUtils::isZero(bound))
-            bound = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
-
-        if (FloatUtils::isZero(1.0 - bound))
-            bound = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
-    }
 
     _lowerBounds[variable] = bound;
     _isBoundWereChanged = true;
@@ -123,15 +105,6 @@ void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
     if ( _statistics )
         _statistics->incNumBoundNotificationsPlConstraints();
 
-    if ( variable == _f )
-    {
-        if (FloatUtils::isZero(bound))
-            bound = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
-
-        if (FloatUtils::isZero(1.0 - bound))
-            bound = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
-    }
-
     _upperBounds[variable] = bound;
     _isBoundWereChanged = true;
 
@@ -152,10 +125,11 @@ void SigmoidConstraint::notifyBrokenAssignment()
 {
     ASSERT(_assignment.exists(_b) && _assignment.exists(_f))
 
-    if (FloatUtils::lt(_lowerBounds[_b], 0) && FloatUtils::gt(_upperBounds[_b], 0) )
+    if (FloatUtils::lt(_lowerBounds[_b], 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) &&
+        FloatUtils::gt(_upperBounds[_b], 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) )
         addSpuriousPoint( { 0.0, 0.5 });
-    else
-        addSpuriousPoint( { _assignment[_b], _assignment[_f] });
+//    else
+//        addSpuriousPoint( { _assignment[_b], _assignment[_f] });
 }
 
 bool SigmoidConstraint::participatingVariable( unsigned variable ) const
@@ -181,8 +155,8 @@ bool SigmoidConstraint::satisfied() const
     double bValue = _assignment.get( _b );
     double fValue = _assignment.get( _f );
 
-    return FloatUtils::areEqual(FloatUtils::sigmoid(bValue), fValue) || 
-           FloatUtils::areEqual(bValue, FloatUtils::sigmoidInverse(fValue));
+    return FloatUtils::areEqual(FloatUtils::sigmoid(bValue), fValue, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
+           FloatUtils::areEqual(bValue, FloatUtils::sigmoidInverse(fValue), GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE);
 
 }
 
@@ -205,23 +179,31 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
     return fixes;
 }
 
-List<Equation> SigmoidConstraint::getBoundEquations() {
+PiecewiseLinearCaseSplit SigmoidConstraint::getValidCaseSplit() const
+{
     List<Equation> refinements;
-    if (GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS)
-        refinements.append(getEquationsAbstraction());
+    refinements.append(const_cast<SigmoidConstraint*>(this)->getEquationsAbstraction());
 
     if (GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION) {
         if (_isBoundWereChanged) {
 
             try {
-                refinements.append(refineCurrentSplit());
+                refinements.append(const_cast<SigmoidConstraint*>(this)->refineCurrentSplit());
             } catch (...) {
                 printf("Equation already was inserted");
             }
-            _isBoundWereChanged = false;
+            const_cast<SigmoidConstraint*>(this)->_isBoundWereChanged = false;
         }
     }
-    return refinements;
+
+    PiecewiseLinearCaseSplit serializedEquations;
+    if (refinements.empty())
+        throw 0;
+
+    for (auto equation : refinements)
+        serializedEquations.addEquation(equation);
+
+    return serializedEquations;
 }
 
 List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getSmartFixes(__attribute__((unused)) ITableau *tableau ) const
@@ -238,6 +220,41 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
     ASSERT(_upperBounds.exists(_b) && _upperBounds.exists(_f));
 
     List<PiecewiseLinearCaseSplit> splits = const_cast<SigmoidConstraint*>(this)->getSplitsAbstraction();
+
+//    File * f = new File("log_splits.txt");
+//    f->open(File::MODE_WRITE_APPEND);
+//    List<float> sizes;
+//    for (auto split : splits){
+//        auto bs = split.getBoundTightenings();
+//        float size = 0;
+//        for (auto b : bs)
+//        {
+//            if (b._variable == _b)
+//            {
+//                if (b._type == Tightening::UB) {
+//                    size += b._value;
+//                } else if (b._type == Tightening::LB) {
+//                    size -= b._value;
+//                }
+//            }
+//        }
+//        sizes.append(size);
+//
+//    }
+//
+//    auto sizes_iter = sizes.begin();
+//    float current = *sizes_iter;
+//    sizes_iter++;
+//    while (sizes_iter != sizes.end())
+//    {
+//        float next = *sizes_iter;
+//        float total = current + next;
+//        f->write(std::to_string(current/total));
+//        f->write("\n");
+//        current = next;
+//        sizes_iter++;
+//    }
+//    f->close();
     return splits;
 }
 
@@ -356,10 +373,12 @@ SigmoidConstraint::Point SigmoidConstraint::getUpperParticipantVariablesBounds()
 
 SigmoidConstraint::ConvexType SigmoidConstraint::getConvexTypeInSegment(double x0, double x1) const
 {
-    if (FloatUtils::lte(x0, 0.0) && FloatUtils::lte(x1, 0.0))
+    if (FloatUtils::lte(x0, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE ) &&
+        FloatUtils::lte(x1, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE ) )
         return CONVEX;
 
-    else if( FloatUtils::gte(x0, 0.0) &&  FloatUtils::gte(x1, 0.0))
+    else if( FloatUtils::gte(x0, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE ) &&
+             FloatUtils::gte(x1, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE ) )
         return CONCAVE;
 
     return UNKNOWN;

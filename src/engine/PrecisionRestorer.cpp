@@ -50,16 +50,13 @@ void PrecisionRestorer::restorePrecision( IEngine &engine,
         List<PiecewiseLinearCaseSplit> targetSplits;
         smtCore.allSplitsSoFar( targetSplits );
 
-        List<Equation> equations = engine.getBoundedEquations();
-
         // Restore engine and tableau to their original form
         engine.restoreState( _initialEngineState );
 
         // Re-add all splits, which will restore variables and equations
         for ( const auto &split : targetSplits )
             engine.applySplit( split );
-
-        engine.restoreBoundedEquations(equations);
+        
         // At this point, the tableau has the appropriate dimensions. Restore the variable bounds
         // and basic variables.
         // Note that if column merging is enabled, the dimensions may not be precisely those before

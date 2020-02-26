@@ -39,8 +39,6 @@ public:
         //   x2: x1f
         //   x3: x3
         printf("Test test_sigmoid_1\n");
-        double sigLowerBound = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
-        double sigUpperBound = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
         double large = 1000;
 
         InputQuery inputQuery;
@@ -52,11 +50,6 @@ public:
         inputQuery.setLowerBound( 1, -large );
         inputQuery.setUpperBound( 1, large );
 
-        inputQuery.setLowerBound( 2, sigLowerBound );
-        inputQuery.setUpperBound( 2, sigUpperBound );
-
-        inputQuery.setLowerBound( 3, sigLowerBound );
-        inputQuery.setUpperBound( 3, sigUpperBound );
 
 
         // x0 - x1b = 0
@@ -135,8 +128,6 @@ public:
         //   x3: x2f
         //   x4: x3
         printf("Test test_sigmoid_2\n");
-        double sigLowerBound = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
-        double sigUpperBound = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
         double large = 1000;
 
         InputQuery inputQuery;
@@ -151,8 +142,6 @@ public:
         inputQuery.setLowerBound( 2, -large );
         inputQuery.setUpperBound( 2, large );
 
-        inputQuery.setLowerBound( 3, sigLowerBound );
-        inputQuery.setUpperBound( 3, sigUpperBound );
 
         inputQuery.setLowerBound( 4, -large );
         inputQuery.setUpperBound( 4, large );

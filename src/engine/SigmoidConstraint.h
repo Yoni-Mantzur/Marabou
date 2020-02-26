@@ -88,7 +88,7 @@ public:
       If the constraint's phase has been fixed, get the (valid) case split.
       Not relevant for Sigmoid, should not call it phase isn't fixed.
     */
-    PiecewiseLinearCaseSplit getValidCaseSplit() const override { throw "Not implemented function"; }
+    PiecewiseLinearCaseSplit getValidCaseSplit() const override;
 
     /*
       Preprocessing related functions, to inform that a variable has been eliminated completely
@@ -138,11 +138,6 @@ public:
     unsigned getF() const override { return _f; }
     Point getLowerParticipantVariablesBounds() const override;
     Point getUpperParticipantVariablesBounds() const override;
-
-    /*
-     * Return list of equations that can help bound more efficiently the constraint;
-     */
-    List<Equation> getBoundEquations() override;
 
     /*
      * Evaluate the concise function given point in the range

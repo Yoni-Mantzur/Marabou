@@ -135,10 +135,6 @@ public:
     void resetExitCode();
     void resetBoundTighteners();
 
-    void restoreBoundedEquations(List<Equation> equations) override;
-    virtual List<Equation> getBoundedEquations() override {
-        return _boundEquations;
-    }
     void tightenBounds(List<Tightening> &bounds);
     List<Tightening> addEquation(Equation equation);
 
@@ -460,10 +456,6 @@ private:
     void augmentInitialBasisIfNeeded( List<unsigned> &initialBasis, const List<unsigned> &basicRows );
 
     void tightenBounds(const List<Tightening> &bounds) const;
-
-    void addEquationsForBoundsIfNeeded();
-
-    List<Equation> _boundEquations;
 };
 
 #endif // __Engine_h__

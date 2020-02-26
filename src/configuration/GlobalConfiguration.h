@@ -131,8 +131,7 @@ public:
     static const double RELU_CONSTRAINT_COMPARISON_TOLERANCE;
 
     // The tolerance for checking whether f = Sigmoid( b ), to determine a Sigmoid's statisfaction
-    static const double SIGMOID_DEFAULT_LOWER_BOUND;
-    static const double SIGMOID_DEFAULT_UPPER_BOUND;
+    static const double SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE;
 
     // Should the initial basis be comprised only of auxiliary (row) variables?
     static const bool ONLY_AUX_INITIAL_BASIS;

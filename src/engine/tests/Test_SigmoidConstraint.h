@@ -91,7 +91,7 @@ public:
 
         TS_ASSERT(!sigmoid.satisfied());
 
-        sigmoid.notifyVariableValue(f, 0);
+        sigmoid.notifyVariableValue(f, 0.1);
         sigmoid.notifyVariableValue(b, 11);
 
         TS_ASSERT(!sigmoid.satisfied());
@@ -143,60 +143,60 @@ public:
     }
 
 
-    void test_sigmoid_case_splits_after_assignments()
-    {
-        unsigned b = 2;
-        unsigned f = 3;
-
-        MockConstraintBoundTightener constraintBoundTightener;
-        SigmoidConstraint sigmoid( b, f );
-
-        sigmoid.registerConstraintBoundTightener(&constraintBoundTightener);
-
-        List<PiecewiseLinearConstraint::Fix> fixes;
-
-        sigmoid.notifyLowerBound(b, 0);
-        sigmoid.notifyLowerBound(f, 0.5);
-
-        sigmoid.notifyUpperBound(b, 1);
-        sigmoid.notifyUpperBound(f, FloatUtils::sigmoid(1));
-
-        sigmoid.notifyVariableValue(b, 0.5);
-        sigmoid.notifyVariableValue(f, 0.6);
-
-        List<PiecewiseLinearCaseSplit> splits = sigmoid.getCaseSplits();
-
-
-        TS_ASSERT_EQUALS( splits.size(), 2U );
-
-        PiecewiseLinearCaseSplit split1 = splits.front();
-        PiecewiseLinearCaseSplit split2 = splits.back();
-
-
-        Tightening boundsForSplit1[4] = {
-                Tightening(b, 0, Tightening::BoundType::LB),
-                Tightening(b, 0.5, Tightening::BoundType::UB),
-                Tightening(f, 0.5, Tightening::BoundType::LB),
-                Tightening(f, FloatUtils::sigmoid(0.5), Tightening::BoundType::UB)
-        };
-
-        Tightening boundsForSplit2[4] = {
-                Tightening(b, 0.5, Tightening::BoundType::LB),
-                Tightening(b, 1, Tightening::BoundType::UB),
-                Tightening(f, FloatUtils::sigmoid(0.5), Tightening::BoundType::LB),
-                Tightening(f, FloatUtils::sigmoid(1), Tightening::BoundType::UB)
-        };
-
-        Equation eq1 = split1.getEquations().front();
-        TS_ASSERT_EQUALS(getEquationValue(eq1, 0, 0.5), 0);
-        TS_ASSERT_EQUALS(getEquationValue(eq1, 0.5, FloatUtils::sigmoid(0.5)), 0);
-        assertBounds(split1, boundsForSplit1);
-
-        Equation eq2 = split2.getEquations().front();
-        TS_ASSERT_EQUALS(getEquationValue(eq2, 0.5, FloatUtils::sigmoid(0.5)), 0);
-        TS_ASSERT_EQUALS(getEquationValue(eq2, 1, FloatUtils::sigmoid(1)), 0);
-        assertBounds(split2, boundsForSplit2);
-    }
+//    void test_sigmoid_case_splits_after_assignments()
+//    {
+//        unsigned b = 2;
+//        unsigned f = 3;
+//
+//        MockConstraintBoundTightener constraintBoundTightener;
+//        SigmoidConstraint sigmoid( b, f );
+//
+//        sigmoid.registerConstraintBoundTightener(&constraintBoundTightener);
+//
+//        List<PiecewiseLinearConstraint::Fix> fixes;
+//
+//        sigmoid.notifyLowerBound(b, 0);
+//        sigmoid.notifyLowerBound(f, 0.5);
+//
+//        sigmoid.notifyUpperBound(b, 1);
+//        sigmoid.notifyUpperBound(f, FloatUtils::sigmoid(1));
+//
+//        sigmoid.notifyVariableValue(b, 0.5);
+//        sigmoid.notifyVariableValue(f, 0.6);
+//
+//        List<PiecewiseLinearCaseSplit> splits = sigmoid.getCaseSplits();
+//
+//
+//        TS_ASSERT_EQUALS( splits.size(), 2U );
+//
+//        PiecewiseLinearCaseSplit split1 = splits.front();
+//        PiecewiseLinearCaseSplit split2 = splits.back();
+//
+//
+//        Tightening boundsForSplit1[4] = {
+//                Tightening(b, 0, Tightening::BoundType::LB),
+//                Tightening(b, 0.5, Tightening::BoundType::UB),
+//                Tightening(f, 0.5, Tightening::BoundType::LB),
+//                Tightening(f, FloatUtils::sigmoid(0.5), Tightening::BoundType::UB)
+//        };
+//
+//        Tightening boundsForSplit2[4] = {
+//                Tightening(b, 0.5, Tightening::BoundType::LB),
+//                Tightening(b, 1, Tightening::BoundType::UB),
+//                Tightening(f, FloatUtils::sigmoid(0.5), Tightening::BoundType::LB),
+//                Tightening(f, FloatUtils::sigmoid(1), Tightening::BoundType::UB)
+//        };
+//
+//        Equation eq1 = split1.getEquations().front();
+//        TS_ASSERT_EQUALS(getEquationValue(eq1, 0, 0.5), 0);
+//        TS_ASSERT_EQUALS(getEquationValue(eq1, 0.5, FloatUtils::sigmoid(0.5)), 0);
+//        assertBounds(split1, boundsForSplit1);
+//
+//        Equation eq2 = split2.getEquations().front();
+//        TS_ASSERT_EQUALS(getEquationValue(eq2, 0.5, FloatUtils::sigmoid(0.5)), 0);
+//        TS_ASSERT_EQUALS(getEquationValue(eq2, 1, FloatUtils::sigmoid(1)), 0);
+//        assertBounds(split2, boundsForSplit2);
+//    }
 
     double getEquationValue(Equation &equation, double x, double y) {
         double sum = 0;

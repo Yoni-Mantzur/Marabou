@@ -13,7 +13,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
     List<PiecewiseLinearCaseSplit> splits;
 
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
-    ASSERT(!FloatUtils::areEqual(lowerBound.x, upperBound.x))
+    ASSERT(!FloatUtils::areEqual(lowerBound.x, upperBound.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
 
     // Guided point will be from lower bound to upper bound
     _pointsForSplits.sort();
@@ -41,7 +41,9 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
         double x2 = *guidedPointsIter;
 
         // Invalid guided points due to bounds were changed
-        if (FloatUtils::gt(x2, upperBound.x) || FloatUtils::lt(x2, lowerBound.x) || FloatUtils::areEqual(x1, x2))
+        if (FloatUtils::gt(x2, upperBound.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
+            FloatUtils::lt(x2, lowerBound.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
+            FloatUtils::areEqual(x1, x2, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
         {
             x2 = (x1 + *(++guidedPointsIter)) / 2;
             guidedPointsIter--;
@@ -75,13 +77,22 @@ List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction()
     List<Equation> refinements;
 
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
+
+    if (getConvexTypeInSegment(lowerBound.x, upperBound.x) != UNKNOWN && guidedPoints.empty())
+        guidedPoints.append((lowerBound.x + upperBound.x) / 2);
     for (double x : guidedPoints)
     {
         // Invalid guided points due to bounds were changed
-        if (FloatUtils::gte(x, upperBound.x) || FloatUtils::lte(x, lowerBound.x) ||
-                                                _registeredPointsForAbstraction.exists(x))
+        if (FloatUtils::gte(x, upperBound.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
+            FloatUtils::lte(x, lowerBound.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
+            _registeredPointsForAbstraction.exists(x))
             continue;
 
+        for ( double x0 : _registeredPointsForAbstraction)
+        {
+            if ( FloatUtils::areEqual(x, x0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) )
+                continue;
+        }
         _registeredPointsForAbstraction.append(x);
 
         double slope = evaluateDerivativeOfConciseFunction(x);
@@ -124,8 +135,11 @@ void PiecewiseLinearAbstraction::addSpuriousPoint(Point p)
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
     ConvexType convexType = getConvexTypeInSegment(lowerBound.x, upperBound.x);
 
-    if ((convexType == UNKNOWN) || (FloatUtils::gte(p.y, fixed_point) && (convexType == CONVEX))
-        || (FloatUtils::lte(p.y, fixed_point) && (convexType == CONCAVE)))
+    if ((convexType == UNKNOWN) ||
+        (FloatUtils::gte(p.y, fixed_point, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) &&
+        (convexType == CONVEX))
+        || (FloatUtils::lte(p.y, fixed_point, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) &&
+        (convexType == CONCAVE)))
     {
         if (!_pointsForSplits.exists(p.x))
         {
@@ -150,12 +164,12 @@ List<Tightening> PiecewiseLinearAbstraction::boundVars(Point p1, Point p2) const
     unsigned b = getB(), f = getF();
 
     // Bound b
-    ASSERT(FloatUtils::lte(p1.x, p2.x))
+    ASSERT(FloatUtils::lt(p1.x, p2.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
     bounds.append(Tightening (b, p1.x, Tightening::LB));
     bounds.append(Tightening(b, p2.x, Tightening::UB));
 
     // Bound f
-    ASSERT(FloatUtils::lte(p1.y, p2.y))
+    ASSERT(FloatUtils::lt(p1.y, p2.y, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
     bounds.append(Tightening(f, p1.y, Tightening::LB));
     bounds.append(Tightening(f, p2.y, Tightening::UB));
 
@@ -178,7 +192,7 @@ Equation PiecewiseLinearAbstraction::getLinearEquation(Point p, double slope) co
 Equation PiecewiseLinearAbstraction::getLinearEquation(Point p1, Point p2) const
 {
     double x0 = p1.x, y0 = p1.y, x1 = p2.x, y1 = p2.y;
-    ASSERT(! FloatUtils::areEqual(x1, x0))
+    ASSERT(! FloatUtils::areEqual(x1, x0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
     double slope = (y1 - y0) / (x1 - x0);
 
     return getLinearEquation(Point(x0, y0), slope);

@@ -74,24 +74,17 @@ void BerkeleyParser::generateQuery( InputQuery &inputQuery )
         unsigned b = it.second;
 
         PiecewiseLinearConstraint *constraint;
-        double minF, maxF;
         if (_berkeleyNeuralNetwork.isNetWithSigmoidNodes())
         {
             constraint = new SigmoidConstraint( b, f);
-            minF = GlobalConfiguration::SIGMOID_DEFAULT_LOWER_BOUND;
-            maxF = GlobalConfiguration::SIGMOID_DEFAULT_UPPER_BOUND;
         }
         else
         {
             constraint = new ReluConstraint( b, f );
-            minF = 0.0;
-            maxF = FloatUtils::infinity();
         }
 
         inputQuery.addPiecewiseLinearConstraint( constraint );
 
-        inputQuery.setLowerBound( f, minF );
-        inputQuery.setUpperBound( f, maxF );
 
         inputQuery.setLowerBound( b, FloatUtils::negativeInfinity() );
         inputQuery.setUpperBound( b, FloatUtils::infinity() );

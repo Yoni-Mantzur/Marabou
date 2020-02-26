@@ -102,8 +102,8 @@ bool Engine::solve( unsigned timeoutInSeconds )
     }
 
     struct timespec mainLoopStart = TimeUtils::sampleMicro();
-    _tableau->dumpEquations();
-    _tableau->dumpAssignment();
+//    _tableau->dumpEquations();
+//    _tableau->dumpAssignment();
     while ( true )
     {
         struct timespec mainLoopEnd = TimeUtils::sampleMicro();
@@ -189,8 +189,8 @@ bool Engine::solve( unsigned timeoutInSeconds )
                     performSymbolicBoundTightening();
                 }
                 while ( applyAllValidConstraintCaseSplits() );
-                _tableau->dumpEquations();
-                _tableau->dumpAssignment();
+//                _tableau->dumpEquations();
+//                _tableau->dumpAssignment();
                 checkBoundCompliancyWithDebugSolution();
                 continue;
             }
@@ -229,8 +229,6 @@ bool Engine::solve( unsigned timeoutInSeconds )
                     _exitCode = Engine::SAT;
                     return true;
                 }
-
-                addEquationsForBoundsIfNeeded();
 
                 // We have violated piecewise-linear constraints.
                 performConstraintFixingStep();
@@ -283,7 +281,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
         {
             // The current query is unsat, and we need to pop.
             // If we're at level 0, the whole query is unsat.
-            printf( "\n======Back Tracking====/n" );
+//            printf( "\n======Back Tracking====/n" );
             if ( !_smtCore.popSplit() )
             {
                 if ( _verbosity > 0 )
@@ -294,8 +292,8 @@ bool Engine::solve( unsigned timeoutInSeconds )
                 _exitCode = Engine::UNSAT;
                 return false;
             }
-            _tableau->dumpEquations();
-            _tableau->dumpAssignment();
+//            _tableau->dumpEquations();
+//            _tableau->dumpAssignment();
             checkBoundCompliancyWithDebugSolution();
         }
         catch ( ... )
@@ -1534,6 +1532,22 @@ bool Engine::applyValidConstraintCaseSplit( PiecewiseLinearConstraint *constrain
         return true;
     }
 
+    if ( GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS)
+    {
+        try {
+            String constraintString;
+            constraint->dump( constraintString );
+            log( Stringf( "A constraint has become valid. Dumping constraint: %s",
+                          constraintString.ascii() ) );
+            PiecewiseLinearCaseSplit validSplit = constraint->getValidCaseSplit();
+            _smtCore.recordImpliedValidSplit( validSplit );
+            applySplit( validSplit );
+            return true;
+        } catch (...) {
+            return false;
+        }
+    }
+
     return false;
 }
 
@@ -1950,27 +1964,7 @@ void Engine::checkOverallProgress()
     }
 }
 
-void Engine::addEquationsForBoundsIfNeeded() {
-    for (PiecewiseLinearConstraint *plConstraint : _violatedPlConstraints) {
-        for (const auto& equation : plConstraint->getBoundEquations())
-        {
-            List<Tightening> bounds = addEquation(equation);
-            tightenBounds(bounds);
-            _boundEquations.append(equation);
-        }
-    }
-}
 
-void Engine::restoreBoundedEquations(List<Equation> equations)
-{
-    for (Equation equation : equations)
-    {
-        List<Tightening> bounds = addEquation(equation);
-        tightenBounds(bounds);
-        if (!_boundEquations.exists(equation))
-            _boundEquations.append(equation);
-    }
-}
 //
 // Local Variables:
 // compile-command: "make -C ../.. "

@@ -14,6 +14,7 @@
  ** [[ Add lengthier description here ]]
  **/
 
+#include <Debug.h>
 #include "AcasParser.h"
 #include "File.h"
 #include "MStringf.h"

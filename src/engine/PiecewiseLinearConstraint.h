@@ -208,15 +208,6 @@ public:
         return false;
     }
 
-
-    /*
-     * Return list of equations that can help bound more efficiently the constraint;
-     */
-    virtual List<Equation> getBoundEquations()
-    {
-        return List<Equation>();
-    }
-
 protected:
     bool _constraintActive;
 	Map<unsigned, double> _assignment;

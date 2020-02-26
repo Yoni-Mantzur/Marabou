@@ -69,9 +69,6 @@ public:
     */
     virtual void reset() = 0;
     virtual List<unsigned> getInputVariables() const = 0;
-
-    virtual List<Equation> getBoundedEquations() = 0;
-    virtual void restoreBoundedEquations(List<Equation> equations) = 0;
 };
 
 #endif // __IEngine_h__

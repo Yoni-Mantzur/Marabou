@@ -393,6 +393,11 @@ unsigned Statistics::getNumPops() const
     return _numPops;
 }
 
+void Statistics::incNumAbstractedEquations()
+{
+    ++_numEquations;
+}
+
 void Statistics::incNumTableauPivots()
 {
     ++_numTableauPivots;
@@ -613,6 +618,21 @@ unsigned Statistics::getNumSplits() const
 unsigned long long Statistics::getNumTableauPivots() const
 {
     return _numTableauPivots;
+}
+
+unsigned Statistics::getNumAbstractedEquations() const
+{
+    return _numEquations;
+}
+
+unsigned Statistics::getNumActivePlConstraints() const
+{
+    return _numActivePlConstraints;
+}
+
+unsigned Statistics::getNumPlConstraints() const
+{
+    return _numPlConstraints;
 }
 
 double Statistics::getMaxDegradation() const

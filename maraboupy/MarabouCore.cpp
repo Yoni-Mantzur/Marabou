@@ -290,5 +290,8 @@ PYBIND11_MODULE(MarabouCore, m) {
         .def("getNumMainLoopIterations", &Statistics::getNumMainLoopIterations)
         .def("getTimeSimplexStepsMicro", &Statistics::getTimeSimplexStepsMicro)
         .def("getNumConstraintFixingSteps", &Statistics::getNumConstraintFixingSteps)
+        .def("getNumAbstractedEquations", &Statistics::getNumAbstractedEquations)
+        .def("getNumActivePlConstraints", &Statistics::getNumActivePlConstraints)
+        .def("getNumPlConstraints", &Statistics::getNumPlConstraints)
         .def("hasTimedOut", &Statistics::hasTimedOut);
 }

@@ -1532,7 +1532,7 @@ bool Engine::applyValidConstraintCaseSplit( PiecewiseLinearConstraint *constrain
         return true;
     }
 
-    if ( GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS)
+    else if ( constraint->isActive() && GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS)
     {
         try {
             String constraintString;
@@ -1542,6 +1542,7 @@ bool Engine::applyValidConstraintCaseSplit( PiecewiseLinearConstraint *constrain
             PiecewiseLinearCaseSplit validSplit = constraint->getValidCaseSplit();
             _smtCore.recordImpliedValidSplit( validSplit );
             applySplit( validSplit );
+            _statistics.incNumAbstractedEquations();
             return true;
         } catch (...) {
             return false;

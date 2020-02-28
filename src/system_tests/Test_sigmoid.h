@@ -10,6 +10,8 @@
 #include "SigmoidConstraint.h"
 
 
+static const double EPSILON = 0.00001;
+
 class SigmoidTestSuite : public CxxTest::TestSuite
 {
 public:
@@ -431,15 +433,23 @@ public:
         // Sanity test
 
         double value_x0 = inputQuery.getSolutionValue( 0 );
+        printf("x0: %f\n", value_x0);
         double value_x1 = inputQuery.getSolutionValue( 1 );
+        printf("x1: %f\n", value_x1);
         double value_x2b = inputQuery.getSolutionValue( 2 );
+        printf("x2b: %f\n", value_x2b);
         double value_x2f = inputQuery.getSolutionValue( 3 );
+        printf("x2f: %f\n", value_x2f);
         double value_x3b = inputQuery.getSolutionValue( 4 );
+        printf("x3b: %f\n", value_x3b);
         double value_x3f = inputQuery.getSolutionValue( 5 );
+        printf("x3f: %f\n", value_x3f);
         double value_x4b = inputQuery.getSolutionValue( 6 );
+        printf("x4b: %f\n", value_x4b);
         double value_x4f = inputQuery.getSolutionValue( 7 );
+        printf("x4f: %f\n", value_x4f);
         double value_x5 = inputQuery.getSolutionValue( 8 );
-
+        printf("x5: %f\n", value_x5);
 
         if ( !FloatUtils::areEqual( value_x0, value_x2b ) )
             correctSolution = false;
@@ -453,33 +463,31 @@ public:
         if ( !FloatUtils::areEqual( value_x4f, value_x5 ) )
             correctSolution = false;
 
-        if ( FloatUtils::lt( value_x0, 0.5) || FloatUtils::gt( value_x0, 1 ) ||
-             FloatUtils::lt( value_x1, 0.5) || FloatUtils::gt( value_x1, 1 ) ||
-             FloatUtils::lt( value_x2b, 0.5 ) || FloatUtils::gt( value_x2b, 1 ) ||
-             FloatUtils::lt( value_x3b, 0.5 ) || FloatUtils::gt( value_x3b, 1 ) ||
-             FloatUtils::lt( value_x2f, FloatUtils::sigmoid(0.5) ) ||
-             FloatUtils::gt( value_x2f, FloatUtils::sigmoid(1) )  ||
-             FloatUtils::lt( value_x3f, FloatUtils::sigmoid(0.5) ) ||
-             FloatUtils::gt( value_x3f, FloatUtils::sigmoid(1) ) ||
-             FloatUtils::lt( value_x4b, 2*FloatUtils::sigmoid(0.5) ) ||
-             FloatUtils::gt( value_x4b, 2*FloatUtils::sigmoid(1) )   ||
+        if (FloatUtils::lt( value_x0, 0.5) || FloatUtils::gt(value_x0, 1 ) ||
+            FloatUtils::lt( value_x1, 0.5) || FloatUtils::gt( value_x1, 1 ) ||
+            FloatUtils::lt( value_x2b, 0.5 ) || FloatUtils::gt( value_x2b, 1 ) ||
+            FloatUtils::lt( value_x3b, 0.5 ) || FloatUtils::gt( value_x3b, 1 ) ||
+            FloatUtils::lt( value_x2f, FloatUtils::sigmoid(0.5) ) ||
+            FloatUtils::gt( value_x2f, FloatUtils::sigmoid(1) ) ||
+            FloatUtils::lt( value_x3f, FloatUtils::sigmoid(0.5) ) ||
+            FloatUtils::gt( value_x3f, FloatUtils::sigmoid(1) ) ||
              FloatUtils::lt( value_x4f, output_lower ) ||
              FloatUtils::gt( value_x4f, output_upper ) )
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b)))
+        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b)))
+        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b)))
+        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b), EPSILON))
         {
             correctSolution = false;
         }
@@ -597,17 +605,17 @@ public:
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b)))
+        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b)))
+        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b)) )
+        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b), EPSILON))
         {
             correctSolution = false;
         }
@@ -729,17 +737,17 @@ public:
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b)))
+        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b)))
+        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b)) )
+        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b), EPSILON) )
         {
             correctSolution = false;
         }
@@ -861,17 +869,17 @@ public:
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b)))
+        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b)))
+        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b)) )
+        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b), EPSILON) )
         {
             correctSolution = false;
         }
@@ -886,7 +894,7 @@ public:
         double output_upper = 0.844;
 
         double input_1_lower = 0.5;
-        double input_1_upper = 10898;
+        double input_1_upper = 10;
         double input_2_lower = 0.44;
         double input_2_upper = 15.89;
 
@@ -993,17 +1001,17 @@ public:
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b)))
+        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b)))
+        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b)) )
+        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b), EPSILON) )
         {
             correctSolution = false;
         }
@@ -1123,17 +1131,17 @@ public:
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b)))
+        if ( !FloatUtils::areEqual(value_x2f, FloatUtils::sigmoid(value_x2b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b)))
+        if ( !FloatUtils::areEqual(value_x3f, FloatUtils::sigmoid(value_x3b), EPSILON))
         {
             correctSolution = false;
         }
 
-        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b)) )
+        if ( !FloatUtils::areEqual(value_x4f, FloatUtils::sigmoid(value_x4b), EPSILON) )
         {
             correctSolution = false;
         }

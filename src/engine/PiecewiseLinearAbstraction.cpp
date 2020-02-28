@@ -43,7 +43,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
         // Invalid guided points due to bounds were changed
         if (FloatUtils::gt(x2, upperBound.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
             FloatUtils::lt(x2, lowerBound.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
-            FloatUtils::areEqual(x1, x2, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+            FloatUtils::isZero(FloatUtils::abs(x1 - x2), 0.001))
         {
             x2 = (x1 + *(++guidedPointsIter)) / 2;
             guidedPointsIter--;
@@ -78,8 +78,9 @@ List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction()
 
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
 
-    if (getConvexTypeInSegment(lowerBound.x, upperBound.x) != UNKNOWN && guidedPoints.empty())
+    if (getConvexTypeInSegment(lowerBound.x, upperBound.x) != UNKNOWN)
         guidedPoints.append((lowerBound.x + upperBound.x) / 2);
+
     for (double x : guidedPoints)
     {
         // Invalid guided points due to bounds were changed
@@ -88,11 +89,16 @@ List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction()
             _registeredPointsForAbstraction.exists(x))
             continue;
 
+        bool shouldContinue = false;
         for ( double x0 : _registeredPointsForAbstraction)
         {
-            if ( FloatUtils::areEqual(x, x0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) )
-                continue;
+            if ( FloatUtils::areEqual(x, x0, 0.001) )
+                shouldContinue = true;
         }
+
+        if (shouldContinue)
+            continue;
+
         _registeredPointsForAbstraction.append(x);
 
         double slope = evaluateDerivativeOfConciseFunction(x);

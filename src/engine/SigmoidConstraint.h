@@ -82,7 +82,7 @@ public:
     /*
       Check if the constraint's phase has been fixed.
     */
-    bool phaseFixed() const override { return false; }
+    bool phaseFixed() const override { return _isFixed; }
 
     /*
       If the constraint's phase has been fixed, get the (valid) case split.
@@ -160,10 +160,9 @@ public:
     */
     bool supportsSymbolicBoundTightening() const override { return false; };
 
-    /*
-     * The constraint is active even if splited
-     */
-    bool isActive() const override { return true; }
+
+    bool isActive() const override { return !_isFixed; }
+
 
     /* For debugging propose */
     void setLogFile(File *file = nullptr) { _logFile = file; };
@@ -174,6 +173,7 @@ private:
     unsigned _b, _f;
     bool _isBoundWereChanged;
     bool _haveEliminatedVariables;
+    bool _isFixed;
 
     /* For debugging propose */
     IFile *_logFile = nullptr;

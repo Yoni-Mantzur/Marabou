@@ -195,55 +195,55 @@ for name in range(10, 100, 10):
     y = np.array([[-4.13783711, -5.86701435, -1.25894247, -0.45177739, -1.38287319,
                 -3.77124648, -7.53252938,  6.1390369 , -7.75015215,  0.80588465]])
 
-    res_file = open("%s/res_%d.txt" % (exp_dir, name), "x")
-    times_file = open("%s/times_%d.txt" % (exp_dir, name), "x")
-    for delta in deltas:
-        # # Set input bounds
-        for var in inputVars:
-            network.setLowerBound(var, x[var] - delta)
-            network.setUpperBound(var, x[var] + delta)
+    with open("%s/res_%d.txt" % (exp_dir, name), "x") as res_file:
 
-        # Set output bounds
-        for var in outputVars:
-            network.setLowerBound(var, -large)
-            network.setUpperBound(var, large)
+        with open("%s/times_%d.txt" % (exp_dir, name), "x") as times_file:
 
-        equation1 = MarabouUtils.Equation(MarabouCore.Equation.EquationType.LE)
-        equation1.addAddend(1, outputVars[7])
-        equation1.addAddend(-1, outputVars[9])
-        equation1.setScalar(0)
+            for delta in deltas:
+                # # Set input bounds
+                for var in inputVars:
+                    network.setLowerBound(var, x[var] - delta)
+                    network.setUpperBound(var, x[var] + delta)
 
-        network.addEquation(equation1)
+                # Set output bounds
+                for var in outputVars:
+                    network.setLowerBound(var, -large)
+                    network.setUpperBound(var, large)
+
+                equation1 = MarabouUtils.Equation(MarabouCore.Equation.EquationType.LE)
+                equation1.addAddend(1, outputVars[7])
+                equation1.addAddend(-1, outputVars[9])
+                equation1.setScalar(0)
+
+                network.addEquation(equation1)
 
 
-        # network.evaluateWithMarabou(np.array([x]))
-        # # Call to C++ Marabou solver
-        # options = Marabou.createOptions(dnc=True, numWorkers=6, initialDivides=2, verbosity=0)
-        # network.saveQuery("query_10")
-        cur_time = time()
-        vals, stats = network.solve("%s/marabou_mnist_%d.log" % (exp_dir, name))
-        total_time = (time()-cur_time)
-        res_file.write("== Net with %d sigmoids and delta: %f\n" %(name, delta))
-        res_file.write("result is: \n")
+                # network.evaluateWithMarabou(np.array([x]))
+                # # Call to C++ Marabou solver
+                # options = Marabou.createOptions(dnc=True, numWorkers=6, initialDivides=2, verbosity=0)
+                # network.saveQuery("query_10")
+                vals, stats = network.solve("%s/marabou_mnist_%d.log" % (exp_dir, name))
+                res_file.write("== Net with %d sigmoids and delta: %f\n" %(name, delta))
+                res_file.write("number splits: %d\n" % stats.getNumSplits())
+                res_file.write("number active: %d/%d\n" % (stats.getNumActivePlConstraints(), stats.getNumPlConstraints()))
+                res_file.write("number equations: %d\n" % stats.getNumAbstractedEquations())
+                res_file.write("result is: \n")
 
-        if len(vals)==0:
-            res_file.write("UNSAT\n")
-        else:
-            res_file.write("SAT\n")
-            for j in range(len(network.inputVars)):
-                for i in range(network.inputVars[j].size):
-                    res_file.write("input {} = {}\n".format(i, vals[network.inputVars[j].item(i)]))
+                if len(vals)==0:
+                    res_file.write("UNSAT\n")
+                else:
+                    res_file.write("SAT\n")
+                    for j in range(len(network.inputVars)):
+                        for i in range(network.inputVars[j].size):
+                            res_file.write("input {} = {}\n".format(i, vals[network.inputVars[j].item(i)]))
 
-                for i in range(network.outputVars.size):
-                    res_file.write("output {} = {}\n".format(i, vals[network.outputVars.item(i)]))
+                        for i in range(network.outputVars.size):
+                            res_file.write("output {} = {}\n".format(i, vals[network.outputVars.item(i)]))
 
-        times_file.write('sigmoids=%d\n' % name)
-        times_file.write("delta=%f\n" % delta)
-        times_file.write('result: %s\n' % ('sat' if vals else 'unsat'))
-        times_file.write('time=%f\n' % total_time)
+                times_file.write('sigmoids=%d\n' % name)
+                times_file.write("delta=%f\n" % delta)
+                times_file.write('result: %s\n' % ('sat' if vals else 'unsat'))
+                times_file.write('time=%f\n' % (stats.getTotalTime() / 1000))
 
-        res_file.flush()
-        times_file.flush()
-
-    res_file.close()
-    times_file.close()
+                res_file.flush()
+                times_file.flush()

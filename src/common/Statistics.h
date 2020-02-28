@@ -67,6 +67,8 @@ public:
     unsigned getNumPrecisionRestorations() const;
     unsigned long long getTimeSimplexStepsMicro() const;
     unsigned long long getNumConstraintFixingSteps() const;
+    unsigned getNumActivePlConstraints() const;
+    unsigned getNumPlConstraints() const;
 
     /*
       Tableau related statistics.
@@ -79,12 +81,14 @@ public:
     void incNumSimplexUnstablePivots();
     void incNumAddedRows();
     void incNumMergedColumns();
+    void incNumAbstractedEquations();
     void setCurrentTableauDimension( unsigned m, unsigned n );
     void addTimePivots( unsigned long long time );
     unsigned getAveragePivotTimeInMicro() const;
     unsigned long long getNumTableauPivots() const;
     unsigned long long getNumSimplexPivotSelectionsIgnoredForStability() const;
     unsigned long long getNumSimplexUnstablePivots() const;
+    unsigned getNumAbstractedEquations() const;
 
     /*
       Smt core related statistics.
@@ -199,6 +203,9 @@ private:
 
     // Total number of states in the search tree visited so far
     unsigned _numVisitedTreeStates;
+
+    // Total equations in tableau
+    unsigned int _numEquations;
 
     // Total number of tableau pivot operations performed, both
     // degenerate and non-degenerate

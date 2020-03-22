@@ -941,6 +941,9 @@ public:
         auto *sigmoid2 = new SigmoidConstraint( 3, 5 );
         auto *sigmoid3 = new SigmoidConstraint( 6, 7 );
 
+        sigmoid1->sigmoid_num = 1;
+        sigmoid2->sigmoid_num = 2;
+        sigmoid3->sigmoid_num = 3;
 
         inputQuery.addPiecewiseLinearConstraint( sigmoid1 );
         inputQuery.addPiecewiseLinearConstraint( sigmoid2 );

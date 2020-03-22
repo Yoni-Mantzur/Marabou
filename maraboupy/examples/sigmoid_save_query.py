@@ -14,7 +14,7 @@ inputVars = network.inputVars[0][0]
 outputVars = network.outputVars[0]
 
 large = 100.0
-delta = 0.3
+delta = 0.015
 
 x = [0.        , 0.        , 0.        , 0.        , 0.        ,
      0.        , 0.        , 0.        , 0.        , 0.        ,
@@ -200,5 +200,5 @@ network.addEquation(equation1)
 # network.evaluateWithMarabou(np.array([x]))
 # # Call to C++ Marabou solver
 # options = Marabou.createOptions(dnc=True, numWorkers=6, initialDivides=2, verbosity=0)
-network.saveQuery("query_20_3")
+network.saveQuery("query_10_029")
 

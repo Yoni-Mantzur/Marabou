@@ -212,7 +212,9 @@ InputQuery QueryLoader::loadQuery( const String &fileName )
         }
         else if ( coType == "sigmoid" )
         {
+            static int num = 0;
             constraint = new SigmoidConstraint( serializeConstraint );
+            dynamic_cast< SigmoidConstraint *>(constraint)->sigmoid_num = ++num;
         }
         else
         {

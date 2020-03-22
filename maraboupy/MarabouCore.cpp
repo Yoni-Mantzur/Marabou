@@ -89,8 +89,9 @@ void addReluConstraint(InputQuery& ipq, unsigned var1, unsigned var2){
     ipq.addPiecewiseLinearConstraint(r);
 }
 
-void addSigmoidConstraint(InputQuery& ipq, unsigned var1, unsigned var2){
+void addSigmoidConstraint(InputQuery& ipq, unsigned var1, unsigned var2, int num){
     PiecewiseLinearConstraint* r = new SigmoidConstraint(var1, var2);
+    dynamic_cast<SigmoidConstraint *>(r)->sigmoid_num = num;
     ipq.addPiecewiseLinearConstraint(r);
 }
 

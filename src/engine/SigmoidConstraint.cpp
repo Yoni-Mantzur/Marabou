@@ -85,7 +85,7 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound )
 
     _lowerBounds[variable] = bound;
     _isBoundWereChanged = true;
-    
+
 
     if (_constraintBoundTightener)
     {
@@ -101,8 +101,8 @@ void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound )
             _constraintBoundTightener->registerTighterLowerBound(_b, sigmoidInverseBound);
         }
     }
-    
-    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable], 
+
+    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable],
             GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
         _isFixed = true;
 }
@@ -245,6 +245,13 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
 
     List<PiecewiseLinearCaseSplit> splits = const_cast<SigmoidConstraint*>(this)->getSplitsAbstraction();
 
+    auto b = splits.begin();
+    while (b != splits.end()) {
+        b->sig_num = sigmoid_num;
+        b->_b = _b;
+        b->_f = _f;
+        b++;
+    }
 //    File * f = new File("log_splits.txt");
 //    f->open(File::MODE_WRITE_APPEND);
 //    List<float> sizes;
@@ -366,7 +373,7 @@ void SigmoidConstraint::getEntailedTightenings(List<Tightening> &tightenings ) c
         tightenings.append(Tightening(_b, sigmoidInverseFLowerBound, Tightening::LB));
         tightenings.append(Tightening(_b, sigmoidInverseFUpperBound, Tightening::UB));
     }
-    
+
     tightenings.append(Tightening(_f, sigmoidbLowerBound, Tightening::LB));
     tightenings.append(Tightening(_f, sigmoidbUpperBound, Tightening::UB));
 }

@@ -52,6 +52,10 @@ public:
       Change the index of a variable that appears in this case split
     */
     void updateVariableIndex( unsigned oldIndex, unsigned newIndex );
+    
+    int sig_num;
+    unsigned _b;
+    unsigned _f;
 
 private:
     /*

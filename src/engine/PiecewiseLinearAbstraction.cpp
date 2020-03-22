@@ -26,6 +26,16 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
 
     guidedPoints.append(lowerBound.x);
 
+
+    for (auto x0 : _pointsForSplits) {
+        if (FloatUtils::isZero(FloatUtils::abs(x0 - upperBound.x), 0.005)
+            || FloatUtils::isZero(FloatUtils::abs(x0 - lowerBound.x), 0.005)) {
+            _pointsForSplits.clear();
+            break;
+        }
+    }
+
+
     if (_pointsForSplits.empty())
         _pointsForSplits.append((lowerBound.x + upperBound.x) / 2);
 
@@ -42,8 +52,7 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
 
         // Invalid guided points due to bounds were changed
         if (FloatUtils::gt(x2, upperBound.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
-            FloatUtils::lt(x2, lowerBound.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
-            FloatUtils::isZero(FloatUtils::abs(x1 - x2), 0.001))
+            FloatUtils::lt(x2, lowerBound.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
         {
             x2 = (x1 + *(++guidedPointsIter)) / 2;
             guidedPointsIter--;
@@ -78,9 +87,8 @@ List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction()
 
     Point lowerBound = getLowerParticipantVariablesBounds(), upperBound = getUpperParticipantVariablesBounds();
 
-    if (getConvexTypeInSegment(lowerBound.x, upperBound.x) != UNKNOWN)
+    if (getConvexTypeInSegment(lowerBound.x, upperBound.x) != UNKNOWN && guidedPoints.empty())
         guidedPoints.append((lowerBound.x + upperBound.x) / 2);
-
     for (double x : guidedPoints)
     {
         // Invalid guided points due to bounds were changed
@@ -89,16 +97,11 @@ List<Equation> PiecewiseLinearAbstraction::getEquationsAbstraction()
             _registeredPointsForAbstraction.exists(x))
             continue;
 
-        bool shouldContinue = false;
         for ( double x0 : _registeredPointsForAbstraction)
         {
-            if ( FloatUtils::areEqual(x, x0, 0.001) )
-                shouldContinue = true;
+            if ( FloatUtils::areEqual(x, x0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) )
+                continue;
         }
-
-        if (shouldContinue)
-            continue;
-
         _registeredPointsForAbstraction.append(x);
 
         double slope = evaluateDerivativeOfConciseFunction(x);

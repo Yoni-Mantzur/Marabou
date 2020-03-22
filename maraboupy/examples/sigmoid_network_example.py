@@ -19,6 +19,12 @@ exp_dir = './networks/sigmoids/experiment_%d' % exp_num
 if not os.path.exists(exp_dir):
     os.mkdir(exp_dir)
 
+with open("%s/details.txt" % exp_dir, "x") as details:
+    details.write("number of abstracted equations: 1\n"
+                  "number of split segments: 1\n"
+                  "description: running with 0.5 segments of 10 inputs and with output range smaller\n"
+                  "also, if too close in split to boundries, split on 1/2\n")
+
 
 for name in range(10, 100, 10):
 
@@ -31,7 +37,7 @@ for name in range(10, 100, 10):
     inputVars = network.inputVars[0][0]
     outputVars = network.outputVars[0]
 
-    large = 100.0
+    large = 10.0
     deltas = [0.01, 0.015, 0.023, 0.3, 0.4, 0.6, 0.7]
 
     x = [0.        , 0.        , 0.        , 0.        , 0.        ,
@@ -202,7 +208,11 @@ for name in range(10, 100, 10):
             for delta in deltas:
                 # # Set input bounds
                 for var in inputVars:
-                    network.setLowerBound(var, x[var] - delta)
+                    if var in range(10):
+                        new_delta = 0
+                    else:
+                        new_delta = delta
+                    network.setLowerBound(var, x[var] - new_delta)
                     network.setUpperBound(var, x[var] + delta)
 
                 # Set output bounds
@@ -217,11 +227,12 @@ for name in range(10, 100, 10):
 
                 network.addEquation(equation1)
 
+                network.saveQuery("%s/marabou_mnist_%d_%f_query" % (exp_dir, name, delta))
+
 
                 # network.evaluateWithMarabou(np.array([x]))
                 # # Call to C++ Marabou solver
                 # options = Marabou.createOptions(dnc=True, numWorkers=6, initialDivides=2, verbosity=0)
-                # network.saveQuery("query_10")
                 vals, stats = network.solve("%s/marabou_mnist_%d.log" % (exp_dir, name))
                 res_file.write("== Net with %d sigmoids and delta: %f\n" %(name, delta))
                 res_file.write("number splits: %d\n" % stats.getNumSplits())

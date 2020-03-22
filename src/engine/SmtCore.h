@@ -16,10 +16,13 @@
 #ifndef __SmtCore_h__
 #define __SmtCore_h__
 
+#include <cmath>
 #include "PiecewiseLinearCaseSplit.h"
 #include "PiecewiseLinearConstraint.h"
 #include "Stack.h"
 #include "Statistics.h"
+#include "File.h"
+#include "MStringf.h"
 
 class EngineState;
 class IEngine;
@@ -28,6 +31,61 @@ class String;
 class SmtCore
 {
 public:
+    class SigmoidStats{
+    public:
+        int id = 0;
+        bool visited = false;
+        double seg_low = 0;
+        double seg_upper = 0;
+        int number_states = 0;
+        int total_depth = 0;
+        int vistied_states = 0;
+
+        SigmoidStats *left = nullptr;
+        SigmoidStats *right = nullptr;
+
+
+        void dump() {
+            File *_logFile = new File("sigmoid_stats.log");
+            _logFile->open(IFile::MODE_WRITE_APPEND);
+            Stringf s("");
+            _logFile->write(s.ascii());
+            _logFile->close();
+        }
+
+        SigmoidStats * get(int id)
+        {
+            if (this->id == id)
+                return this;
+
+            if (left == NULL || right == NULL) {
+                return nullptr;
+            }
+
+            auto l = left->get(id);
+            if (l != NULL)
+                return l;
+
+            auto r = right->get(id);
+            return r;
+        }
+
+        void append(int id) {
+            SigmoidStats *split = get(id);
+            static int u_id = 0;
+            if (split->left == NULL) {
+                split->left = new SigmoidStats();
+                split->left->id = (++u_id);
+            }
+
+            if (split->right == NULL) {
+                split->right = new SigmoidStats();
+                split->right->id = (++u_id);
+
+            }
+        }
+
+    };
     SmtCore( IEngine *engine );
     ~SmtCore();
 
@@ -116,6 +174,7 @@ private:
         List<PiecewiseLinearCaseSplit> _impliedValidSplits;
         List<PiecewiseLinearCaseSplit> _alternativeSplits;
         EngineState *_engineState;
+        int sig_num;
     };
 
     /*
@@ -161,6 +220,9 @@ private:
       debugging purposes.
     */
     unsigned _stateId;
+
+    Map<int, SigmoidStats> _sigmoids;
+    Map<int, Stack<int>> ids;
 };
 
 #endif // __SmtCore_h__

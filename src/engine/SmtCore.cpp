@@ -14,14 +14,15 @@
  **/
 
 #include "Debug.h"
+#include "DivideStrategy.h"
 #include "EngineState.h"
 #include "FloatUtils.h"
 #include "GlobalConfiguration.h"
 #include "IEngine.h"
 #include "MStringf.h"
 #include "MarabouError.h"
+#include "ReluConstraint.h"
 #include "SmtCore.h"
-#include "SigmoidConstraint.h"
 
 SmtCore::SmtCore( IEngine *engine )
     : _statistics( NULL )
@@ -29,6 +30,8 @@ SmtCore::SmtCore( IEngine *engine )
     , _needToSplit( false )
     , _constraintForSplitting( NULL )
     , _stateId( 0 )
+    , _constraintViolationThreshold
+      ( GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD )
 {
 }
 
@@ -55,10 +58,14 @@ void SmtCore::reportViolatedConstraint( PiecewiseLinearConstraint *constraint )
 
     ++_constraintToViolationCount[constraint];
 
-    if ( _constraintToViolationCount[constraint] >= GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD )
+    if ( _constraintToViolationCount[constraint] >=
+         _constraintViolationThreshold )
     {
         _needToSplit = true;
-        _constraintForSplitting = constraint;
+        if ( GlobalConfiguration::SPLITTING_HEURISTICS == DivideStrategy::ReLUViolation )
+            _constraintForSplitting = constraint;
+        else
+            pickSplitPLConstraint();
     }
 }
 
@@ -116,43 +123,6 @@ void SmtCore::performSplit()
     StackEntry *stackEntry = new StackEntry;
     // Perform the first split: add bounds and equations
     List<PiecewiseLinearCaseSplit>::iterator split = splits.begin();
-
-    
-    
-//    // For debugging:
-//    auto *s = dynamic_cast<SigmoidConstraint *>(_constraintForSplitting);
-//    int sig_num = s->sigmoid_num;
-//    stackEntry->sig_num = sig_num;
-//    if (!_sigmoids.exists(sig_num)) {
-//        ids[sig_num].push(0);
-//
-//        _sigmoids[sig_num].seg_low = s->getLowerParticipantVariablesBounds().x;
-//        _sigmoids[sig_num].seg_upper = s->getUpperParticipantVariablesBounds().x;
-//    }
-//
-//
-//    int id = ids[sig_num].top();
-//    _sigmoids[sig_num].append(id);
-//    SigmoidStats *pStats = _sigmoids[sig_num].get(id);
-//    SigmoidStats *stats;
-//    if (!pStats->left->visited)
-//        stats = pStats->left;
-//    else
-//        stats = pStats->right;
-//    stats->visited = true;
-//
-//    for (auto b: (*split).getBoundTightenings()){
-//        if (b._type == b.LB && b._variable == s->getB())
-//            stats->seg_low = b._value;
-//        if (b._type == b.UB && b._variable == s->getB())
-//            stats->seg_upper = b._value;
-//    }
-//    ids[sig_num].push(pStats->right->id);
-//    ids[sig_num].push(pStats->left->id);
-//    // For debugging:
-
-    
-    
     _engine->applySplit( *split );
     stackEntry->_activeSplit = *split;
 
@@ -200,8 +170,6 @@ bool SmtCore::popSplit()
     String error;
     while ( _stack.back()->_alternativeSplits.empty() )
     {
-//        this->ids[_stack.back()->sig_num].pop();
-//        this->ids[_stack.back()->sig_num].pop();
         if ( checkSkewFromDebuggingSolution() )
         {
             // Pops should not occur from a compliant stack!
@@ -236,21 +204,6 @@ bool SmtCore::popSplit()
 
     // Erase any valid splits that were learned using the split we just popped
     stackEntry->_impliedValidSplits.clear();
-
-    // For debugging
-//    int sig_num = split->sig_num;
-//
-//    ids[sig_num].pop();
-//    int id = ids[sig_num].top();
-//
-//    auto stats = _sigmoids[sig_num].get(id);
-//
-//    for (auto b: (*split).getBoundTightenings()){
-//        if (b._type == b.LB  && b._variable == split->_b)
-//            stats->seg_low = b._value;
-//        if (b._type == b.UB && b._variable == split->_b)
-//            stats->seg_upper = b._value;
-//    }
 
     log( "\tApplying new split..." );
     _engine->applySplit( *split );
@@ -332,7 +285,6 @@ bool SmtCore::checkSkewFromDebuggingSolution()
     {
         if ( !splitAllowsStoredSolution( split, error ) )
         {
-            std::cout << error << std::endl;
             printf( "Error with one of the splits implied at root level:\n\t%s\n", error.ascii() );
             throw MarabouError( MarabouError::DEBUGGING_ERROR );
         }
@@ -346,14 +298,12 @@ bool SmtCore::checkSkewFromDebuggingSolution()
         {
             if ( stackEntry->_alternativeSplits.empty() )
             {
-                std::cout << error << std::endl;
                 printf( "Error! Have a split that is non-compliant with the stored solution, "
                         "without alternatives:\n\t%s\n", error.ascii() );
                 throw MarabouError( MarabouError::DEBUGGING_ERROR );
             }
 
             // Active split is non-compliant but this is fine, because there are alternatives. We're done.
-            std::cout << error << std::endl;
             return false;
         }
 
@@ -362,7 +312,6 @@ bool SmtCore::checkSkewFromDebuggingSolution()
         {
             if ( !splitAllowsStoredSolution( split, error ) )
             {
-                std::cout << error << std::endl;
                 printf( "Error with one of the splits implied at this stack level:\n\t%s\n",
                         error.ascii() );
                 throw MarabouError( MarabouError::DEBUGGING_ERROR );
@@ -415,6 +364,11 @@ bool SmtCore::splitAllowsStoredSolution( const PiecewiseLinearCaseSplit &split, 
     return true;
 }
 
+void SmtCore::setConstraintViolationThreshold( unsigned threshold )
+{
+    _constraintViolationThreshold = threshold;
+}
+
 PiecewiseLinearConstraint *SmtCore::chooseViolatedConstraintForFixing( List<PiecewiseLinearConstraint *> &_violatedPlConstraints ) const
 {
     ASSERT( !_violatedPlConstraints.empty() );
@@ -446,6 +400,14 @@ PiecewiseLinearConstraint *SmtCore::chooseViolatedConstraintForFixing( List<Piec
     }
 
     return candidate;
+}
+
+void SmtCore::pickSplitPLConstraint()
+{
+    if ( _needToSplit && !_constraintForSplitting )
+    {
+        _constraintForSplitting = _engine->pickSplitPLConstraint();
+    }
 }
 
 //

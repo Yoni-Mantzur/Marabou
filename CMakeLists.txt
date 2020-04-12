@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_STATIC_MARABOU "Build static Marabou binary" OFF)
 option(BUILD_PYTHON "Build Python" ON)
-option(FORCE_PYTHON_BUILD "Build  python even if there is only python32" OFF)
+option(FORCE_PYTHON_BUILD "Build python even if there is only python32" OFF)
 option(RUN_UNIT_TEST "run unit tests on build" ON)
 option(RUN_REGRESS_TEST "run regression tests on build" OFF)
 option(RUN_SYSTEM_TEST "run system tests on build" OFF)
@@ -93,11 +93,7 @@ endif()
 
 if (NOT MSVC)
     set(COMPILE_FLAGS  -Wall -Wextra  -Werror -MMD) #-Wno-deprecated
-<<<<<<< HEAD
-    set(RELEASE_FLAGS) #-Wno-deprecated
-=======
-    set(RELEASE_FLAGS ${COMPILE_FLAGS} -O3) #-Wno-deprecated
->>>>>>> 41ccc59a1bcadd99b8038317e25cdba34a017677
+    set(RELEASE_FLAGS ${COMPILE_FLAGS} -O0) #-Wno-deprecated
 endif()
 
 if (RUN_MEMORY_TEST)
@@ -120,12 +116,6 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CXXTEST_FLAGS ${CXXTEST_FLAGS} -Wno-terminate)
 endif()
 
-<<<<<<< HEAD
-if (NOT MSVC)
-    set(RELEASE_FLAGS  ${COMPILE_FLAGS})
-endif()
-=======
->>>>>>> 41ccc59a1bcadd99b8038317e25cdba34a017677
 
 
 # Boost
@@ -203,7 +193,6 @@ if (${BUILD_PYTHON})
         # If the default didn't work just find any python version
         find_package(PythonInterp REQUIRED)
     endif()
-    message("python path - ${PythonInterp}")
 
     if (NOT EXISTS ${PYBIND11_DIR})
         message("didnt find pybind, getting it")
@@ -235,7 +224,6 @@ if(CXXTEST_FOUND)
     include_directories(${CXXTEST_INCLUDE_DIR})
     enable_testing()
 endif()
-
 
 target_link_libraries(${MARABOU_TEST_LIB} ${LIBS})
 target_include_directories(${MARABOU_TEST_LIB} PRIVATE ${LIBS_INCLUDES})

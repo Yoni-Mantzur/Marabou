@@ -165,9 +165,14 @@ public:
      */
     bool isActive() const override { return _constraintActive; }
 
+    /*
+     *Turn the constraint on/off.
+     */
+    void setActiveConstraint( bool active ) override;
+
 
     /* For debugging propose */
-    void setLogFile(File *file = nullptr) { _logFile = file; };
+    void LogFile(File *file = nullptr) { _logFile = file; };
     void setSigmoidNum (int sigmoidNum) { sigmoid_num = sigmoidNum; };
     int sigmoid_num;
 

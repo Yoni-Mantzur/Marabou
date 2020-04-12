@@ -338,6 +338,15 @@ SigmoidConstraint::ConvexType SigmoidConstraint::getConvexTypeInSegment(double x
     return UNKNOWN;
 }
 
+void SigmoidConstraint::setActiveConstraint( bool active )
+{
+    _constraintActive = active;
+
+    // Sigmoid constraint should be always active if it's not fixed
+    if ( !_isFixed )
+        _constraintActive = true;
+}
+
 
 /** Debuging **/
 

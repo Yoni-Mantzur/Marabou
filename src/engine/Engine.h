@@ -24,6 +24,7 @@
 #include "BlandsRule.h"
 #include "DantzigsRule.h"
 #include "DegradationChecker.h"
+#include "DivideStrategy.h"
 #include "IEngine.h"
 #include "InputQuery.h"
 #include "Map.h"
@@ -128,6 +129,21 @@ public:
     void setVerbosity( unsigned verbosity );
 
     /*
+      Pick the piecewise linear constraint for splitting
+    */
+    PiecewiseLinearConstraint *pickSplitPLConstraint();
+
+    /*
+      Update the scores of each candidate splitting PL constraints
+    */
+    void updateScores();
+
+    /*
+      Set the constraint violation threshold of SmtCore
+    */
+    void setConstraintViolationThreshold( unsigned threshold );
+
+    /*
       PSA: The following two methods are for DnC only and should be used very
       cautiously.
      */
@@ -172,6 +188,11 @@ private:
       The existing piecewise-linear constraints.
     */
     List<PiecewiseLinearConstraint *> _plConstraints;
+
+    /*
+      The ordered set of candidate PL constraints for splitting
+    */
+    Set<PiecewiseLinearConstraint *> _candidatePlConstraints;
 
     /*
       Piecewise linear constraints that are currently violated.
@@ -455,7 +476,15 @@ private:
     void addAuxiliaryVariables();
     void augmentInitialBasisIfNeeded( List<unsigned> &initialBasis, const List<unsigned> &basicRows );
 
+<<<<<<< HEAD
     void tightenBounds(const List<Tightening> &bounds) const;
+=======
+    /*
+      Update the preferred direction to perform fixes and the preferred order
+      to handle case splits
+    */
+    void updateDirections();
+>>>>>>> 41ccc59a1bcadd99b8038317e25cdba34a017677
 };
 
 #endif // __Engine_h__

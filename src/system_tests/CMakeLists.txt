@@ -12,7 +12,12 @@ add_system_test(max)
 add_system_test(mps)
 add_system_test(relu)
 add_system_test(Disjunction)
+<<<<<<< HEAD
 add_system_test(sigmoid)
+=======
+add_system_test(AbsoluteValue)
+
+>>>>>>> 41ccc59a1bcadd99b8038317e25cdba34a017677
 file(COPY "${RESOURCES_DIR}/mps/lp_feasible_1.mps" DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY "${RESOURCES_DIR}/mps/lp_infeasible_1.mps" DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${ACAS_REGRESS_NET} DESTINATION ${CMAKE_BINARY_DIR})

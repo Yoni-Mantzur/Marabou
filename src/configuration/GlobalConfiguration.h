@@ -21,6 +21,8 @@ class GlobalConfiguration
 public:
     static void print();
 
+    static const bool USE_POLARITY_BASED_DIRECTION_HEURISTICS;
+
     // The default epsilon used for comparing doubles
     static const double DEFAULT_EPSILON_FOR_COMPARISONS;
 
@@ -108,6 +110,8 @@ public:
     // The number of violations of a constraints after which the SMT core will initiate a case split
     static const unsigned CONSTRAINT_VIOLATION_THRESHOLD;
 
+    static const unsigned SPLITTING_HEURISTICS;
+
     // How often should we perform full bound tightening, on the entire contraints matrix A.
     static const unsigned BOUND_TIGHTING_ON_CONSTRAINT_MATRIX_FREQUENCY;
 
@@ -127,8 +131,11 @@ public:
     // PSE's Gamma function's update tolerance
     static const double PSE_GAMMA_UPDATE_TOLERANCE;
 
-    // The tolerance for checking whether f = Relu( b ), to determine a ReLU's statisfaction
+    // The tolerance for checking whether f = Relu( b )
     static const double RELU_CONSTRAINT_COMPARISON_TOLERANCE;
+
+    // The tolerance for checking whether f = Abs( b )
+    static const double ABS_CONSTRAINT_COMPARISON_TOLERANCE;
 
     // The tolerance for checking whether f = Sigmoid( b ), to determine a Sigmoid's statisfaction
     static const double SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE;

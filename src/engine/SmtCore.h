@@ -16,6 +16,7 @@
 #ifndef __SmtCore_h__
 #define __SmtCore_h__
 
+#include <File.h>
 #include "PiecewiseLinearCaseSplit.h"
 #include "PiecewiseLinearConstraint.h"
 #include "Stack.h"
@@ -28,6 +29,25 @@ class String;
 class SmtCore
 {
 public:
+    void dumpStats(int loop);
+    class SigmoidStats{
+    public:
+        int id = 0;
+        int u_id = 0;
+        bool visited = false;
+        double seg_low = 0;
+        double seg_upper = 0;
+
+        SigmoidStats *left = nullptr;
+        SigmoidStats *right = nullptr;
+        SigmoidStats *parent = nullptr;
+
+
+        ~SigmoidStats(){
+            delete left;
+            delete right;
+        }
+    };
     SmtCore( IEngine *engine );
     ~SmtCore();
 
@@ -173,6 +193,11 @@ private:
       Split when some relu has been violated for this many times
     */
     unsigned _constraintViolationThreshold;
+
+    Map<int, Stack<int>> ids;
+    SigmoidStats *_sigmoids;
+    SigmoidStats *root;
+    void _dumpStatsHelper(File *pFile, SigmoidStats *pStats);
 };
 
 #endif // __SmtCore_h__

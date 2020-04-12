@@ -27,6 +27,7 @@
 #include "Preprocessor.h"
 #include "TableauRow.h"
 #include "TimeUtils.h"
+#include "SigmoidConstraint.h"
 
 Engine::Engine( unsigned verbosity )
     : _rowBoundTightener( *_tableau )
@@ -106,8 +107,38 @@ bool Engine::solve( unsigned timeoutInSeconds )
     struct timespec mainLoopStart = TimeUtils::sampleMicro();
 //    _tableau->dumpEquations();
 //    _tableau->dumpAssignment();
+    unsigned long long loop[10] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+    int loop_idx = 0;
+
     while ( true )
     {
+        if (loop_idx < 10 && _statistics.getNumMainLoopIterations() == (loop[loop_idx] * 1000) ) {
+            _smtCore.dumpStats(loop[loop_idx]);
+            loop_idx++;
+        }
+
+        if (_statistics.getNumMainLoopIterations() >= 1 && _statistics.getNumMainLoopIterations() < 5 ) {
+            for (auto s: _plConstraints) {
+                if (dynamic_cast<SigmoidConstraint *>(s)->sigmoid_num == 3) {
+                    _smtCore.setConstraintViolationThreshold(0);
+                    _smtCore.reportViolatedConstraint(s);
+                }
+            }
+        }
+//
+//        if (_statistics.getNumMainLoopIterations() >= 11 && _statistics.getNumMainLoopIterations() < 21) {
+//            for (auto s: _plConstraints) {
+//                if (dynamic_cast<SigmoidConstraint *>(s)->sigmoid_num == 5) {
+//                    _smtCore.setConstraintViolationThreshold(0);
+//                    _smtCore.reportViolatedConstraint(s);
+//                }
+//            }
+//        }
+//
+        else {
+            _smtCore.setConstraintViolationThreshold(GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD);
+        }
+
         struct timespec mainLoopEnd = TimeUtils::sampleMicro();
         _statistics.addTimeMainLoop( TimeUtils::timePassed( mainLoopStart, mainLoopEnd ) );
         mainLoopStart = mainLoopEnd;
@@ -196,9 +227,6 @@ bool Engine::solve( unsigned timeoutInSeconds )
             {
                 _smtCore.performSplit();
                 splitJustPerformed = true;
-//                _tableau->dumpEquations();
-//                _tableau->dumpAssignment();
-                checkBoundCompliancyWithDebugSolution();
                 continue;
             }
 
@@ -233,17 +261,18 @@ bool Engine::solve( unsigned timeoutInSeconds )
                         printf( "\nEngine::solve: SAT assignment found\n" );
                         _statistics.print();
                     }
+                    _smtCore.dumpStats(1);
                     _exitCode = Engine::SAT;
                     return true;
                 }
 
                 // We have violated piecewise-linear constraints.
                 performConstraintFixingStep();
+
                 // Finally, take this opporunity to tighten any bounds
                 // and perform any valid case splits.
                 tightenBoundsOnConstraintMatrix();
                 applyAllBoundTightenings();
-
                 // For debugging purposes
                 checkBoundCompliancyWithDebugSolution();
 
@@ -289,6 +318,13 @@ bool Engine::solve( unsigned timeoutInSeconds )
             // The current query is unsat, and we need to pop.
             // If we're at level 0, the whole query is unsat.
 //            printf( "\n======Back Tracking====/n" );
+            unsigned activeConstraints = 0;
+            for ( const auto &constraint : _plConstraints ) {
+                if (constraint->isActive())
+                    ++activeConstraints;
+            }
+            std::cout << "BEFORE: num of active PL: " << activeConstraints << std::endl;
+
             if ( !_smtCore.popSplit() )
             {
                 if ( _verbosity > 0 )
@@ -303,6 +339,19 @@ bool Engine::solve( unsigned timeoutInSeconds )
             {
                 splitJustPerformed = true;
             }
+
+            unsigned afterActiveConstraints = 0;
+            for ( const auto &constraint : _plConstraints ) {
+                if (constraint->isActive())
+                    ++afterActiveConstraints;
+            }
+            std::cout << "After: num of active PL: " << afterActiveConstraints << std::endl;
+
+            if (activeConstraints != afterActiveConstraints) {
+                std::cout << "im here" << std::endl;
+            }
+
+
 
         }
         catch ( ... )
@@ -345,7 +394,6 @@ void Engine::performConstraintFixingStep()
 
     // Select a violated constraint as the target
     selectViolatedPlConstraint();
-
 
     // Report the violated constraint to the SMT engine
     reportPlViolation();
@@ -1438,19 +1486,20 @@ void Engine::tightenBounds(List<Tightening> &bounds)
 
     for ( auto &bound : bounds )
     {
-        unsigned variable = _tableau->getVariableAfterMerging(bound._variable );
+        unsigned variable = _tableau->getVariableAfterMerging( bound._variable );
 
         if ( bound._type == Tightening::LB )
         {
             log( Stringf( "x%u: lower bound set to %.3lf", variable, bound._value ) );
-            _tableau->tightenLowerBound(variable, bound._value );
+            _tableau->tightenLowerBound( variable, bound._value );
         }
         else
         {
             log( Stringf( "x%u: upper bound set to %.3lf", variable, bound._value ) );
-            _tableau->tightenUpperBound(variable, bound._value );
+            _tableau->tightenUpperBound( variable, bound._value );
         }
     }
+
     DEBUG( _tableau->verifyInvariants() );
 }
 
@@ -1470,7 +1519,6 @@ void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
 
     log( "Done with split\n" );
 }
-
 
 void Engine::applyAllRowTightenings()
 {
@@ -1547,7 +1595,7 @@ bool Engine::applyValidConstraintCaseSplit( PiecewiseLinearConstraint *constrain
         return true;
     }
 
-    else if ( constraint->isActive() && GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS)
+    if ( constraint->isActive() && GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS )
     {
         try {
             String constraintString;
@@ -1557,7 +1605,6 @@ bool Engine::applyValidConstraintCaseSplit( PiecewiseLinearConstraint *constrain
             PiecewiseLinearCaseSplit validSplit = constraint->getValidCaseSplit();
             _smtCore.recordImpliedValidSplit( validSplit );
             applySplit( validSplit );
-            _statistics.incNumAbstractedEquations();
             return true;
         } catch (...) {
             return false;
@@ -1720,7 +1767,7 @@ void Engine::checkBoundCompliancyWithDebugSolution()
         // The stack is compliant, we should not have learned any non-compliant bounds
         for ( const auto &var : _preprocessedQuery._debuggingSolution )
         {
-             printf( "Looking at var %u\n", var.first );
+            // printf( "Looking at var %u\n", var.first );
 
             if ( FloatUtils::gt( _tableau->getLowerBound( var.first ), var.second, 1e-5 ) )
             {

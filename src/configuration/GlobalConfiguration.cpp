@@ -100,11 +100,11 @@ const bool GlobalConfiguration::USE_SMART_FIX = false;
 const bool GlobalConfiguration::USE_LEAST_FIX = false;
 
 const bool GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS = true;
-const bool GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION = false;
+const bool GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION = true;
 const bool GlobalConfiguration::PREPROCESSOR_PL_CONSTRAINTS_ADD_ABSTRACTION = true;
 
-const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH = 1;
-const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_SPLIT_SEGMENTS_TH = 1;
+const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH = 20;
+const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_SPLIT_SEGMENTS_TH = 2;
 
 
 

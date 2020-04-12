@@ -23,6 +23,7 @@
 #include "MarabouError.h"
 #include "ReluConstraint.h"
 #include "SmtCore.h"
+#include "SigmoidConstraint.h"
 
 SmtCore::SmtCore( IEngine *engine )
     : _statistics( NULL )
@@ -33,6 +34,11 @@ SmtCore::SmtCore( IEngine *engine )
     , _constraintViolationThreshold
       ( GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD )
 {
+    _sigmoids = new SigmoidStats();
+    root = _sigmoids;
+
+    _sigmoids->visited = true;
+    _sigmoids->id = 0;
 }
 
 SmtCore::~SmtCore()
@@ -57,6 +63,17 @@ void SmtCore::reportViolatedConstraint( PiecewiseLinearConstraint *constraint )
         _constraintToViolationCount[constraint] = 0;
 
     ++_constraintToViolationCount[constraint];
+
+//    static int i = 0;
+//    static int j = 0;
+//
+//    if (i < 10) {
+//        _constraintToViolationCount[constraint] = GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD;
+//        i++;
+//    } else if (j < 10){
+//        _constraintToViolationCount[constraint] = GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD;
+//        j++;
+//    }
 
     if ( _constraintToViolationCount[constraint] >=
          _constraintViolationThreshold )
@@ -112,7 +129,7 @@ void SmtCore::performSplit()
     List<PiecewiseLinearCaseSplit> splits = _constraintForSplitting->getCaseSplits();
     ASSERT( !splits.empty() );
     ASSERT( splits.size() >= 2 ); // Not really necessary, can add code to handle this case.
-    _constraintForSplitting->setActiveConstraint( false );
+//    _constraintForSplitting->setActiveConstraint( false );
 
     // Obtain the current state of the engine
     EngineState *stateBeforeSplits = new EngineState;
@@ -123,6 +140,34 @@ void SmtCore::performSplit()
     StackEntry *stackEntry = new StackEntry;
     // Perform the first split: add bounds and equations
     List<PiecewiseLinearCaseSplit>::iterator split = splits.begin();
+
+
+
+    // For debugging:
+    auto *s = dynamic_cast<SigmoidConstraint *>(_constraintForSplitting);
+    int sig_num = s->sigmoid_num;
+
+    std::cout << "Split on: " << sig_num << std::endl;
+    _sigmoids->left = new SigmoidStats();
+    _sigmoids->right = new SigmoidStats();
+
+    _sigmoids->left->id = sig_num;
+    _sigmoids->right->id = sig_num;
+
+    _sigmoids->left->parent = _sigmoids;
+    _sigmoids->right->parent = _sigmoids;
+
+    _sigmoids->left->visited = true;
+
+    for (auto b: (*split).getBoundTightenings()){
+        if (b._type == b.LB && b._variable == s->getB())
+            _sigmoids->left->seg_low = b._value;
+        if (b._type == b.UB && b._variable == s->getB())
+            _sigmoids->left->seg_upper = b._value;
+    }
+
+    _sigmoids = _sigmoids->left;
+    // For debugging:
     _engine->applySplit( *split );
     stackEntry->_activeSplit = *split;
 
@@ -170,6 +215,10 @@ bool SmtCore::popSplit()
     String error;
     while ( _stack.back()->_alternativeSplits.empty() )
     {
+        // For debugging
+        _sigmoids = _sigmoids->parent;
+        // For debugging
+
         if ( checkSkewFromDebuggingSolution() )
         {
             // Pops should not occur from a compliant stack!
@@ -204,6 +253,23 @@ bool SmtCore::popSplit()
 
     // Erase any valid splits that were learned using the split we just popped
     stackEntry->_impliedValidSplits.clear();
+
+    // For debugging
+    while (_sigmoids->right == NULL || _sigmoids->right->visited) {
+        _sigmoids = _sigmoids->parent;
+    }
+    _sigmoids->right->visited = true;
+
+    for (auto b: (*split).getBoundTightenings()){
+        if (b._type == b.LB && b._variable == split->_b)
+            _sigmoids->right->seg_low = b._value;
+        if (b._type == b.UB && b._variable == split->_b)
+            _sigmoids->right->seg_upper = b._value;
+    }
+
+    _sigmoids = _sigmoids->right;
+    // For debugging
+
 
     log( "\tApplying new split..." );
     _engine->applySplit( *split );
@@ -408,6 +474,36 @@ void SmtCore::pickSplitPLConstraint()
     {
         _constraintForSplitting = _engine->pickSplitPLConstraint();
     }
+}
+
+void SmtCore::dumpStats(int loop)
+{
+    File * f = new File(Stringf("/mnt/c/Users/t-yomant/lab/Marabou/sig_10_029/log_stats_%d.txt", loop));
+    f->open(File::MODE_WRITE_TRUNCATE);
+
+    _dumpStatsHelper(f, root);
+
+    f->close();
+}
+
+void SmtCore::_dumpStatsHelper(File *pFile, SmtCore::SigmoidStats *pStats) {
+
+    if (pStats == NULL || !pStats->visited) {
+
+        pFile->write(Stringf("%d\n", -1));
+        return;
+    }
+
+    if (pStats == _sigmoids){
+        pFile->write(Stringf("r "));
+    }
+
+    pFile->write(Stringf("%f ", pStats->seg_low));
+    pFile->write(Stringf("%d ", pStats->id));
+    pFile->write(Stringf("%f\n", pStats->seg_upper));
+
+    _dumpStatsHelper(pFile, pStats->left);
+    _dumpStatsHelper(pFile, pStats->right);
 }
 
 //

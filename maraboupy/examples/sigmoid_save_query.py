@@ -1,20 +1,21 @@
 import sys
-sys.path.append("/cs/labs/guykatz/yoni_mantzur/marabou")
+marabou_dir ='/mnt/c/Users/t-yomant/lab/Marabou'
+sys.path.append(marabou_dir)
 
 from maraboupy import MarabouNetwork
 from maraboupy import MarabouUtils, MarabouCore, Marabou
 import numpy as np
 
 
-network = Marabou.read_tf('./networks/sigmoids/mnist_20.pb')  # type: MarabouNetwork.MarabouNetwork
+network = Marabou.read_tf(marabou_dir+'maraboupy/networks/sigmoids/mnist_10.pb')  # type: MarabouNetwork.MarabouNetwork
 
 
 # Get the input and output variable numbers; [0] since first dimension is batch size
 inputVars = network.inputVars[0][0]
 outputVars = network.outputVars[0]
 
-large = 100.0
-delta = 0.015
+large = 10.0
+delta = 0.029
 
 x = [0.        , 0.        , 0.        , 0.        , 0.        ,
      0.        , 0.        , 0.        , 0.        , 0.        ,

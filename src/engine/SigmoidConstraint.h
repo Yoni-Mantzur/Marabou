@@ -160,18 +160,16 @@ public:
     */
     bool supportsSymbolicBoundTightening() const override { return false; };
 
-
-    bool isActive() const override { return !_isFixed; }
+    /*
+     * The constraint is active even if splited
+     */
+    bool isActive() const override { return _constraintActive; }
 
 
     /* For debugging propose */
     void setLogFile(File *file = nullptr) { _logFile = file; };
     void setSigmoidNum (int sigmoidNum) { sigmoid_num = sigmoidNum; };
-
-    /* For debugging propose */
     int sigmoid_num;
-
-
 
 private:
 

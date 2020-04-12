@@ -104,7 +104,7 @@ const bool GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION = true;
 const bool GlobalConfiguration::PREPROCESSOR_PL_CONSTRAINTS_ADD_ABSTRACTION = true;
 
 const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH = 5;
-const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_SPLIT_SEGMENTS_TH = 2;
+const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_SPLIT_SEGMENTS_TH = 1;
 
 
 

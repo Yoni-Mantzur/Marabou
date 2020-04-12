@@ -126,6 +126,7 @@ public:
 
     static double sigmoid( double x );
     static double sigmoidInverse( double x );
+    static double sigmoidDerivative(double x);
 };
 
 #endif // __FloatUtils_h__

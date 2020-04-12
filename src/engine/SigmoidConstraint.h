@@ -160,13 +160,16 @@ public:
     */
     bool supportsSymbolicBoundTightening() const override { return false; };
 
-
-    bool isActive() const override { return !_isFixed; }
+    /*
+     * The constraint is active even if splited
+     */
+    bool isActive() const override { return _constraintActive; }
 
 
     /* For debugging propose */
     void setLogFile(File *file = nullptr) { _logFile = file; };
     void setSigmoidNum (int sigmoidNum) { sigmoid_num = sigmoidNum; };
+    int sigmoid_num;
 
 private:
 
@@ -184,7 +187,6 @@ private:
     void writePoint(double x, double y, bool isFix = false);
     void writeLimit(double lower, double upper, bool isB = false);
     void writeEquations(List<Equation> eqs);
-    int sigmoid_num;
     void dumpAssignment(double bValue, double fValue) const;
     void dumpUpperBound(const List<Equation> &refinements) const;
     void dumpSplits(const List<PiecewiseLinearCaseSplit> &splits) const;

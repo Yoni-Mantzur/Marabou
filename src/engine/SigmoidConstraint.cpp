@@ -14,109 +14,89 @@
 #include "Statistics.h"
 #include "TableauRow.h"
 
-SigmoidConstraint::SigmoidConstraint(unsigned b, unsigned f )
-        : _b ( b )
-        , _f( f )
-        , _isBoundWereChanged(false)
-        , _haveEliminatedVariables(false)
-        , _isFixed(false)
-{
+SigmoidConstraint::SigmoidConstraint(unsigned b, unsigned f)
+        : _b(b), _f(f), _isBoundWereChanged(false), _haveEliminatedVariables(false), _isFixed(false) {
 }
 
-SigmoidConstraint::SigmoidConstraint( const String &serializedSigmoid )
-        : _isBoundWereChanged(false)
-        , _haveEliminatedVariables(false)
-        , _isFixed(false)
-{
-    const String &sigmoid = String("sigmoid" );
-    String constraintType = serializedSigmoid.substring( 0, sigmoid.length() );
+SigmoidConstraint::SigmoidConstraint(const String &serializedSigmoid)
+        : _isBoundWereChanged(false), _haveEliminatedVariables(false), _isFixed(false) {
+    const String &sigmoid = String("sigmoid");
+    String constraintType = serializedSigmoid.substring(0, sigmoid.length());
     ASSERT(constraintType == sigmoid);
 
     // remove the constraint type in serialized form
-    String serializedValues = serializedSigmoid.substring( sigmoid.length()+1, serializedSigmoid.length() - 5 );
-    List<String> values = serializedValues.tokenize( "," );
+    String serializedValues = serializedSigmoid.substring(sigmoid.length() + 1, serializedSigmoid.length() - 5);
+    List<String> values = serializedValues.tokenize(",");
 
-    ASSERT( values.size() == 2);
+    ASSERT(values.size() == 2);
 
     auto var = values.begin();
-    _f = atoi( var->ascii() );
+    _f = atoi(var->ascii());
     ++var;
-    _b = atoi( var->ascii() );
+    _b = atoi(var->ascii());
 
     ASSERT(_b < _f)
     printf("b is: %d and _f is %d\n", _b, _f);
 
 }
 
-PiecewiseLinearConstraint *SigmoidConstraint::duplicateConstraint() const
-{
-    SigmoidConstraint *clone = new SigmoidConstraint( _b, _f );
+PiecewiseLinearConstraint *SigmoidConstraint::duplicateConstraint() const {
+    SigmoidConstraint *clone = new SigmoidConstraint(_b, _f);
     *clone = *this;
     return clone;
 }
 
-void SigmoidConstraint::restoreState( const PiecewiseLinearConstraint *state )
-{
+void SigmoidConstraint::restoreState(const PiecewiseLinearConstraint *state) {
     const auto *sigmoid = dynamic_cast<const SigmoidConstraint *>( state );
     *this = *sigmoid;
 }
 
-void SigmoidConstraint::registerAsWatcher( ITableau *tableau )
-{
-    tableau->registerToWatchVariable( this, _b );
-    tableau->registerToWatchVariable( this, _f );
+void SigmoidConstraint::registerAsWatcher(ITableau *tableau) {
+    tableau->registerToWatchVariable(this, _b);
+    tableau->registerToWatchVariable(this, _f);
 }
 
-void SigmoidConstraint::unregisterAsWatcher( ITableau *tableau )
-{
-    tableau->unregisterToWatchVariable( this, _b );
-    tableau->unregisterToWatchVariable( this, _f );
+void SigmoidConstraint::unregisterAsWatcher(ITableau *tableau) {
+    tableau->unregisterToWatchVariable(this, _b);
+    tableau->unregisterToWatchVariable(this, _f);
 }
 
-void SigmoidConstraint::notifyVariableValue( unsigned variable, double value )
-{
+void SigmoidConstraint::notifyVariableValue(unsigned variable, double value) {
     _assignment[variable] = value;
 }
 
-void SigmoidConstraint::notifyLowerBound( unsigned variable, double bound )
-{
+void SigmoidConstraint::notifyLowerBound(unsigned variable, double bound) {
     if (_statistics)
         _statistics->incNumBoundNotificationsPlConstraints();
 
     _lowerBounds[variable] = bound;
     _isBoundWereChanged = true;
-    
 
-    if (_constraintBoundTightener)
-    {
-        if (variable == _b)
-        {
+    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable], 0.00001))
+        _isFixed = true;
+
+    if (_constraintBoundTightener) {
+        if (variable == _b) {
             double sigmoidBound = FloatUtils::sigmoid(bound);
             _constraintBoundTightener->registerTighterLowerBound(_f, sigmoidBound);
-        }
-
-        else if (variable == _f)
-        {
+        } else if (variable == _f) {
             double sigmoidInverseBound = FloatUtils::sigmoidInverse(bound);
             _constraintBoundTightener->registerTighterLowerBound(_b, sigmoidInverseBound);
         }
     }
-    
-    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable], 
-            GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
-        _isFixed = true;
 }
 
-void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
-{
-    if ( _statistics )
+void SigmoidConstraint::notifyUpperBound(unsigned variable, double bound) {
+    if (_statistics)
         _statistics->incNumBoundNotificationsPlConstraints();
 
     _upperBounds[variable] = bound;
     _isBoundWereChanged = true;
 
-    if (_constraintBoundTightener)
-    {
+    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable], 0.00001))
+        _isFixed = true;
+
+    if (_constraintBoundTightener) {
         if (variable == _b) {
             double sigmoidBound = FloatUtils::sigmoid(bound);
             _constraintBoundTightener->registerTighterUpperBound(_f, sigmoidBound);
@@ -126,53 +106,45 @@ void SigmoidConstraint::notifyUpperBound( unsigned variable, double bound )
             _constraintBoundTightener->registerTighterUpperBound(_b, sigmoidInverseBound);
         }
     }
-
-    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable],
-                             GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
-        _isFixed = true;
 }
 
-void SigmoidConstraint::notifyBrokenAssignment()
-{
+void SigmoidConstraint::notifyBrokenAssignment() {
     ASSERT(_assignment.exists(_b) && _assignment.exists(_f))
 
-    if (FloatUtils::lt(_lowerBounds[_b], 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) &&
-        FloatUtils::gt(_upperBounds[_b], 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) )
-        addSpuriousPoint( { 0.0, 0.5 });
+    if (getConvexTypeInSegment(_lowerBounds[_b], _upperBounds[_b]))
+        addSpuriousPoint({0.0, 0.5});
     else
-        addSpuriousPoint( { _assignment[_b], _assignment[_f] });
+        addSpuriousPoint({_assignment[_b], _assignment[_f]});
 }
 
-bool SigmoidConstraint::participatingVariable( unsigned variable ) const
-{
-    return ( variable == _b ||  variable == _f );
+bool SigmoidConstraint::participatingVariable(unsigned variable) const {
+    return (variable == _b || variable == _f);
 }
 
-List<unsigned> SigmoidConstraint::getParticipatingVariables() const
-{
+List<unsigned> SigmoidConstraint::getParticipatingVariables() const {
     List<unsigned> participatingVariables;
 
-    participatingVariables.append( _b );
-    participatingVariables.append( _f );
+    participatingVariables.append(_b);
+    participatingVariables.append(_f);
 
     return participatingVariables;
 }
 
-bool SigmoidConstraint::satisfied() const
-{
-    if ( !( _assignment.exists( _b ) && _assignment.exists( _f ) ) )
-        throw MarabouError( MarabouError::PARTICIPATING_VARIABLES_ABSENT );
+bool SigmoidConstraint::satisfied() const {
+    if (!(_assignment.exists(_b) && _assignment.exists(_f)))
+        throw MarabouError(MarabouError::PARTICIPATING_VARIABLES_ABSENT);
 
-    double bValue = _assignment.get( _b );
-    double fValue = _assignment.get( _f );
+    double bValue = _assignment.get(_b);
+    double fValue = _assignment.get(_f);
 
-    return FloatUtils::areEqual(FloatUtils::sigmoid(bValue), fValue, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
-           FloatUtils::areEqual(bValue, FloatUtils::sigmoidInverse(fValue), GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE);
+    return FloatUtils::areEqual(FloatUtils::sigmoid(bValue), fValue,
+                                GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) ||
+           FloatUtils::areEqual(bValue, FloatUtils::sigmoidInverse(fValue),
+                                GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE);
 
 }
 
-List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
-{
+List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const {
     ASSERT(_assignment.exists(_b));
     ASSERT(_assignment.exists(_f));
 
@@ -180,256 +152,196 @@ List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getPossibleFixes() const
     double fValue = _assignment.get(_f);
     double sigmoidValue = FloatUtils::sigmoid(bValue);
 
-    List <PiecewiseLinearConstraint::Fix> fixes;
+    List<PiecewiseLinearConstraint::Fix> fixes;
 
-    fixes.append(Fix(_f, sigmoidValue ));
+    fixes.append(Fix(_f, sigmoidValue));
 
     double sigmoidInverseValue = FloatUtils::sigmoidInverse(fValue);
-    fixes.append(Fix(_b, sigmoidInverseValue ));
+    fixes.append(Fix(_b, sigmoidInverseValue));
 
     return fixes;
 }
 
-PiecewiseLinearCaseSplit SigmoidConstraint::getValidCaseSplit() const
-{
-    PiecewiseLinearCaseSplit validCaseSplit;
-    if ( _isFixed )
-    {
-        ASSERT(FloatUtils::areEqual(_lowerBounds[_b], _upperBounds[_b],
-                GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+PiecewiseLinearCaseSplit SigmoidConstraint::getValidCaseSplit() const {
+    List<Equation> refinements;
 
-        validCaseSplit.storeBoundTightening(Tightening(_b, _lowerBounds[_b], Tightening::LB));
-        validCaseSplit.storeBoundTightening(Tightening(_b, _lowerBounds[_b], Tightening::UB));
+    if (_isFixed) {
+        std::cout << Stringf("Constraint %d is fixed, adding the const equations", sigmoid_num) << std::endl;
+        PiecewiseLinearCaseSplit constraintToConst;
 
-        validCaseSplit.storeBoundTightening(Tightening(_f, FloatUtils::sigmoid(_lowerBounds[_b]), Tightening::LB));
-        validCaseSplit.storeBoundTightening(Tightening(_f, FloatUtils::sigmoid(_lowerBounds[_b]), Tightening::UB));
+        Equation constEqForB(Equation::EQ);
+        constEqForB.addAddend(1, _b);
+        constEqForB.setScalar(_lowerBounds[_b]);
 
-        return validCaseSplit;
+        ASSERT(FloatUtils::areEqual(_lowerBounds[_f], FloatUtils::sigmoid(_lowerBounds[_b]),
+                                    GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+        Equation constEqForF(Equation::EQ);
+        constEqForF.addAddend(1, _f);
+        constEqForF.setScalar(_lowerBounds[_f]);
+
+        constraintToConst.addEquation(constEqForB);
+        constraintToConst.addEquation(constEqForF);
+
+        constraintToConst.storeBoundTightening(Tightening(_b, _lowerBounds[_b], Tightening::LB));
+        constraintToConst.storeBoundTightening(Tightening(_b, _lowerBounds[_b], Tightening::UB));
+
+        constraintToConst.storeBoundTightening(Tightening(_f, _lowerBounds[_f], Tightening::LB));
+        constraintToConst.storeBoundTightening(Tightening(_f, _lowerBounds[_f], Tightening::UB));
+
+        return constraintToConst;
     }
 
-    List<Equation> refinements;
-    refinements.append(const_cast<SigmoidConstraint*>(this)->getEquationsAbstraction());
+    refinements.append(const_cast<SigmoidConstraint *>(this)->getEquationsAbstraction());
 
     if (GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION) {
         if (_isBoundWereChanged) {
 
             try {
-                refinements.append(const_cast<SigmoidConstraint*>(this)->refineCurrentSplit());
-            } catch (...) { printf("Equation already inserted\n"); }
-            const_cast<SigmoidConstraint*>(this)->_isBoundWereChanged = false;
+                refinements.append(const_cast<SigmoidConstraint *>(this)->refineCurrentSplit());
+            } catch (...) {
+                printf("Equation already was inserted\n");
+            }
+            const_cast<SigmoidConstraint *>(this)->_isBoundWereChanged = false;
         }
     }
 
-
+    PiecewiseLinearCaseSplit serializedEquations;
     if (refinements.empty())
         throw 0;
 
     for (auto equation : refinements)
-        validCaseSplit.addEquation(equation);
+        serializedEquations.addEquation(equation);
 
-    return validCaseSplit;
+    return serializedEquations;
 }
 
-List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getSmartFixes(__attribute__((unused)) ITableau *tableau ) const
-{
+List<PiecewiseLinearConstraint::Fix> SigmoidConstraint::getSmartFixes(__attribute__((unused)) ITableau *tableau) const {
     // TODO: write something smarter
     return getPossibleFixes();
 }
 
-List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const
-{
+List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const {
     ASSERT(_assignment.exists(_b));
     ASSERT(_assignment.exists(_f));
     ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f));
     ASSERT(_upperBounds.exists(_b) && _upperBounds.exists(_f));
 
-    List<PiecewiseLinearCaseSplit> splits = const_cast<SigmoidConstraint*>(this)->getSplitsAbstraction();
-
-//    File * f = new File("log_splits.txt");
-//    f->open(File::MODE_WRITE_APPEND);
-//    List<float> sizes;
-//    for (auto split : splits){
-//        auto bs = split.getBoundTightenings();
-//        float size = 0;
-//        for (auto b : bs)
-//        {
-//            if (b._variable == _b)
-//            {
-//                if (b._type == Tightening::UB) {
-//                    size += b._value;
-//                } else if (b._type == Tightening::LB) {
-//                    size -= b._value;
-//                }
-//            }
-//        }
-//        sizes.append(size);
-//
-//    }
-//
-//    auto sizes_iter = sizes.begin();
-//    float current = *sizes_iter;
-//    sizes_iter++;
-//    while (sizes_iter != sizes.end())
-//    {
-//        float next = *sizes_iter;
-//        float total = current + next;
-//        f->write(std::to_string(current/total));
-//        f->write("\n");
-//        current = next;
-//        sizes_iter++;
-//    }
-//    f->close();
-    return splits;
+    return const_cast<SigmoidConstraint *>(this)->getSplitsAbstraction();
 }
 
-void SigmoidConstraint::dump( String &output ) const
-{
-    output = Stringf( "SigmoidConstraint: x%u = sigmoid( x%u ).\n", _f, _b);
+void SigmoidConstraint::dump(String &output) const {
+    output = Stringf("SigmoidConstraint: x%u = sigmoid( x%u ).\n", _f, _b);
 
-    output += Stringf( "b in [%s, %s], ",
-                       _lowerBounds.exists( _b ) ? Stringf( "%lf", _lowerBounds[_b] ).ascii() : "-inf",
-                       _upperBounds.exists( _b ) ? Stringf( "%lf", _upperBounds[_b] ).ascii() : "inf" );
+    output += Stringf("b in [%s, %s], ",
+                      _lowerBounds.exists(_b) ? Stringf("%lf", _lowerBounds[_b]).ascii() : "-inf",
+                      _upperBounds.exists(_b) ? Stringf("%lf", _upperBounds[_b]).ascii() : "inf");
 
-    output += Stringf( "f in [%s, %s]",
-                       _lowerBounds.exists( _f ) ? Stringf( "%lf", _lowerBounds[_f] ).ascii() : "-inf",
-                       _upperBounds.exists( _f ) ? Stringf( "%lf", _upperBounds[_f] ).ascii() : "inf" );
+    output += Stringf("f in [%s, %s]",
+                      _lowerBounds.exists(_f) ? Stringf("%lf", _lowerBounds[_f]).ascii() : "-inf",
+                      _upperBounds.exists(_f) ? Stringf("%lf", _upperBounds[_f]).ascii() : "inf");
 }
 
-void SigmoidConstraint::addAuxiliaryEquations( InputQuery & inputQuery )
-{
+void SigmoidConstraint::addAuxiliaryEquations(InputQuery &inputQuery) {
     try {
         inputQuery.addEquation((refineCurrentSplit()));
     } catch (...) {
-        printf("Equation already was inserted");
+        printf("Equation already was inserted\n");
     }
 }
 
-void SigmoidConstraint::eliminateVariable( unsigned /* variable */, double /* fixedValue */)
-{
+void SigmoidConstraint::eliminateVariable(unsigned /* variable */, double /* fixedValue */) {
     _haveEliminatedVariables = true;
 }
 
-bool SigmoidConstraint::constraintObsolete() const
-{
+bool SigmoidConstraint::constraintObsolete() const {
     return _haveEliminatedVariables;
 }
 
-void SigmoidConstraint::updateVariableIndex( unsigned oldIndex, unsigned newIndex )
-{
-    ASSERT( oldIndex == _b || oldIndex == _f );
-    ASSERT( !_assignment.exists( newIndex ) &&
-            !_lowerBounds.exists( newIndex ) &&
-            !_upperBounds.exists( newIndex ) &&
-            newIndex != _b && newIndex != _f );
+void SigmoidConstraint::updateVariableIndex(unsigned oldIndex, unsigned newIndex) {
+    ASSERT(oldIndex == _b || oldIndex == _f);
+    ASSERT(!_assignment.exists(newIndex) &&
+           !_lowerBounds.exists(newIndex) &&
+           !_upperBounds.exists(newIndex) &&
+           newIndex != _b && newIndex != _f);
 
-    if ( _assignment.exists( oldIndex ) )
-    {
-        _assignment[newIndex] = _assignment.get( oldIndex );
-        _assignment.erase( oldIndex );
+    if (_assignment.exists(oldIndex)) {
+        _assignment[newIndex] = _assignment.get(oldIndex);
+        _assignment.erase(oldIndex);
     }
 
-    if ( _lowerBounds.exists( oldIndex ) )
-    {
-        _lowerBounds[newIndex] = _lowerBounds.get( oldIndex );
-        _lowerBounds.erase( oldIndex );
+    if (_lowerBounds.exists(oldIndex)) {
+        _lowerBounds[newIndex] = _lowerBounds.get(oldIndex);
+        _lowerBounds.erase(oldIndex);
     }
 
-    if ( _upperBounds.exists( oldIndex ) )
-    {
-        _upperBounds[newIndex] = _upperBounds.get( oldIndex );
-        _upperBounds.erase( oldIndex );
+    if (_upperBounds.exists(oldIndex)) {
+        _upperBounds[newIndex] = _upperBounds.get(oldIndex);
+        _upperBounds.erase(oldIndex);
     }
 
-    if ( oldIndex == _b )
+    if (oldIndex == _b)
         _b = newIndex;
     else
         _f = newIndex;
 }
 
-void SigmoidConstraint::getEntailedTightenings(List<Tightening> &tightenings ) const
-{
-    ASSERT( _lowerBounds.exists( _b ) && _lowerBounds.exists( _f ) &&
-            _upperBounds.exists( _b ) && _upperBounds.exists( _f ) );
+void SigmoidConstraint::getEntailedTightenings(List<Tightening> &tightenings) const {
+    ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f) &&
+           _upperBounds.exists(_b) && _upperBounds.exists(_f));
 
     double bLowerBound = _lowerBounds[_b], sigmoidbLowerBound = FloatUtils::sigmoid(bLowerBound);
-    double fLowerBound = _lowerBounds[_f];
+    double fLowerBound = _lowerBounds[_f], sigmoidInversefLowerBound = FloatUtils::sigmoidInverse(fLowerBound);
 
     double bUpperBound = _upperBounds[_b], sigmoidbUpperBound = FloatUtils::sigmoid(bUpperBound);
-    double fUpperBound = _upperBounds[_f];
+    double fUpperBound = _upperBounds[_f], sigmoidInversefUpperBound = FloatUtils::sigmoidInverse(fUpperBound);
 
-    if (FloatUtils::gt(fLowerBound, 0.0) && FloatUtils::gt(fLowerBound, 1.0) && FloatUtils::gt(fUpperBound, 0.0)
-        && FloatUtils::lt(fUpperBound, 1.0))
-    {
-        double sigmoidInverseFLowerBound = FloatUtils::sigmoidInverse(fLowerBound);
-        double sigmoidInverseFUpperBound = FloatUtils::sigmoidInverse( fUpperBound );
-
-        tightenings.append(Tightening(_b, sigmoidInverseFLowerBound, Tightening::LB));
-        tightenings.append(Tightening(_b, sigmoidInverseFUpperBound, Tightening::UB));
-    }
-    
+    tightenings.append(Tightening(_b, sigmoidInversefLowerBound, Tightening::LB));
+    tightenings.append(Tightening(_b, sigmoidInversefUpperBound, Tightening::UB));
     tightenings.append(Tightening(_f, sigmoidbLowerBound, Tightening::LB));
     tightenings.append(Tightening(_f, sigmoidbUpperBound, Tightening::UB));
 }
 
-void SigmoidConstraint::getCostFunctionComponent(__attribute__((unused)) Map<unsigned, double> &cost ) const
-{
+void SigmoidConstraint::getCostFunctionComponent(__attribute__((unused)) Map<unsigned, double> &cost) const {
     //TODO: LEARN ABOUT THIS
 }
 
-String SigmoidConstraint::serializeToString() const
-{
-    // Output format is: sigmoid,f,b
-    return Stringf( "sigmoid,%u,%u", _f, _b );
+String SigmoidConstraint::serializeToString() const {
+    return Stringf("sigmoid,%u,%u", _f, _b);
 }
 
-double SigmoidConstraint::evaluateDerivativeOfConciseFunction(double x) const
-{
-    double sigmoidValue = FloatUtils::sigmoid(x);
-    return sigmoidValue * ( 1 - sigmoidValue );
+double SigmoidConstraint::evaluateDerivativeOfConciseFunction(double x) const {
+    return FloatUtils::sigmoidDerivative(x);
 }
 
 
-SigmoidConstraint::Point SigmoidConstraint::getLowerParticipantVariablesBounds() const
-{
+SigmoidConstraint::Point SigmoidConstraint::getLowerParticipantVariablesBounds() const {
     ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f))
 
-    return { _lowerBounds[_b], _lowerBounds[_f] };
+    return {_lowerBounds[_b], _lowerBounds[_f]};
 }
 
-SigmoidConstraint::Point SigmoidConstraint::getUpperParticipantVariablesBounds() const
-{
+SigmoidConstraint::Point SigmoidConstraint::getUpperParticipantVariablesBounds() const {
     ASSERT(_upperBounds.exists(_b) && _upperBounds.exists(_f))
 
-    return { _upperBounds[_b], _upperBounds[_f] };
+    return {_upperBounds[_b], _upperBounds[_f]};
 }
 
-SigmoidConstraint::ConvexType SigmoidConstraint::getConvexTypeInSegment(double x0, double x1) const
-{
-    if (FloatUtils::lte(x0, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE ) &&
-        FloatUtils::lte(x1, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE ) )
+SigmoidConstraint::ConvexType SigmoidConstraint::getConvexTypeInSegment(double x0, double x1) const {
+    if (FloatUtils::lte(x0, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) &&
+        FloatUtils::lte(x1, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
         return CONVEX;
 
-    else if( FloatUtils::gte(x0, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE ) &&
-             FloatUtils::gte(x1, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE ) )
+    if (FloatUtils::gte(x0, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) &&
+        FloatUtils::gte(x1, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
         return CONCAVE;
 
     return UNKNOWN;
 }
 
 
-
-
-
-
-
-
-
-
-
 /** Debuging **/
 
-void SigmoidConstraint::writePoint(double x, double y, bool isFix)
-{
+void SigmoidConstraint::writePoint(double x, double y, bool isFix) {
     _logFile->open(IFile::MODE_WRITE_APPEND);
     if (isFix)
         _logFile->write("F,");
@@ -442,11 +354,10 @@ void SigmoidConstraint::writePoint(double x, double y, bool isFix)
     _logFile->close();
 }
 
-void SigmoidConstraint::writeLimit(double lower, double upper, bool isB)
-{
+void SigmoidConstraint::writeLimit(double lower, double upper, bool isB) {
     _logFile->open(IFile::MODE_WRITE_APPEND);
     _logFile->write("L,");
-    isB? _logFile->write("b," + std::to_string(_b) + ",") :
+    isB ? _logFile->write("b," + std::to_string(_b) + ",") :
     _logFile->write("f," + std::to_string(_f) + ",");
     _logFile->write(std::to_string(lower));
     _logFile->write(",");
@@ -456,14 +367,13 @@ void SigmoidConstraint::writeLimit(double lower, double upper, bool isB)
 }
 
 
-void SigmoidConstraint::writeEquations(List<Equation> eqs)
-{
+void SigmoidConstraint::writeEquations(List<Equation> eqs) {
     _logFile->open(IFile::MODE_WRITE_APPEND);
     for (auto eq : eqs) {
         _logFile->write("E,");
         for (Equation::Addend addend : eq._addends) {
             _logFile->write(std::to_string(addend._coefficient));
-            addend._variable == _b?
+            addend._variable == _b ?
             _logFile->write("b(" + std::to_string(_b) + ")") :
             _logFile->write("f(" + std::to_string(_f) + ")");
         }
@@ -505,7 +415,7 @@ void SigmoidConstraint::dumpSplits(const List<PiecewiseLinearCaseSplit> &splits)
                         bounds[0] = bound._value;
                     else
                         bounds[1] = bound._value;
-                } else if (bound._variable == _f){
+                } else if (bound._variable == _f) {
                     if (bound._type == bound.LB)
                         bounds[2] = bound._value;
                     else

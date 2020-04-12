@@ -476,15 +476,13 @@ private:
     void addAuxiliaryVariables();
     void augmentInitialBasisIfNeeded( List<unsigned> &initialBasis, const List<unsigned> &basicRows );
 
-<<<<<<< HEAD
-    void tightenBounds(const List<Tightening> &bounds) const;
-=======
     /*
       Update the preferred direction to perform fixes and the preferred order
       to handle case splits
     */
     void updateDirections();
->>>>>>> 41ccc59a1bcadd99b8038317e25cdba34a017677
+
+    void tightenBounds(const List<Tightening> &bounds) const;
 };
 
 #endif // __Engine_h__

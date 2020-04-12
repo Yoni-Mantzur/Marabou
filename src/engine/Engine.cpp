@@ -196,9 +196,6 @@ bool Engine::solve( unsigned timeoutInSeconds )
             {
                 _smtCore.performSplit();
                 splitJustPerformed = true;
-//                _tableau->dumpEquations();
-//                _tableau->dumpAssignment();
-                checkBoundCompliancyWithDebugSolution();
                 continue;
             }
 
@@ -1438,17 +1435,17 @@ void Engine::tightenBounds(List<Tightening> &bounds)
 
     for ( auto &bound : bounds )
     {
-        unsigned variable = _tableau->getVariableAfterMerging(bound._variable );
+        unsigned variable = _tableau->getVariableAfterMerging( bound._variable );
 
         if ( bound._type == Tightening::LB )
         {
             log( Stringf( "x%u: lower bound set to %.3lf", variable, bound._value ) );
-            _tableau->tightenLowerBound(variable, bound._value );
+            _tableau->tightenLowerBound( variable, bound._value );
         }
         else
         {
             log( Stringf( "x%u: upper bound set to %.3lf", variable, bound._value ) );
-            _tableau->tightenUpperBound(variable, bound._value );
+            _tableau->tightenUpperBound( variable, bound._value );
         }
     }
     DEBUG( _tableau->verifyInvariants() );
@@ -1547,7 +1544,7 @@ bool Engine::applyValidConstraintCaseSplit( PiecewiseLinearConstraint *constrain
         return true;
     }
 
-    else if ( constraint->isActive() && GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS)
+    if ( constraint->isActive() && GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS )
     {
         try {
             String constraintString;

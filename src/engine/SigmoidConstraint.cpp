@@ -114,7 +114,7 @@ void SigmoidConstraint::notifyBrokenAssignment() {
     if (getConvexTypeInSegment(_lowerBounds[_b], _upperBounds[_b]))
         addSpuriousPoint({0.0, 0.5});
     else
-        addSpuriousPoint( { _assignment[_b], _assignment[_f] });
+        addSpuriousPoint({_assignment[_b], _assignment[_f]});
 }
 
 bool SigmoidConstraint::participatingVariable(unsigned variable) const {
@@ -331,8 +331,8 @@ SigmoidConstraint::ConvexType SigmoidConstraint::getConvexTypeInSegment(double x
         FloatUtils::lte(x1, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
         return CONVEX;
 
-    else if (FloatUtils::gte(x0, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) &&
-             FloatUtils::gte(x1, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+    if (FloatUtils::gte(x0, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE) &&
+        FloatUtils::gte(x1, 0.0, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
         return CONCAVE;
 
     return UNKNOWN;

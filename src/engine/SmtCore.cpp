@@ -26,13 +26,13 @@
 #include "SigmoidConstraint.h"
 
 SmtCore::SmtCore( IEngine *engine )
-    : _statistics( NULL )
-    , _engine( engine )
-    , _needToSplit( false )
-    , _constraintForSplitting( NULL )
-    , _stateId( 0 )
-    , _constraintViolationThreshold
-      ( GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD )
+        : _statistics( NULL )
+        , _engine( engine )
+        , _needToSplit( false )
+        , _constraintForSplitting( NULL )
+        , _stateId( 0 )
+        , _constraintViolationThreshold
+                  ( GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD )
 {
     _sigmoids = new SigmoidStats();
     root = _sigmoids;

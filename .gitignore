@@ -38,4 +38,7 @@ _deps
 build
 /.idea
 /cmake-build-debug
-
+sig_*
+maraboupy/examples/networks/sigmoids
+log_stats.txt
+log_splits.txt

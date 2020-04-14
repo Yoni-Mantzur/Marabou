@@ -83,6 +83,8 @@ void SmtCore::reportViolatedConstraint( PiecewiseLinearConstraint *constraint )
             _constraintForSplitting = constraint;
         else
             pickSplitPLConstraint();
+
+        _constraintToViolationCount[_constraintForSplitting] = 0;
     }
 }
 

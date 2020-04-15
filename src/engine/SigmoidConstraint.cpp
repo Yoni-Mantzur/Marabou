@@ -72,8 +72,8 @@ void SigmoidConstraint::notifyLowerBound(unsigned variable, double bound) {
     _lowerBounds[variable] = bound;
     _isBoundWereChanged = true;
 
-    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable], 0.00001))
-        _isFixed = true;
+//    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable], 0.000001))
+//        _isFixed = true;
 
     if (_constraintBoundTightener) {
         if (variable == _b) {
@@ -93,8 +93,8 @@ void SigmoidConstraint::notifyUpperBound(unsigned variable, double bound) {
     _upperBounds[variable] = bound;
     _isBoundWereChanged = true;
 
-    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable], 0.00001))
-        _isFixed = true;
+//    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable], 0.00001))
+//        _isFixed = true;
 
     if (_constraintBoundTightener) {
         if (variable == _b) {
@@ -173,8 +173,8 @@ PiecewiseLinearCaseSplit SigmoidConstraint::getValidCaseSplit() const {
         constEqForB.addAddend(1, _b);
         constEqForB.setScalar(_lowerBounds[_b]);
 
-        ASSERT(FloatUtils::areEqual(_lowerBounds[_f], FloatUtils::sigmoid(_lowerBounds[_b]),
-                                    GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+        double sigmoidLowerB = FloatUtils::sigmoid(_lowerBounds[_b]);
+//        ASSERT(FloatUtils::areEqual(_lowerBounds[_f], sigmoidLowerB, 0.000001))
         Equation constEqForF(Equation::EQ);
         constEqForF.addAddend(1, _f);
         constEqForF.setScalar(_lowerBounds[_f]);
@@ -185,8 +185,8 @@ PiecewiseLinearCaseSplit SigmoidConstraint::getValidCaseSplit() const {
         constraintToConst.storeBoundTightening(Tightening(_b, _lowerBounds[_b], Tightening::LB));
         constraintToConst.storeBoundTightening(Tightening(_b, _lowerBounds[_b], Tightening::UB));
 
-        constraintToConst.storeBoundTightening(Tightening(_f, _lowerBounds[_f], Tightening::LB));
-        constraintToConst.storeBoundTightening(Tightening(_f, _lowerBounds[_f], Tightening::UB));
+        constraintToConst.storeBoundTightening(Tightening(_f, sigmoidLowerB, Tightening::LB));
+        constraintToConst.storeBoundTightening(Tightening(_f, sigmoidLowerB, Tightening::UB));
 
         return constraintToConst;
     }
@@ -226,7 +226,31 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const {
     ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f));
     ASSERT(_upperBounds.exists(_b) && _upperBounds.exists(_f));
 
-    return const_cast<SigmoidConstraint *>(this)->getSplitsAbstraction();
+    if ( getConvexTypeInSegment(_lowerBounds[_b], _upperBounds[_b]) == UNKNOWN)
+        return const_cast<SigmoidConstraint *>(this)->getSplitsAbstraction();
+
+    double middle = ( _upperBounds[_f] + _lowerBounds[_f] ) / 2;
+    double middleInv = FloatUtils::sigmoidInverse(middle);
+//
+    List<PiecewiseLinearCaseSplit> ls;
+
+    PiecewiseLinearCaseSplit s1;
+    s1.storeBoundTightening(Tightening(_b, _lowerBounds[_b], Tightening::LB));
+    s1.storeBoundTightening(Tightening(_b, middleInv, Tightening::UB));
+    s1.storeBoundTightening(Tightening(_f, _lowerBounds[_f], Tightening::LB));
+    s1.storeBoundTightening(Tightening(_f, FloatUtils::sigmoid(middleInv), Tightening::UB));
+
+    ls.append(s1);
+
+    PiecewiseLinearCaseSplit s2;
+    s2.storeBoundTightening(Tightening(_b, middleInv+0.000005, Tightening::LB));
+    s2.storeBoundTightening(Tightening(_b, _upperBounds[_b], Tightening::UB));
+    s2.storeBoundTightening(Tightening(_f, FloatUtils::sigmoid(middleInv) + 0.000005, Tightening::LB));
+    s2.storeBoundTightening(Tightening(_f, _upperBounds[_f], Tightening::UB));
+
+    ls.append(s2);
+
+    return ls;
 }
 
 void SigmoidConstraint::dump(String &output) const {

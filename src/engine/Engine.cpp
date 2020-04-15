@@ -117,14 +117,14 @@ bool Engine::solve( unsigned timeoutInSeconds )
             loop_idx++;
         }
 
-        if (_statistics.getNumMainLoopIterations() >= 1 && _statistics.getNumMainLoopIterations() < 5 ) {
-            for (auto s: _plConstraints) {
-                if (dynamic_cast<SigmoidConstraint *>(s)->sigmoid_num == 3) {
-                    _smtCore.setConstraintViolationThreshold(0);
-                    _smtCore.reportViolatedConstraint(s);
-                }
-            }
-        }
+//        if (_statistics.getNumMainLoopIterations() >= 1 && _statistics.getNumMainLoopIterations() < 5 ) {
+//            for (auto s: _plConstraints) {
+//                if (dynamic_cast<SigmoidConstraint *>(s)->sigmoid_num == 3) {
+//                    _smtCore.setConstraintViolationThreshold(0);
+//                    _smtCore.reportViolatedConstraint(s);
+//                }
+//            }
+//        }
 //
 //        if (_statistics.getNumMainLoopIterations() >= 11 && _statistics.getNumMainLoopIterations() < 21) {
 //            for (auto s: _plConstraints) {
@@ -135,9 +135,9 @@ bool Engine::solve( unsigned timeoutInSeconds )
 //            }
 //        }
 //
-        else {
-            _smtCore.setConstraintViolationThreshold(GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD);
-        }
+//        else {
+//            _smtCore.setConstraintViolationThreshold(GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD);
+//        }
 
         struct timespec mainLoopEnd = TimeUtils::sampleMicro();
         _statistics.addTimeMainLoop( TimeUtils::timePassed( mainLoopStart, mainLoopEnd ) );

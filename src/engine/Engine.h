@@ -436,7 +436,7 @@ private:
       Perform a round of symbolic bound tightening, taking into
       account the current state of the piecewise linear constraints.
     */
-    void performSymbolicBoundTightening();
+    void performSymbolicOrArithmeticBoundTightening();
 
     /*
       Check whether a timeout value has been provided and exceeded.

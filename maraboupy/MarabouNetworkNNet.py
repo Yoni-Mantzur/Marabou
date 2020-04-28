@@ -83,46 +83,8 @@ class MarabouNetworkNNet(MarabouNetwork.MarabouNetwork):
 
         # Set the number of variables
         self.numVars = self.numberOfVariables()
-        if use_nlr:
-            self.nlr = self.createNLR(filename)
-        else:
-            self.nlr = None
 
-    def createNLR(self, filename):
-        nlr = MarabouCore.NetworkLevelReasoner()
-        nlr.setNumberOfLayers(self.numLayers + 1)
-        for layer, size in enumerate(self.layerSizes):
-            nlr.setLayerSize(layer, size)
-        nlr.allocateMemoryByTopology()
-        # Biases
-        for layer in range(len(self.biases)):
-            for node in range(len(self.biases[layer])):
-                nlr.setBias(layer + 1, node, self.biases[layer][node])
-        # Weights
-        for layer in range(len(self.weights)): # starting from the first hidden layer
-            for target in range(len(self.weights[layer])):
-                for source in range(len(self.weights[layer][target])):
-                    nlr.setWeight(layer, source, target, self.weights[layer][target][source])
-
-        # Activation Functions
-        RELU = 0;
-        for layer in range(len(self.weights) - 1): # only hidden layers
-            for neuron in range(len(self.weights[layer])):
-                nlr.setNeuronActivationFunction(layer, neuron, RELU );
-
-        # Variable indexing
-        for layer in range(len(self.layerSizes))[1:-1]:
-            for node in range(self.layerSizes[layer]):
-                nlr.setWeightedSumVariable(layer, node, self.nodeTo_b(layer, node))
-                nlr.setActivationResultVariable(layer, node, self.nodeTo_f(layer, node))
-
-        for node in range(self.inputSize):
-            nlr.setActivationResultVariable(0, node, self.nodeTo_f(0, node))
-
-        for node in range(self.outputSize):
-            nlr.setWeightedSumVariable(len(self.layerSizes) - 1, node, self.nodeTo_b(len(self.layerSizes) - 1, node))
-
-        return nlr
+        self.nlr = self.createNLR(activationFunction=0) if use_nlr else None
 
     def getMarabouQuery(self):
         ipq = super(MarabouNetworkNNet, self).getMarabouQuery()
@@ -231,49 +193,7 @@ class MarabouNetworkNNet(MarabouNetwork.MarabouNetwork):
         self.f_variables = f_variables
         self.outputVars = np.array([output_variables])
 
-    """
-    Compute the variable number for the b variables in that correspond to the
-        layer, node argument.
 
-    Args:
-        layer: (int) layer number.
-        node: (int) node number.
-    Returns:
-        variable number: (int) variable number that corresponds to the b variable
-        of the node defined by the layer, node indices.
-    """
-    def nodeTo_b(self, layer, node):
-        assert(0 < layer)
-        assert(node < self.layerSizes[layer])
-
-        offset = self.layerSizes[0]
-        offset += sum([x*2 for x in self.layerSizes[1:layer]])
-
-        return offset + node
-
-    """
-    Compute the variable number for the f variables in that correspond to the
-        layer, node argument.
-
-    Args:
-        layer: (int) layer number.
-        node: (int) node number.
-    Returns:
-        variable number: (int) variable number that corresponds to the f variable
-        of the node defined by the layer, node indices.
-    """
-    def nodeTo_f(self, layer, node):
-        assert(layer < len(self.layerSizes))
-        assert(node < self.layerSizes[layer])
-
-        if layer == 0:
-            return node
-        else:
-            offset = self.layerSizes[0]
-            offset += sum([x*2 for x in self.layerSizes[1:layer]])
-            offset += self.layerSizes[layer]
-
-            return offset + node
     """
     Constructs the equation representation from the class members
     Arguments:

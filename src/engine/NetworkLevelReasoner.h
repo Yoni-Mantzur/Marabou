@@ -67,14 +67,18 @@ public:
     enum ActivationFunction {
         ReLU = 0,
         AbsoluteValue = 1,
+        Sigmoid = 2,
     };
 
     void setNumberOfLayers( unsigned numberOfLayers );
+    unsigned int getNumberOfLayers() const;
     void setLayerSize( unsigned layer, unsigned size );
+    const Map<unsigned int, unsigned int> &getLayerSizes() const;
     void setNeuronActivationFunction( unsigned layer, unsigned neuron, ActivationFunction activationFuction );
     void setWeight( unsigned sourceLayer, unsigned sourceNeuron, unsigned targetNeuron, double weight );
+    double **getWeights() const;
     void setBias( unsigned layer, unsigned neuron, double bias );
-
+    const Map<Index, double> &getBias() const;
     /*
       A method that allocates all internal memory structures, based on
       the network's topology. Should be invoked after the layer sizes

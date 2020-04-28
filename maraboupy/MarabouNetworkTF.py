@@ -46,6 +46,9 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
         self.readFromPb(filename, inputNames, outputName, savedModel, savedModelTags)
         self.processBiasAddRelations()
 
+        self.inputSize = len(self.inputVars[0][0])
+        self.outputSize = len(self.outputVars[0])
+
     def clear(self):
         """
         Reset values to represent empty network
@@ -110,12 +113,15 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
             outputOp = self.sess.graph.get_operations()[-1]
         self.setInputOps(inputOps)
         self.setOutputOp(outputOp)
+
+        self.layerSizes += [len(self.inputVars[0][0])]
         ### END finding input/output operations ###
 
         ### Generate equations corresponding to network ###
         self.foundnInputFlags = 0
         self.makeGraphEquations(self.outputOp)
         assert self.foundnInputFlags == len(inputOps)
+
         ### END generating equations ###
 
     def setInputOps(self, ops):
@@ -132,6 +138,7 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
             except:
                 self.shapeMap[op] = [None]
             self.inputVars.append(self.opToVarArray(op))
+            #TODO: here we declare first layer vars
         self.inputOps = ops
 
 
@@ -148,7 +155,7 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
             self.shapeMap[op] = [None]
         self.outputOp = op
         self.outputVars = self.opToVarArray(self.outputOp)
-
+        #TODO: here we declare last layer vars
     def opToVarArray(self, x):
         """
         Function to find variables corresponding to operation
@@ -252,22 +259,31 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
         assert A.shape[1] == B.shape[0]
         m, n = curValues.shape
         p = A.shape[1]
+
+        self.layerSizes += [n]
+
         ### END getting inputs ###
 
         ### Generate actual equations ###
+        self.weights.append([])
         for i in range(m):
             for j in range(n):
-                e = []
+                self.weights[-1].append([])
                 e = MarabouUtils.Equation()
                 for k in range(p):
+                    self.weights[-1][-1].append(B[k][j])
                     e.addAddend(B[k][j], A[i][k])
+
+                # TODO: Here we create the equations, so we've the weights of prevLayers to current Layer
                 e.addAddend(-1, curValues[i][j])
                 e.setScalar(0.0)
                 self.addEquation(e)
 
+        assert len(self.weights[-1]) == n and all([len(w) == p for w in self.weights[-1]])
+
     def biasAddEquations(self, op):
         """
-        Function to generate equations corresponding to bias addition
+        Function to gelennerate equations corresponding to bias addition
         Arguments:
             op: (tf.op) representing bias add operation
         """
@@ -285,9 +301,11 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
         ### END getting inputs ###
 
         ### Do not generate equations, as these can be eliminated ###
+        self.biases.append([])
         for i in range(len(prevVars)):
             # prevVars = curVars - prevConst
             self.biasAddRelations += [(prevVars[i], curVars[i], -prevConsts[i])]
+            self.biases[-1].append(prevConsts[i])
 
     def processBiasAddRelations(self):
         """
@@ -309,6 +327,7 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
                 e.setScalar(c)
                 self.addEquation(e)
             else:
+                # TODO: here we set bias equations
                 biasAddUpdates[x] = (xprime, c)
                 self.setLowerBound(x, 0.0)
                 self.setUpperBound(x, 0.0)
@@ -509,6 +528,10 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
             return
         if op.node_def.op == 'MatMul':
             self.matMulEquations(op)
+
+            # Assuming that each MatMul indicates new layer
+            self.numLayers += 1
+
         elif op.node_def.op == 'BiasAdd':
             self.biasAddEquations(op)
         elif op.node_def.op == 'Add':
@@ -533,6 +556,7 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
         Arguments:
             op: (tf.op) representing operation until which we want to generate network equations
         """
+        # Going from last layer to first
         if op in self.madeGraphEquations:
             return
         self.madeGraphEquations += [op]
@@ -565,3 +589,33 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
         out = self.sess.run(outputName + ":0", feed_dict=feed_dict)
 
         return out[0]
+
+    def nodeTo_b(self, layer, node):
+        assert(0 < layer)
+        assert(node < self.layerSizes[layer])
+
+        if layer == self.numLayers:
+            return self.outputVars[0][node]
+
+        activations = self.sigmoidList or self.reluList
+
+        offset = sum([l_s for l_s in self.layerSizes[1:layer]])
+
+        b_var = activations[offset + node][0]
+
+        return b_var
+
+    def nodeTo_f(self, layer, node):
+        assert(layer < len(self.layerSizes))
+        assert(node < self.layerSizes[layer])
+
+        if layer == 0:
+            return self.inputVars[0][0][node]
+
+        activations = self.sigmoidList or self.reluList
+
+        offset = sum([l_s for l_s in self.layerSizes[1:layer]])
+
+        f_var = activations[offset + node][1]
+
+        return f_var

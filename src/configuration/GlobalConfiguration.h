@@ -170,6 +170,10 @@ public:
     // Symbolic tightening rounding constant
     static const double SYMBOLIC_TIGHTENING_ROUNDING_CONSTANT;
 
+    // Whether arithmetic bound tightening should be used or not
+    static const bool USE_ARITHMETIC_BOUND_TIGHTENING;
+
+
     /*
       Constraint fixing heuristics
     */

@@ -353,6 +353,51 @@ void InputQuery::saveQuery( const String &fileName )
         ++i;
     }
 
+    // nlr
+    if (_networkLevelReasoner)
+    {
+        queryFile->write(Stringf("\n%s\n", "nlr"));
+
+        // Activation
+        queryFile->write(Stringf("%d\n", _networkLevelReasoner->Sigmoid));
+
+        // Number of layers
+        queryFile->write(Stringf("%u\n", _networkLevelReasoner->getNumberOfLayers()));
+
+        // Layer sizes
+        for (auto layer_size : _networkLevelReasoner->getLayerSizes()) {
+            queryFile->write(Stringf("%u,%u\n", layer_size.first, layer_size.second));
+        }
+
+        // Biases
+        queryFile->write(Stringf("%u\n", _networkLevelReasoner->getBias().size()));
+        for (auto bias : _networkLevelReasoner->getBias()) {
+            NetworkLevelReasoner::Index biasIndex = bias.first;
+            queryFile->write(Stringf("%u,%u,%f\n", biasIndex._layer, biasIndex._neuron, bias.second));
+        }
+
+        // Weights
+        for (unsigned layer = 0; layer < _networkLevelReasoner->getNumberOfLayers() - 1; ++layer) {
+            unsigned int numberOfWeightsInLayer =
+                    _networkLevelReasoner->getLayerSizes()[layer] * _networkLevelReasoner->getLayerSizes()[layer + 1];
+            for (unsigned w_index = 0; w_index < numberOfWeightsInLayer; ++w_index)
+                queryFile->write(Stringf("%u,%f\n", layer, _networkLevelReasoner->getWeights()[layer][w_index]));
+        }
+
+        // Node to b variable
+        queryFile->write(Stringf("%u\n", _networkLevelReasoner->getIndexToWeightedSumVariable().size()));
+        for (auto nodeToBVar : _networkLevelReasoner->getIndexToWeightedSumVariable()) {
+            NetworkLevelReasoner::Index node = nodeToBVar.first;
+            queryFile->write(Stringf("%u,%u,%u\n", node._layer, node._neuron, nodeToBVar.second));
+        }
+
+        // Node to f variable
+        queryFile->write(Stringf("%u\n", _networkLevelReasoner->getIndexToActivationResultVariable().size()));
+        for (auto nodeToFVar : _networkLevelReasoner->getIndexToActivationResultVariable()) {
+            NetworkLevelReasoner::Index node = nodeToFVar.first;
+            queryFile->write(Stringf("%u,%u,%u\n", node._layer, node._neuron, nodeToFVar.second));
+        }
+    }
     queryFile->close();
 }
 

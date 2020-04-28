@@ -45,6 +45,16 @@ class MarabouNetwork:
         self.inputVars = []
         self.outputVars = np.array([])
 
+        self.numLayers = 0
+        self.layerSizes = []
+        self.inputSize = 0
+        self.outputSize = 0
+        self.weights = []
+        self.biases = []
+
+        self.nlr = None
+
+
     def getNewVariable(self):
         """
         Function to request allocation of new variable
@@ -189,7 +199,10 @@ class MarabouNetwork:
         for u in self.upperBounds:
             assert u < self.numVars
             ipq.setUpperBound(u, self.upperBounds[u])
-            
+
+        if self.nlr:
+            ipq.setNetworkLevelReasoner(self.nlr)
+
         return ipq
 
     def solve(self, filename="", verbose=True, options=None):
@@ -210,6 +223,7 @@ class MarabouNetwork:
                     to how an input query was solved.
         """
         ipq = self.getMarabouQuery()
+
         if options == None:
             options = MarabouCore.Options()
         vals, stats = MarabouCore.solve(ipq, options, filename)
@@ -299,3 +313,82 @@ class MarabouNetwork:
         outNotMar = self.evaluate(inputs, useMarabou=False)
         err = np.abs(outMar - outNotMar)
         return err
+
+    """
+    Compute the variable number for the b variables in that correspond to the
+        layer, node argument.
+
+    Args:
+        layer: (int) layer number.
+        node: (int) node number.
+    Returns:
+        variable number: (int) variable number that corresponds to the b variable
+        of the node defined by the layer, node indices.
+    """
+    def nodeTo_b(self, layer, node):
+        assert(0 < layer)
+        assert(node < self.layerSizes[layer])
+
+        offset = self.layerSizes[0]
+        offset += sum([x*2 for x in self.layerSizes[1:layer]])
+
+        return offset + node
+
+    """
+    Compute the variable number for the f variables in that correspond to the
+        layer, node argument.
+
+    Args:
+        layer: (int) layer number.
+        node: (int) node number.
+    Returns:
+        variable number: (int) variable number that corresponds to the f variable
+        of the node defined by the layer, node indices.
+    """
+    def nodeTo_f(self, layer, node):
+        assert(layer < len(self.layerSizes))
+        assert(node < self.layerSizes[layer])
+
+        if layer == 0:
+            return node
+        else:
+            offset = self.layerSizes[0]
+            offset += sum([x*2 for x in self.layerSizes[1:layer]])
+            offset += self.layerSizes[layer]
+
+            return offset + node
+
+    def createNLR(self, activationFunction):
+
+        nlr = MarabouCore.NetworkLevelReasoner()
+        nlr.setNumberOfLayers(self.numLayers + 1)
+        for layer, size in enumerate(self.layerSizes):
+            nlr.setLayerSize(layer, size)
+        nlr.allocateMemoryByTopology()
+        # Biases
+        for layer in range(len(self.biases)):
+            for node in range(len(self.biases[layer])):
+                nlr.setBias(layer + 1, node, self.biases[layer][node])
+        # Weights
+        for layer in range(len(self.weights)):  # starting from the first hidden layer
+            for target in range(len(self.weights[layer])):
+                for source in range(len(self.weights[layer][target])):
+                    nlr.setWeight(layer, source, target, self.weights[layer][target][source])
+
+        for layer in range(len(self.weights) - 1):  # only hidden layers
+            for neuron in range(len(self.weights[layer])):
+                nlr.setNeuronActivationFunction(layer, neuron, activationFunction)
+
+        # Variable indexing
+        for layer in range(len(self.layerSizes))[1:-1]:
+            for node in range(self.layerSizes[layer]):
+                nlr.setWeightedSumVariable(layer, node, self.nodeTo_b(layer, node))
+                nlr.setActivationResultVariable(layer, node, self.nodeTo_f(layer, node))
+
+        for node in range(self.inputSize):
+            nlr.setActivationResultVariable(0, node, self.nodeTo_f(0, node))
+
+        for node in range(self.outputSize):
+            nlr.setWeightedSumVariable(len(self.layerSizes) - 1, node, self.nodeTo_b(len(self.layerSizes) - 1, node))
+
+        return nlr

@@ -184,7 +184,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
             {
                 do
                 {
-                    performSymbolicBoundTightening();
+                    performSymbolicOrArithmeticBoundTightening();
                 }
                 while ( applyAllValidConstraintCaseSplits() );
                 splitJustPerformed = false;
@@ -244,7 +244,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
                 checkBoundCompliancyWithDebugSolution();
 
                 while ( applyAllValidConstraintCaseSplits() )
-                    performSymbolicBoundTightening();
+                    performSymbolicOrArithmeticBoundTightening();
 
                 continue;
             }
@@ -1763,9 +1763,10 @@ List<unsigned> Engine::getInputVariables() const
     return _preprocessedQuery.getInputVariables();
 }
 
-void Engine::performSymbolicBoundTightening()
+void Engine::performSymbolicOrArithmeticBoundTightening()
 {
-    if ( ( !GlobalConfiguration::USE_SYMBOLIC_BOUND_TIGHTENING ) ||
+    if ( ( !GlobalConfiguration::USE_SYMBOLIC_BOUND_TIGHTENING  &&
+           !GlobalConfiguration::USE_ARITHMETIC_BOUND_TIGHTENING ) ||
          ( !_networkLevelReasoner ) )
         return;
 
@@ -1776,8 +1777,11 @@ void Engine::performSymbolicBoundTightening()
     // Step 1: tell the NLR about the current bounds
     _networkLevelReasoner->obtainCurrentBounds();
 
-    // Step 2: perform SBT
-    _networkLevelReasoner->symbolicBoundPropagation();
+    // Step 2: perform SBT or ABT
+    if ( GlobalConfiguration::USE_SYMBOLIC_BOUND_TIGHTENING )
+        _networkLevelReasoner->symbolicBoundPropagation();
+    else
+        _networkLevelReasoner->intervalArithmeticBoundPropagation();
 
     // Step 3: Extract the bounds
     List<Tightening> tightenings;

@@ -18,7 +18,7 @@ TAGS
 tools/boost_1_68_0
 /tools/boost.unzipped
 /tools/boost_1_68_0.tar.gz
-/tools/pybind11-2.3.0
+/tools/pybind11*
 /cpp_interface_example/example.elf
 /src/input_parsers/mps_example/mps.elf
 
@@ -37,8 +37,13 @@ _deps
 /tools/pybind11_2_3_0.tar.gz
 build
 /.idea
-/cmake-build-debug
+/cmake-build-*
 sig_*
+sigmoids*
 maraboupy/examples/networks/sigmoids
 log_stats.txt
 log_splits.txt
+log/
+query*
+regress/logs/
+slurm-*

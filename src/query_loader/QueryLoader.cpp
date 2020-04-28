@@ -223,6 +223,140 @@ InputQuery QueryLoader::loadQuery( const String &fileName )
         inputQuery.addPiecewiseLinearConstraint( constraint );
     }
 
+    // nlr
+    String line = input->readLine();
+    if (line == "nlr") {
+        NetworkLevelReasoner *nlr = new NetworkLevelReasoner();
+
+        // Activation
+        int activation = atoi(input->readLine().trim().ascii());
+
+        // Number of layers
+        unsigned numLayers = atoi(input->readLine().trim().ascii());
+        nlr->setNumberOfLayers(numLayers);
+
+        // Layer sizes
+        for (unsigned i = 0; i < numLayers; ++i) {
+            String line = input->readLine();
+            List<String> tokens = line.tokenize(",");
+
+            // format: <layer, size>
+            ASSERT(tokens.size() == 2);
+
+            auto it = tokens.begin();
+            unsigned layer = atoi(it->ascii());
+            ++it;
+
+            unsigned size = atoi(it->ascii());
+            ++it;
+
+            log(Stringf("layer: %u, size: %u\n", layer, size));
+            nlr->setLayerSize(layer, size);
+        }
+    
+        nlr->allocateMemoryByTopology();
+            
+        // Set Activations
+        for (unsigned layer = 0; layer < numLayers; ++layer) {
+            for (unsigned node = 0; node < nlr->getLayerSizes()[layer]; ++node) {
+                nlr->setNeuronActivationFunction(layer, node, NetworkLevelReasoner::ActivationFunction(activation));
+            }
+        }
+
+        // Biases
+        unsigned numBiases = atoi(input->readLine().trim().ascii());
+        for (unsigned b = 0; b < numBiases; ++b) {
+            String line = input->readLine();
+            List<String> tokens = line.tokenize(",");
+
+            // format: <layer, node, bias>
+            ASSERT(tokens.size() == 3);
+
+            auto it = tokens.begin();
+            unsigned layer = atoi(it->ascii());
+            ++it;
+
+            unsigned node = atoi(it->ascii());
+            ++it;
+
+            double bias = atof(it->ascii());
+            ++it;
+
+            log(Stringf("layer: %u, node: %u, bias: %f\n", layer, node, bias));
+            nlr->setBias(layer, node, bias);
+        }
+
+        // Weights
+        for (unsigned layer = 0; layer < numLayers - 1; ++layer) {
+            for (unsigned sourceNode = 0; sourceNode < nlr->getLayerSizes()[layer]; ++sourceNode) {
+                for (unsigned targetNode = 0; targetNode < nlr->getLayerSizes()[layer + 1]; ++targetNode) {
+                    String line = input->readLine();
+                    List<String> tokens = line.tokenize(",");
+
+                    // format: <layer, size>
+                    ASSERT(tokens.size() == 2);
+
+                    auto it = tokens.begin();
+                    unsigned sourceLayer = atoi(it->ascii());
+                    ++it;
+
+                    double weight = atof(it->ascii());
+                    ++it;
+
+                    log(Stringf("sourceLayer: %u, size: %u\n", sourceLayer, sourceNode, targetNode, weight));
+                    nlr->setWeight(sourceLayer, sourceNode, targetNode, weight);
+                }
+            }
+        }
+
+        // Node to b variable
+        unsigned numberOfIndices = atoi(input->readLine().trim().ascii());
+        for (unsigned i = 0; i < numberOfIndices; ++i) {
+            String line = input->readLine();
+            List<String> tokens = line.tokenize(",");
+
+            // format: <layer, node, variable>
+            ASSERT(tokens.size() == 3);
+
+            auto it = tokens.begin();
+            unsigned layer = atoi(it->ascii());
+            ++it;
+
+            unsigned node = atoi(it->ascii());
+            ++it;
+
+            unsigned var = atoi(it->ascii());
+            ++it;
+
+            log(Stringf("NODE TO B: layer: %u, node: %u, var: %f\n", layer, node, var));
+            nlr->setWeightedSumVariable(layer, node, var);
+        }
+
+        // Node to f variable
+        numberOfIndices = atoi(input->readLine().trim().ascii());
+        for (unsigned i = 0; i < numberOfIndices; ++i) {
+            String line = input->readLine();
+            List<String> tokens = line.tokenize(",");
+
+            // format: <layer, node, variable>
+            ASSERT(tokens.size() == 3);
+
+            auto it = tokens.begin();
+            unsigned layer = atoi(it->ascii());
+            ++it;
+
+            unsigned node = atoi(it->ascii());
+            ++it;
+
+            unsigned var = atoi(it->ascii());
+            ++it;
+
+            log(Stringf("NODE TO F: layer: %u, node: %u, var: %f\n", layer, node, var));
+            nlr->setActivationResultVariable(layer, node, var);
+        }
+
+        inputQuery.setNetworkLevelReasoner(nlr);
+    }
     return inputQuery;
 }
 

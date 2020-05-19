@@ -68,6 +68,7 @@ public:
         ReLU = 0,
         AbsoluteValue = 1,
         Sigmoid = 2,
+        Linear = 3,
     };
 
     void setNumberOfLayers( unsigned numberOfLayers );
@@ -151,6 +152,9 @@ public:
 
     void getConstraintTightenings( List<Tightening> &tightenings ) const;
 
+    bool isAdversarial() const;
+    void setIsAdversarial();
+
 private:
     unsigned _numberOfLayers;
     Map<unsigned, unsigned> _layerSizes;
@@ -219,6 +223,9 @@ private:
     void absoluteValueSymbolicPropagation( const Index &index, double &lbLb, double &lbUb, double &ubLb, double &ubUb );
 
     static void log( const String &message );
+
+    bool _isAdversarial;
+
 };
 
 #endif // __NetworkLevelReasoner_h__

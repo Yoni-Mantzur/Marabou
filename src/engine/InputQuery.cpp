@@ -361,6 +361,9 @@ void InputQuery::saveQuery( const String &fileName )
         // Activation
         queryFile->write(Stringf("%d\n", _networkLevelReasoner->Sigmoid));
 
+        // Is adversarial
+        queryFile->write(Stringf("%d\n", _networkLevelReasoner->isAdversarial()? 1:0));
+
         // Number of layers
         queryFile->write(Stringf("%u\n", _networkLevelReasoner->getNumberOfLayers()));
 
@@ -378,8 +381,7 @@ void InputQuery::saveQuery( const String &fileName )
 
         // Weights
         for (unsigned layer = 0; layer < _networkLevelReasoner->getNumberOfLayers() - 1; ++layer) {
-            unsigned int numberOfWeightsInLayer =
-                    _networkLevelReasoner->getLayerSizes()[layer] * _networkLevelReasoner->getLayerSizes()[layer + 1];
+            unsigned int numberOfWeightsInLayer = _networkLevelReasoner->getLayerSizes()[layer] * _networkLevelReasoner->getLayerSizes()[layer + 1];
             for (unsigned w_index = 0; w_index < numberOfWeightsInLayer; ++w_index)
                 queryFile->write(Stringf("%u,%f\n", layer, _networkLevelReasoner->getWeights()[layer][w_index]));
         }

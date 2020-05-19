@@ -265,10 +265,12 @@ PYBIND11_MODULE(MarabouCore, m) {
     nlr.def("allocateMemoryByTopology", &NetworkLevelReasoner::allocateMemoryByTopology);
     nlr.def("setWeightedSumVariable", &NetworkLevelReasoner::setWeightedSumVariable);
     nlr.def("setActivationResultVariable", &NetworkLevelReasoner::setActivationResultVariable);
+    nlr.def("setIsAdversarial", &NetworkLevelReasoner::setIsAdversarial);
     py::enum_<NetworkLevelReasoner::ActivationFunction >(nlr, "ActivationFunction")
             .value("ReLU", NetworkLevelReasoner::ActivationFunction::ReLU)
             .value("AbsoluteValue", NetworkLevelReasoner::ActivationFunction::AbsoluteValue)
             .value("Sigmoid", NetworkLevelReasoner::ActivationFunction::Sigmoid)
+            .value("Linear", NetworkLevelReasoner::ActivationFunction::Linear)
             .export_values();
     py::class_<Equation> eq(m, "Equation");
     eq.def(py::init());

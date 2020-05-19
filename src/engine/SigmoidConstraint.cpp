@@ -72,8 +72,9 @@ void SigmoidConstraint::notifyLowerBound(unsigned variable, double bound) {
     _lowerBounds[variable] = bound;
     _isBoundWereChanged = true;
 
-//    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable], 0.000001))
-//        _isFixed = true;
+    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable],
+                             GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+        _isFixed = true;
 
     if (_constraintBoundTightener) {
         if (variable == _b) {
@@ -93,8 +94,9 @@ void SigmoidConstraint::notifyUpperBound(unsigned variable, double bound) {
     _upperBounds[variable] = bound;
     _isBoundWereChanged = true;
 
-//    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable], 0.00001))
-//        _isFixed = true;
+    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable],
+                             GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+        _isFixed = true;
 
     if (_constraintBoundTightener) {
         if (variable == _b) {
@@ -111,10 +113,10 @@ void SigmoidConstraint::notifyUpperBound(unsigned variable, double bound) {
 void SigmoidConstraint::notifyBrokenAssignment() {
     ASSERT(_assignment.exists(_b) && _assignment.exists(_f))
 
-    if (getConvexTypeInSegment(_lowerBounds[_b], _upperBounds[_b]))
+    if (getConvexTypeInSegment(_lowerBounds[_b], _upperBounds[_b]) == UNKNOWN)
         addSpuriousPoint({0.0, 0.5});
-//    else
-//        addSpuriousPoint({_assignment[_b], _assignment[_f]});
+    else
+        addSpuriousPoint({_assignment[_b], _assignment[_f]});
 }
 
 bool SigmoidConstraint::participatingVariable(unsigned variable) const {
@@ -174,7 +176,7 @@ PiecewiseLinearCaseSplit SigmoidConstraint::getValidCaseSplit() const {
         constEqForB.setScalar(_lowerBounds[_b]);
 
         double sigmoidLowerB = FloatUtils::sigmoid(_lowerBounds[_b]);
-//        ASSERT(FloatUtils::areEqual(_lowerBounds[_f], sigmoidLowerB, 0.000001))
+
         Equation constEqForF(Equation::EQ);
         constEqForF.addAddend(1, _f);
         constEqForF.setScalar(_lowerBounds[_f]);
@@ -191,16 +193,14 @@ PiecewiseLinearCaseSplit SigmoidConstraint::getValidCaseSplit() const {
         return constraintToConst;
     }
 
-    refinements.append(const_cast<SigmoidConstraint *>(this)->getEquationsAbstraction());
+    refinements.append(const_cast<SigmoidConstraint *>(this)->getEquationsAbstraction(true));
 
     if (GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION) {
         if (_isBoundWereChanged) {
 
             try {
                 refinements.append(const_cast<SigmoidConstraint *>(this)->refineCurrentSplit());
-            } catch (...) {
-                printf("Equation already was inserted\n");
-            }
+            } catch (...) {}
             const_cast<SigmoidConstraint *>(this)->_isBoundWereChanged = false;
         }
     }
@@ -225,32 +225,8 @@ List<PiecewiseLinearCaseSplit> SigmoidConstraint::getCaseSplits() const {
     ASSERT(_assignment.exists(_f));
     ASSERT(_lowerBounds.exists(_b) && _lowerBounds.exists(_f));
     ASSERT(_upperBounds.exists(_b) && _upperBounds.exists(_f));
+    return const_cast<SigmoidConstraint *>(this)->getSplitsAbstraction(true);
 
-    if ( getConvexTypeInSegment(_lowerBounds[_b], _upperBounds[_b]) == UNKNOWN)
-        return const_cast<SigmoidConstraint *>(this)->getSplitsAbstraction();
-
-    double middle = ( _upperBounds[_f] + _lowerBounds[_f] ) / 2;
-    double middleInv = FloatUtils::sigmoidInverse(middle);
-//
-    List<PiecewiseLinearCaseSplit> ls;
-
-    PiecewiseLinearCaseSplit s1;
-    s1.storeBoundTightening(Tightening(_b, _lowerBounds[_b], Tightening::LB));
-    s1.storeBoundTightening(Tightening(_b, middleInv, Tightening::UB));
-    s1.storeBoundTightening(Tightening(_f, _lowerBounds[_f], Tightening::LB));
-    s1.storeBoundTightening(Tightening(_f, FloatUtils::sigmoid(middleInv), Tightening::UB));
-
-    ls.append(s1);
-
-    PiecewiseLinearCaseSplit s2;
-    s2.storeBoundTightening(Tightening(_b, middleInv+0.000005, Tightening::LB));
-    s2.storeBoundTightening(Tightening(_b, _upperBounds[_b], Tightening::UB));
-    s2.storeBoundTightening(Tightening(_f, FloatUtils::sigmoid(middleInv) + 0.000005, Tightening::LB));
-    s2.storeBoundTightening(Tightening(_f, _upperBounds[_f], Tightening::UB));
-
-    ls.append(s2);
-
-    return ls;
 }
 
 void SigmoidConstraint::dump(String &output) const {
@@ -268,9 +244,7 @@ void SigmoidConstraint::dump(String &output) const {
 void SigmoidConstraint::addAuxiliaryEquations(InputQuery &inputQuery) {
     try {
         inputQuery.addEquation((refineCurrentSplit()));
-    } catch (...) {
-        printf("Equation already was inserted\n");
-    }
+    } catch (...) {}
 }
 
 void SigmoidConstraint::eliminateVariable(unsigned /* variable */, double /* fixedValue */) {

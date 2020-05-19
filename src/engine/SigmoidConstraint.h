@@ -149,6 +149,12 @@ public:
      */
     double evaluateDerivativeOfConciseFunction(double x) const override;
 
+
+    /*
+     * Evaluate the Inverse of the concise function given point in the range
+    */
+    double evaluateInverseOfConciseFunction(double y) const override { return FloatUtils::sigmoidInverse(y); };
+
     /*
      * Check if the concise function is convex function
     */
@@ -169,12 +175,11 @@ public:
      *Turn the constraint on/off.
      */
     void setActiveConstraint( bool active ) override;
-
+    
 
     /* For debugging propose */
     void LogFile(File *file = nullptr) { _logFile = file; };
-    void setSigmoidNum (int sigmoidNum) { sigmoid_num = sigmoidNum; };
-    int sigmoid_num;
+
 
 private:
 
@@ -197,6 +202,8 @@ private:
     void dumpSplits(const List<PiecewiseLinearCaseSplit> &splits) const;
     void dumpFixes(double bValue, double fValue, double sigmoidValue) const;
     void dumpRestore(bool isBefore) const;
+    int sigmoid_num;
+
 };
 
 

@@ -77,7 +77,7 @@ InputQuery Preprocessor::preprocess( const InputQuery &query, bool attemptVariab
 
     if ( attemptVariableElimination )
         eliminateVariables();
-    
+
     return _preprocessed;
 }
 
@@ -115,6 +115,7 @@ void Preprocessor::makeAllEquationsEqualities()
 {
     for ( auto &equation : _preprocessed.getEquations() )
     {
+        equation.dump();
         if ( equation._type == Equation::EQ )
             continue;
 
@@ -130,6 +131,7 @@ void Preprocessor::makeAllEquationsEqualities()
         equation._type = Equation::EQ;
 
         equation.addAddend( 1, auxVariable );
+        equation.dump();
     }
 }
 
@@ -400,7 +402,6 @@ bool Preprocessor::processConstraints()
 		{
 			constraint->notifyLowerBound( variable, _preprocessed.getLowerBound( variable ) );
 			constraint->notifyUpperBound( variable, _preprocessed.getUpperBound( variable ) );
-//			ASSERT( FloatUtils::areEqual( _preprocessed.getLowerBound( variable ), _preprocessed.getUpperBounds( variable ) ) )
 		}
 
         List<Tightening> tightenings;

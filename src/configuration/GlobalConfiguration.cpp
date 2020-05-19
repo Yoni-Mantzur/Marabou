@@ -93,7 +93,7 @@ const bool GlobalConfiguration::DANTZIGS_RULE_LOGGING = false;
 const bool GlobalConfiguration::BASIS_FACTORIZATION_LOGGING = false;
 const bool GlobalConfiguration::PROJECTED_STEEPEST_EDGE_LOGGING = false;
 const bool GlobalConfiguration::GAUSSIAN_ELIMINATION_LOGGING = false;
-const bool GlobalConfiguration::QUERY_LOADER_LOGGING = false;
+const bool GlobalConfiguration::QUERY_LOADER_LOGGING = true;
 const bool GlobalConfiguration::SYMBOLIC_BOUND_TIGHTENER_LOGGING = false;
 const bool GlobalConfiguration::NETWORK_LEVEL_REASONER_LOGGING = true;
 
@@ -101,10 +101,10 @@ const bool GlobalConfiguration::USE_SMART_FIX = false;
 const bool GlobalConfiguration::USE_LEAST_FIX = true;
 
 const bool GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS = true;
-const bool GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION = false;
+const bool GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION = true;
 const bool GlobalConfiguration::PREPROCESSOR_PL_CONSTRAINTS_ADD_ABSTRACTION = true;
 
-const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH = 5;
+const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH = 3;
 const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_SPLIT_SEGMENTS_TH = 1;
 
 

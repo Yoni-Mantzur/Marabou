@@ -151,8 +151,6 @@ public:
     void resetExitCode();
     void resetBoundTighteners();
 
-    void tightenBounds(List<Tightening> &bounds);
-    List<Tightening> addEquation(Equation equation);
 
 private:
     enum BasisRestorationRequired {
@@ -476,8 +474,6 @@ private:
       to handle case splits
     */
     void updateDirections();
-
-    void tightenBounds(const List<Tightening> &bounds) const;
 };
 
 #endif // __Engine_h__

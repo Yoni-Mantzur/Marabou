@@ -55,12 +55,12 @@ public:
     /*
      * Get splits abstraction
      */
-    List<PiecewiseLinearCaseSplit> getSplitsAbstraction();
+    List<PiecewiseLinearCaseSplit> getSplitsAbstraction(bool isGuidedByF);
 
     /*
      * Get equations abstraction
      */
-    List<Equation> getEquationsAbstraction();
+    List<Equation> getEquationsAbstraction(bool isGuidedByF);
 
     /*
      * Refine the current split guided the new bounds are given
@@ -97,6 +97,11 @@ public:
     virtual double evaluateDerivativeOfConciseFunction(double x) const = 0;
 
     /*
+     * Evaluate the Inverse of the concise function given point in the range
+    */
+    virtual double evaluateInverseOfConciseFunction(double y) const = 0;
+
+    /*
      * Check if the concise function is convex function
      */
     virtual ConvexType getConvexTypeInSegment(double x0, double x1) const = 0;
@@ -105,10 +110,10 @@ private:
     /*
     * List of spurious points from above and beneath
     */
-    List<double> _pointsForSplits;
-    List<double> _pointsForAbstractedBounds;
+    List<Point> _pointsForSplits;
+    List<Point> _pointsForAbstractedBounds;
 
-    List<double> _registeredPointsForAbstraction;
+    List<Point> _registeredPointsForAbstraction;
     List<Point> _registeredPointsForCurrentSplit;
 
     /*
@@ -129,6 +134,9 @@ private:
     void setEquationTypeForSplitAbstraction(Equation *equation, double x0, double x1);
     void setEquationTypeForAbstraction(Equation *equation, double x0, double x1);
 
+    bool validatePoint(Point p, List<Point> registeredPoints, bool includeP = false, bool withBounds = false);
+
+    Point getMiddlePoint(bool isGuidedByF, Point &lowerBound, Point &upperBound) const;
 };
 
 

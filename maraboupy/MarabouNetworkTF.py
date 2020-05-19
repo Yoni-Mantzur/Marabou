@@ -339,6 +339,7 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
                     xprime, c = biasAddUpdates[x]
                     equ.replaceVariable(x, xprime, c)
 
+
     def addEquations(self, op):
         """
         Function to generate equations corresponding to bias addition
@@ -594,7 +595,16 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
         assert(0 < layer)
         assert(node < self.layerSizes[layer])
 
-        if layer == self.numLayers:
+        if self.is_adversarial:
+
+            if layer == self.numLayers:
+                # // TODO: what reuturn herE?
+                return self.numVars - 1
+
+            if layer == self.numLayers - 1:
+                return self.oldOutputVars[0][node]
+
+        elif layer == self.numLayers:
             return self.outputVars[0][node]
 
         activations = self.sigmoidList or self.reluList
@@ -611,6 +621,9 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
 
         if layer == 0:
             return self.inputVars[0][0][node]
+
+        if self.is_adversarial and layer == self.numLayers - 1:
+            return self.oldOutputVars[0][node]
 
         activations = self.sigmoidList or self.reluList
 

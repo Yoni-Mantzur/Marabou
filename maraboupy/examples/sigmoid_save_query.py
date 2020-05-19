@@ -6,7 +6,7 @@ from maraboupy import MarabouUtils, MarabouCore, Marabou
 import numpy as np
 
 
-network = Marabou.read_tf('./networks/sigmoids/mnist_10.pb')  # type: MarabouNetwork.MarabouNetwork
+network = Marabou.read_tf('./networks/sigmoids/mnist_20.pb')  # type: MarabouNetwork.MarabouNetwork
 
 
 # Get the input and output variable numbers; [0] since first dimension is batch size
@@ -189,17 +189,12 @@ for var in outputVars:
     network.setLowerBound(var, -large)
     network.setUpperBound(var, large)
 
-equation1 = MarabouUtils.Equation(MarabouCore.Equation.EquationType.LE)
-equation1.addAddend(1, outputVars[7])
-equation1.addAddend(-1, outputVars[9])
-equation1.setScalar(0)
-
-network.addEquation(equation1)
+network.addAdverserialQuery((outputVars[7], 7), (outputVars[9], 9))
 
 network.nlr = network.createNLR(MarabouCore.NetworkLevelReasoner.ActivationFunction.Sigmoid)
 
 # network.evaluateWithMarabou(np.array([x]))
 # # Call to C++ Marabou solver
 # options = Marabou.createOptions(dnc=True, numWorkers=6, initialDivides=2, verbosity=0)
-network.saveQuery("query_10_0.029")
+network.saveQuery("query_30_0.029")
 

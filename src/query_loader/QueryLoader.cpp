@@ -180,6 +180,11 @@ InputQuery QueryLoader::loadQuery( const String &fileName )
         inputQuery.addEquation( equation );
     }
 
+    for (auto eq : inputQuery.getEquations())
+    {
+       eq.dump();
+    }
+
     // Constraints
     for ( unsigned i = 0; i < numConstraints; ++i )
     {
@@ -213,6 +218,7 @@ InputQuery QueryLoader::loadQuery( const String &fileName )
         else if ( coType == "sigmoid" )
         {
             constraint = new SigmoidConstraint( serializeConstraint );
+
         }
         else
         {
@@ -231,9 +237,15 @@ InputQuery QueryLoader::loadQuery( const String &fileName )
         // Activation
         int activation = atoi(input->readLine().trim().ascii());
 
+
+        // isAdversarial
+        int isAdversarial = atoi(input->readLine().trim().ascii());
+        log( Stringf( "Is Adverisiral: %u\n", isAdversarial) );
+
         // Number of layers
         unsigned numLayers = atoi(input->readLine().trim().ascii());
         nlr->setNumberOfLayers(numLayers);
+        log( Stringf( "Number of layers: %u\n", numLayers ) );
 
         // Layer sizes
         for (unsigned i = 0; i < numLayers; ++i) {
@@ -257,9 +269,21 @@ InputQuery QueryLoader::loadQuery( const String &fileName )
         nlr->allocateMemoryByTopology();
             
         // Set Activations
-        for (unsigned layer = 0; layer < numLayers; ++layer) {
-            for (unsigned node = 0; node < nlr->getLayerSizes()[layer]; ++node) {
-                nlr->setNeuronActivationFunction(layer, node, NetworkLevelReasoner::ActivationFunction(activation));
+        for (unsigned layer = 0; layer < numLayers - 1; ++layer) {
+            if (layer == numLayers - 2 && isAdversarial)
+            {
+                for (unsigned node = 0; node < nlr->getLayerSizes()[layer]; ++node)
+                    nlr->setNeuronActivationFunction(layer, node, NetworkLevelReasoner::ActivationFunction::Linear);
+
+                nlr->setIsAdversarial();
+
+            }
+
+            else {
+                for (unsigned node = 0; node < nlr->getLayerSizes()[layer]; ++node) {
+                    nlr->setNeuronActivationFunction(layer, node, NetworkLevelReasoner::ActivationFunction(activation));
+
+                }
             }
         }
 
@@ -303,7 +327,7 @@ InputQuery QueryLoader::loadQuery( const String &fileName )
                     double weight = atof(it->ascii());
                     ++it;
 
-                    log(Stringf("sourceLayer: %u, size: %u\n", sourceLayer, sourceNode, targetNode, weight));
+                    log(Stringf("sourceLayer: %u, sourceNode: %u, targetNode:%u weight:%f\n", sourceLayer, sourceNode, targetNode, weight));
                     nlr->setWeight(sourceLayer, sourceNode, targetNode, weight);
                 }
             }
@@ -328,7 +352,7 @@ InputQuery QueryLoader::loadQuery( const String &fileName )
             unsigned var = atoi(it->ascii());
             ++it;
 
-            log(Stringf("NODE TO B: layer: %u, node: %u, var: %f\n", layer, node, var));
+            log(Stringf("NODE TO B: layer: %u, node: %u, var: %d\n", layer, node, var));
             nlr->setWeightedSumVariable(layer, node, var);
         }
 
@@ -351,7 +375,7 @@ InputQuery QueryLoader::loadQuery( const String &fileName )
             unsigned var = atoi(it->ascii());
             ++it;
 
-            log(Stringf("NODE TO F: layer: %u, node: %u, var: %f\n", layer, node, var));
+            log(Stringf("NODE TO F: layer: %u, node: %u, var: %d\n", layer, node, var));
             nlr->setActivationResultVariable(layer, node, var);
         }
 

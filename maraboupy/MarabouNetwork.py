@@ -15,7 +15,7 @@
  ** [[ Add lengthier description here ]]
  **/
 '''
-
+import MarabouUtils
 from maraboupy import MarabouCore
 import numpy as np
 
@@ -51,6 +51,7 @@ class MarabouNetwork:
         self.outputSize = 0
         self.weights = []
         self.biases = []
+        self.is_adversarial = False
 
         self.nlr = None
 
@@ -376,6 +377,13 @@ class MarabouNetwork:
                     nlr.setWeight(layer, source, target, self.weights[layer][target][source])
 
         for layer in range(len(self.weights) - 1):  # only hidden layers
+            if layer == len(self.weights) - 2 and self.is_adversarial:
+                for neuron in range(len(self.weights[layer])):
+                    nlr.setNeuronActivationFunction(layer, neuron, MarabouCore.NetworkLevelReasoner.ActivationFunction.Linear)
+
+                nlr.setIsAdversarial()
+                continue
+
             for neuron in range(len(self.weights[layer])):
                 nlr.setNeuronActivationFunction(layer, neuron, activationFunction)
 
@@ -392,3 +400,32 @@ class MarabouNetwork:
             nlr.setWeightedSumVariable(len(self.layerSizes) - 1, node, self.nodeTo_b(len(self.layerSizes) - 1, node))
 
         return nlr
+
+    def addAdverserialQuery(self, output_var_expected, output_var_adverserial):
+        new_var = self.getNewVariable()
+        self.setLowerBound(new_var, 0)
+
+        equation1 = MarabouUtils.Equation(MarabouCore.Equation.EquationType.EQ)
+        equation1.addAddend(1, output_var_expected[0])
+        equation1.addAddend(-1, output_var_adverserial[0])
+        equation1.addAddend(1, new_var)
+        equation1.setScalar(0)
+
+        self.addEquation(equation1)
+
+        self.outputSize = 1
+        self.numLayers += 1
+        self.layerSizes += [1]
+
+        self.biases.append([0])
+
+        last_layer_weights = [0] * len(self.outputVars[0])
+
+        last_layer_weights[output_var_expected[1]] = 1
+        last_layer_weights[output_var_adverserial[1]] = -1
+
+        self.weights.append([last_layer_weights])
+        self.oldOutputVars = self.outputVars
+        self.outputVars = np.array([[new_var]])
+        self.is_adversarial = True
+

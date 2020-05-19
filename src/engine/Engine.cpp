@@ -103,8 +103,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
     bool splitJustPerformed = true;
     struct timespec mainLoopStart = TimeUtils::sampleMicro();
-//    _tableau->dumpEquations();
-//    _tableau->dumpAssignment();
+
     while ( true )
     {
         struct timespec mainLoopEnd = TimeUtils::sampleMicro();
@@ -243,8 +242,11 @@ bool Engine::solve( unsigned timeoutInSeconds )
                 // For debugging purposes
                 checkBoundCompliancyWithDebugSolution();
 
-                while ( applyAllValidConstraintCaseSplits() )
+                do
+                {
                     performSymbolicOrArithmeticBoundTightening();
+                }
+                while ( applyAllValidConstraintCaseSplits() );
 
                 continue;
             }
@@ -284,7 +286,6 @@ bool Engine::solve( unsigned timeoutInSeconds )
         {
             // The current query is unsat, and we need to pop.
             // If we're at level 0, the whole query is unsat.
-//            printf( "\n======Back Tracking====/n" );
             if ( !_smtCore.popSplit() )
             {
                 if ( _verbosity > 0 )
@@ -326,6 +327,7 @@ void Engine::mainLoopStatistics()
 
     if ( _statistics.getNumMainLoopIterations() % GlobalConfiguration::STATISTICS_PRINTING_FREQUENCY == 0 )
         _statistics.print();
+
 
     _statistics.incNumMainLoopIterations();
 
@@ -1336,52 +1338,59 @@ bool Engine::attemptToMergeVariables( unsigned x1, unsigned x2 )
     return true;
 }
 
-List<Tightening> Engine::addEquation(Equation equation)
+void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
 {
+    log( "" );
+    log( "Applying a split. " );
+
     DEBUG( _tableau->verifyInvariants() );
-    List<Tightening> bounds;
-    /*
-      First, adjust the equation if any variables have been merged.
-      E.g., if the equation is x1 + x2 + x3 = 0, and x1 and x2 have been
-      merged, the equation becomes 2x1 + x3 = 0
-    */
-    for ( auto &addend : equation._addends )
-        addend._variable = _tableau->getVariableAfterMerging( addend._variable );
 
-    List<Equation::Addend>::iterator addend;
-    List<Equation::Addend>::iterator otherAddend;
-
-    addend = equation._addends.begin();
-    while ( addend != equation._addends.end() )
+    List<Tightening> bounds = split.getBoundTightenings();
+    List<Equation> equations = split.getEquations();
+    for ( auto &equation : equations )
     {
-        otherAddend = addend;
-        ++otherAddend;
+        /*
+          First, adjust the equation if any variables have been merged.
+          E.g., if the equation is x1 + x2 + x3 = 0, and x1 and x2 have been
+          merged, the equation becomes 2x1 + x3 = 0
+        */
+        for ( auto &addend : equation._addends )
+            addend._variable = _tableau->getVariableAfterMerging( addend._variable );
 
-        while ( otherAddend != equation._addends.end() )
+        List<Equation::Addend>::iterator addend;
+        List<Equation::Addend>::iterator otherAddend;
+
+        addend = equation._addends.begin();
+        while ( addend != equation._addends.end() )
         {
-            if ( otherAddend->_variable == addend->_variable )
+            otherAddend = addend;
+            ++otherAddend;
+
+            while ( otherAddend != equation._addends.end() )
             {
-                addend->_coefficient += otherAddend->_coefficient;
-                otherAddend = equation._addends.erase( otherAddend );
+                if ( otherAddend->_variable == addend->_variable )
+                {
+                    addend->_coefficient += otherAddend->_coefficient;
+                    otherAddend = equation._addends.erase( otherAddend );
+                }
+                else
+                    ++otherAddend;
             }
+
+            if ( FloatUtils::isZero( addend->_coefficient ) )
+                addend = equation._addends.erase( addend );
             else
-                ++otherAddend;
+                ++addend;
         }
 
-        if ( FloatUtils::isZero( addend->_coefficient ) )
-            addend = equation._addends.erase( addend );
-        else
-            ++addend;
-    }
-
-    /*
-      In the general case, we just add the new equation to the tableau.
-      However, we also support a very common case: equations of the form
-      x1 = x2, which are common, e.g., with ReLUs. For these equations we
-      may be able to merge two columns of the tableau.
-    */
-    unsigned x1, x2;
-    bool canMergeColumns =
+        /*
+          In the general case, we just add the new equation to the tableau.
+          However, we also support a very common case: equations of the form
+          x1 = x2, which are common, e.g., with ReLUs. For these equations we
+          may be able to merge two columns of the tableau.
+        */
+        unsigned x1, x2;
+        bool canMergeColumns =
             // Only if the flag is on
             GlobalConfiguration::USE_COLUMN_MERGING_EQUATIONS &&
             // Only if the equation has the correct form
@@ -1393,18 +1402,18 @@ List<Tightening> Engine::addEquation(Equation equation)
             ( !_tableau->isBasic( x2 ) ||
               !_tableau->basicOutOfBounds( _tableau->variableToIndex( x2 ) ) );
 
-    bool columnsSuccessfullyMerged = false;
-    if ( canMergeColumns )
-        columnsSuccessfullyMerged = attemptToMergeVariables( x1, x2 );
+        bool columnsSuccessfullyMerged = false;
+        if ( canMergeColumns )
+            columnsSuccessfullyMerged = attemptToMergeVariables( x1, x2 );
 
-    if ( !columnsSuccessfullyMerged )
-    {
-        // General case: add a new equation to the tableau
-        unsigned auxVariable = _tableau->addEquation( equation );
-        _activeEntryStrategy->resizeHook( _tableau );
-
-        switch ( equation._type )
+        if ( !columnsSuccessfullyMerged )
         {
+            // General case: add a new equation to the tableau
+            unsigned auxVariable = _tableau->addEquation( equation );
+            _activeEntryStrategy->resizeHook( _tableau );
+
+            switch ( equation._type )
+            {
             case Equation::GE:
                 bounds.append( Tightening( auxVariable, 0.0, Tightening::UB ) );
                 break;
@@ -1421,14 +1430,12 @@ List<Tightening> Engine::addEquation(Equation equation)
             default:
                 ASSERT( false );
                 break;
+            }
         }
     }
-    adjustWorkMemorySize();
-    return bounds;
-}
 
-void Engine::tightenBounds(List<Tightening> &bounds)
-{
+    adjustWorkMemorySize();
+
     _rowBoundTightener->resetBounds();
     _constraintBoundTightener->resetBounds();
 
@@ -1447,26 +1454,10 @@ void Engine::tightenBounds(List<Tightening> &bounds)
             _tableau->tightenUpperBound( variable, bound._value );
         }
     }
+
     DEBUG( _tableau->verifyInvariants() );
-}
-
-void Engine::applySplit( const PiecewiseLinearCaseSplit &split )
-{
-    log( "" );
-    log( "Applying a split. " );
-
-    List<Tightening> bounds = split.getBoundTightenings();
-    List<Equation> equations = split.getEquations();
-    for ( auto &equation : equations )
-    {
-        bounds.append(addEquation(equation));
-    }
-
-    tightenBounds(bounds);
-
     log( "Done with split\n" );
 }
-
 
 void Engine::applyAllRowTightenings()
 {
@@ -1548,13 +1539,12 @@ bool Engine::applyValidConstraintCaseSplit( PiecewiseLinearConstraint *constrain
         try {
             String constraintString;
             constraint->dump( constraintString );
-            log( Stringf( "A constraint has become valid. Dumping constraint: %s",
-                          constraintString.ascii() ) );
+            log( Stringf( "Adding abstraction to constraint: %s", constraintString.ascii() ) );
             PiecewiseLinearCaseSplit validSplit = constraint->getValidCaseSplit();
             _smtCore.recordImpliedValidSplit( validSplit );
             applySplit( validSplit );
             _statistics.incNumAbstractedEquations();
-            return true;
+            return false;
         } catch (...) {
             return false;
         }
@@ -1926,7 +1916,7 @@ void Engine::checkOverallProgress()
 {
     // Get fresh statistics
     unsigned numVisitedStates = _statistics.getNumVisitedTreeStates();
-    unsigned long long currentIteration = _statistics.getNumMainLoopIterations();
+//    unsigned long long currentIteration = _statistics.getNumMainLoopIterations();
 
     if ( numVisitedStates > _lastNumVisitedStates )
     {
@@ -1934,18 +1924,19 @@ void Engine::checkOverallProgress()
         _lastNumVisitedStates = numVisitedStates;
         _lastIterationWithProgress = _statistics.getNumMainLoopIterations();
     }
-    else
-    {
-        // No progress has been made. If it's been too long, request a restoration
-        if ( currentIteration >
-             _lastIterationWithProgress +
-             GlobalConfiguration::MAX_ITERATIONS_WITHOUT_PROGRESS )
-        {
-            log( "checkOverallProgress detected cycling. Requesting a precision restoration" );
-            _basisRestorationRequired = Engine::STRONG_RESTORATION_NEEDED;
-            _lastIterationWithProgress = currentIteration;
-        }
-    }
+//    else
+//    {
+//        // No progress has been made. If it's been too long, request a restoration
+//        if ( currentIteration >
+//             _lastIterationWithProgress +
+//             GlobalConfiguration::MAX_ITERATIONS_WITHOUT_PROGRESS )
+//        {
+//            log( "checkOverallProgress detected cycling. Requesting a precision restoration" );
+//            log( "checkOverallProgress detected cycling. Requesting a precision restoration" );
+//            _basisRestorationRequired = Engine::STRONG_RESTORATION_NEEDED;
+//            _lastIterationWithProgress = currentIteration;
+//        }
+//    }
 }
 
 void Engine::updateDirections()

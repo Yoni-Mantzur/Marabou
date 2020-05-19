@@ -43,6 +43,7 @@ NetworkLevelReasoner::NetworkLevelReasoner()
     , _previousLayerUpperBounds( NULL )
     , _previousLayerLowerBias( NULL )
     , _previousLayerUpperBias( NULL )
+    , _isAdversarial( false )
 {
 }
 
@@ -384,6 +385,10 @@ void NetworkLevelReasoner::evaluate( double *input, double *output )
                     _work2[targetNeuron] = FloatUtils::sigmoid( _work2[targetNeuron] );
                     break;
 
+                case Linear:
+                    _work2[targetNeuron] = _work2[targetNeuron];
+                    break;
+
                 default:
                     throw MarabouError( MarabouError::NETWORK_LEVEL_REASONER_ACTIVATION_NOT_SUPPORTED );
                     break;
@@ -696,16 +701,30 @@ void NetworkLevelReasoner::intervalArithmeticBoundPropagation()
 
                     break;
 
-                case Sigmoid:
+                case Sigmoid: 
+                {
+                    double sigmoidLb = FloatUtils::sigmoid(lb);
+                    if (sigmoidLb > _lowerBoundsActivations[i][j])
+                        _lowerBoundsActivations[i][j] = sigmoidLb;
 
-                    if ( lb > _lowerBoundsActivations[i][j] )
-                        _lowerBoundsActivations[i][j] = FloatUtils::sigmoid(lb);
 
-                    if ( ub < _upperBoundsActivations[i][j] )
-                        _upperBoundsActivations[i][j] = FloatUtils::sigmoid(ub);
+                    double sigmoidUb = FloatUtils::sigmoid(ub);
+                    if (sigmoidUb < _upperBoundsActivations[i][j])
+                        _upperBoundsActivations[i][j] = sigmoidUb;
 
                     break;
+                }
 
+                case Linear:
+                {
+                    if ( lb > _lowerBoundsActivations[i][j] )
+                        _lowerBoundsActivations[i][j] = lb;
+
+                    if ( ub < _upperBoundsActivations[i][j] )
+                        _upperBoundsActivations[i][j] = ub;
+
+                    break;
+                }
 
                 default:
                     throw MarabouError( MarabouError::NETWORK_LEVEL_REASONER_ACTIVATION_NOT_SUPPORTED );
@@ -1195,6 +1214,14 @@ double **NetworkLevelReasoner::getWeights() const {
 
 const Map<NetworkLevelReasoner::Index, double> &NetworkLevelReasoner::getBias() const {
     return _bias;
+}
+
+bool NetworkLevelReasoner::isAdversarial() const {
+    return _isAdversarial;
+}
+
+void NetworkLevelReasoner::setIsAdversarial() {
+    NetworkLevelReasoner::_isAdversarial = true;
 }
 
 //

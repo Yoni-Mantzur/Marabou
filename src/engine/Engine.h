@@ -474,6 +474,8 @@ private:
       to handle case splits
     */
     void updateDirections();
+
+    void addAbstractionEquations();
 };
 
 #endif // __Engine_h__

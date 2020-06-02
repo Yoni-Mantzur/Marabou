@@ -186,6 +186,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
                     performSymbolicOrArithmeticBoundTightening();
                 }
                 while ( applyAllValidConstraintCaseSplits() );
+
                 splitJustPerformed = false;
             }
 
@@ -234,10 +235,17 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
                 // We have violated piecewise-linear constraints.
                 performConstraintFixingStep();
+
+
+                // Add abstraction equations to the violated constraints
+                addAbstractionEquations();
+
+
                 // Finally, take this opporunity to tighten any bounds
                 // and perform any valid case splits.
                 tightenBoundsOnConstraintMatrix();
                 applyAllBoundTightenings();
+
 
                 // For debugging purposes
                 checkBoundCompliancyWithDebugSolution();
@@ -327,7 +335,6 @@ void Engine::mainLoopStatistics()
 
     if ( _statistics.getNumMainLoopIterations() % GlobalConfiguration::STATISTICS_PRINTING_FREQUENCY == 0 )
         _statistics.print();
-
 
     _statistics.incNumMainLoopIterations();
 
@@ -1534,22 +1541,6 @@ bool Engine::applyValidConstraintCaseSplit( PiecewiseLinearConstraint *constrain
         return true;
     }
 
-    if ( constraint->isActive() && GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS )
-    {
-        try {
-            String constraintString;
-            constraint->dump( constraintString );
-            log( Stringf( "Adding abstraction to constraint: %s", constraintString.ascii() ) );
-            PiecewiseLinearCaseSplit validSplit = constraint->getValidCaseSplit();
-            _smtCore.recordImpliedValidSplit( validSplit );
-            applySplit( validSplit );
-            _statistics.incNumAbstractedEquations();
-            return false;
-        } catch (...) {
-            return false;
-        }
-    }
-
     return false;
 }
 
@@ -1972,6 +1963,28 @@ PiecewiseLinearConstraint *Engine::pickSplitPLConstraint()
 void Engine::setConstraintViolationThreshold( unsigned threshold )
 {
     _smtCore.setConstraintViolationThreshold( threshold );
+}
+
+void Engine::addAbstractionEquations()
+{
+    for ( auto constraint : _violatedPlConstraints )
+    {
+        if (constraint->isActive() && GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS) {
+            try {
+                String constraintString;
+                constraint->dump(constraintString);
+                log(Stringf("Adding abstraction to constraint: %s", constraintString.ascii()));
+                PiecewiseLinearCaseSplit validSplit = constraint->getValidCaseSplit();
+                _smtCore.recordImpliedValidSplit(validSplit);
+                applySplit(validSplit);
+                _statistics.incNumAbstractedEquations();
+            }
+            catch (...)
+            {
+                continue;
+            }
+        }
+    }
 }
 
 //

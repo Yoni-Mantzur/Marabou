@@ -115,8 +115,8 @@ void SigmoidConstraint::notifyBrokenAssignment() {
 
     if (getConvexTypeInSegment(_lowerBounds[_b], _upperBounds[_b]) == UNKNOWN)
         addSpuriousPoint({0.0, 0.5});
-    else
-        addSpuriousPoint({_assignment[_b], _assignment[_f]});
+//    else
+//        addSpuriousPoint({_assignment[_b], _assignment[_f]});
 }
 
 bool SigmoidConstraint::participatingVariable(unsigned variable) const {

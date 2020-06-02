@@ -46,7 +46,7 @@ const unsigned GlobalConfiguration::MAX_SIMPLEX_PIVOT_SEARCH_ITERATIONS = 5;
 const unsigned GlobalConfiguration::CONSTRAINT_VIOLATION_THRESHOLD = 20;
 const unsigned GlobalConfiguration::SPLITTING_HEURISTICS = DivideStrategy::ReLUViolation;
 const unsigned GlobalConfiguration::BOUND_TIGHTING_ON_CONSTRAINT_MATRIX_FREQUENCY = 100;
-const unsigned GlobalConfiguration::ROW_BOUND_TIGHTENER_SATURATION_ITERATIONS = 20;
+const unsigned GlobalConfiguration::ROW_BOUND_TIGHTENER_SATURATION_ITERATIONS = 10;
 const double GlobalConfiguration::COST_FUNCTION_ERROR_THRESHOLD = 0.0000000001;
 
 const bool GlobalConfiguration::USE_HARRIS_RATIO_TEST = true;

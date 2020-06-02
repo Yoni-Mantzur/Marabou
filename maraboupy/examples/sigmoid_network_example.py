@@ -1,18 +1,16 @@
 import os
-
 from pathlib import Path
 
 marabou_path = Path(r"/cs/labs/guykatz/yoni_mantzur/marabou")
 # marabou_path = Path(r'/mnt/c/Users/t-yomant/lab/Marabou')
 
 path_to_sigmoids = marabou_path / Path(r'maraboupy/examples/networks/sigmoids')
-# import sys
-# sys.path.append(marabou_path)
+import sys
 
+sys.path.append(marabou_path)
 
-from maraboupy import MarabouCore, MarabouUtils, MarabouNetwork, Marabou
+from maraboupy import MarabouCore, MarabouNetwork, Marabou
 import numpy as np
-
 
 try:
     exp_num = int(''.join((filter(lambda c: c.isdigit(),
@@ -33,7 +31,7 @@ for name in range(10, 100, 10):
 
     network.nlr = network.createNLR(MarabouCore.NetworkLevelReasoner.ActivationFunction.Sigmoid)
 
-# Get the input and output variable numbers; [0] since first dimension is batch size
+    # Get the input and output variable numbers; [0] since first dimension is batch size
     inputVars = network.inputVars[0][0]
     outputVars = network.outputVars[0]
 
@@ -216,12 +214,9 @@ for name in range(10, 100, 10):
                     network.setLowerBound(var, -large)
                     network.setUpperBound(var, large)
 
-                equation1 = MarabouUtils.Equation(MarabouCore.Equation.EquationType.LE)
-                equation1.addAddend(1, outputVars[7])
-                equation1.addAddend(-1, outputVars[9])
-                equation1.setScalar(0)
+                network.addAdverserialQuery((outputVars[7], 7), (outputVars[9], 9))
 
-                network.addEquation(equation1)
+                network.nlr = network.createNLR(MarabouCore.NetworkLevelReasoner.ActivationFunction.Sigmoid)
 
                 # network.evaluateWithMarabou(np.array([x]))
                 # # Call to C++ Marabou solver

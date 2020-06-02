@@ -15,8 +15,7 @@
  ** [[ Add lengthier description here ]]
  **/
 '''
-import MarabouUtils
-from maraboupy import MarabouCore
+from maraboupy import MarabouUtils, MarabouCore
 import numpy as np
 
 class MarabouNetwork:

@@ -13,4 +13,6 @@ dir=/cs/labs/guykatz/yoni_mantzur/marabou/maraboupy/examples
 
 cd $dir
 
+export PYTHONPATH="/cs/labs/guykatz/yoni_mantzur/marabou:${PYTHONPATH}"
+
 python sigmoid_network_example.py

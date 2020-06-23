@@ -375,13 +375,13 @@ class MarabouNetwork:
                 for source in range(len(self.weights[layer][target])):
                     nlr.setWeight(layer, source, target, self.weights[layer][target][source])
 
-        for layer in range(len(self.weights) - 1):  # only hidden layers
-            if layer == len(self.weights) - 2 and self.is_adversarial:
-                for neuron in range(len(self.weights[layer])):
+        for layer in range(self.numLayers):  # only hidden layers
+            if layer == self.numLayers - 1 and self.is_adversarial:
+                for neuron in range(self.layerSizes[layer]):
                     nlr.setNeuronActivationFunction(layer, neuron, MarabouCore.NetworkLevelReasoner.ActivationFunction.Linear)
 
                 nlr.setIsAdversarial()
-                continue
+                break
 
             for neuron in range(len(self.weights[layer])):
                 nlr.setNeuronActivationFunction(layer, neuron, activationFunction)

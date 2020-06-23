@@ -36,6 +36,7 @@ Statistics::Statistics()
     , _numSplits( 0 )
     , _numPops( 0 )
     , _numVisitedTreeStates( 1 )
+    , _numEquations( 0 )
     , _numTableauPivots( 0 )
     , _numTableauDegeneratePivots( 0 )
     , _numTableauDegeneratePivotsByRequest( 0 )
@@ -287,6 +288,9 @@ void Statistics::print()
 
     printf( "\t--- SBT ---\n" );
     printf( "\tNumber of tightened bounds: %llu\n", _numTighteningsFromSymbolicBoundTightening );
+
+    printf( "\t--- SIGMOIDS ---\n" );
+    printf( "\tNumber of abstracted bounds: %u\n", _numEquations );
 }
 
 double Statistics::printPercents( unsigned long long part, unsigned long long total ) const

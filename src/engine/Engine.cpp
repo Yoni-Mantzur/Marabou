@@ -93,7 +93,6 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
     updateDirections();
     storeInitialEngineState();
-
     if ( _verbosity > 0 )
     {
         printf( "\nEngine::solve: Initial statistics\n" );
@@ -190,6 +189,12 @@ bool Engine::solve( unsigned timeoutInSeconds )
                 splitJustPerformed = false;
             }
 
+            if ( !_tableau->allBoundsValid() )
+            {
+                // Some variable bounds are invalid, so the query is unsat
+                throw InfeasibleQueryException();
+            }
+
             // Perform any SmtCore-initiated case splits
             if ( _smtCore.needToSplit() )
             {
@@ -197,13 +202,6 @@ bool Engine::solve( unsigned timeoutInSeconds )
                 splitJustPerformed = true;
                 continue;
             }
-
-            if ( !_tableau->allBoundsValid() )
-            {
-                // Some variable bounds are invalid, so the query is unsat
-                throw InfeasibleQueryException();
-            }
-
             if ( allVarsWithinBounds() )
             {
                 // The linear portion of the problem has been solved.
@@ -1970,19 +1968,21 @@ void Engine::addAbstractionEquations()
     for ( auto constraint : _violatedPlConstraints )
     {
         if (constraint->isActive() && GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS) {
-            try {
-                String constraintString;
-                constraint->dump(constraintString);
-                log(Stringf("Adding abstraction to constraint: %s", constraintString.ascii()));
-                PiecewiseLinearCaseSplit validSplit = constraint->getValidCaseSplit();
-                _smtCore.recordImpliedValidSplit(validSplit);
-                applySplit(validSplit);
-                _statistics.incNumAbstractedEquations();
-            }
-            catch (...)
-            {
-                continue;
-            }
+
+            String constraintString;
+            constraint->dump(constraintString);
+            log(Stringf("Adding abstraction to constraint: %s", constraintString.ascii()));
+            const PiecewiseLinearCaseSplit &split = constraint->getValidCaseSplit();
+
+            if (split.getBoundTightenings().empty() && split.getEquations().empty())
+                return;
+
+            PiecewiseLinearCaseSplit validSplit = split;
+            _smtCore.recordImpliedValidSplit(validSplit);
+            applySplit(validSplit);
+            _statistics.incNumAbstractedEquations();
+
+
         }
     }
 }

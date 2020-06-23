@@ -1,21 +1,24 @@
-import os
-from pathlib import Path
+import sys
+from pathlib import PosixPath
 
-marabou_path = Path(r"/cs/labs/guykatz/yoni_mantzur/marabou")
+marabou_path = PosixPath(r"/cs/labs/guykatz/yoni_mantzur/marabou")
+
+sys.path.append(str(marabou_path))
+
+import os
+
 # marabou_path = Path(r'/mnt/c/Users/t-yomant/lab/Marabou')
 
-path_to_sigmoids = marabou_path / Path(r'maraboupy/examples/networks/sigmoids')
-import sys
-
-sys.path.append(marabou_path)
+path_to_sigmoids = marabou_path / r'maraboupy/examples/networks/sigmoids'
 
 from maraboupy import MarabouCore, MarabouNetwork, Marabou
 import numpy as np
 
 try:
-    exp_num = int(''.join((filter(lambda c: c.isdigit(),
-                                  max(filter(lambda dir: 'experiment_' in dir,
-                                             os.listdir(path_to_sigmoids))))))) + 1
+    exp_num = max(map(int, map(lambda y: ''.join(y),
+                               map(lambda f: filter(lambda c: c.isdigit(), f), filter(lambda dir: 'experiment_' in dir,
+                                                                                      os.listdir(
+                                                                                          path_to_sigmoids)))))) + 1
 except ValueError:
     exp_num = 1
 
@@ -23,20 +26,15 @@ exp_dir = path_to_sigmoids / f'experiment_{exp_num}'
 if not os.path.exists(exp_dir):
     os.mkdir(exp_dir)
 
+large = 100.0
+deltas = [0.01, 0.015, 0.023, 0.029, 0.03, 0.09, 0.1, 0.3, 0.4, 0.6, 0.7]
+
+org_exp_dir = exp_dir
 for name in range(10, 100, 10):
+    exp_dir = org_exp_dir / f'{name}'
 
-    filename = path_to_sigmoids / f'mnist_{name}.pb'
+    os.mkdir(exp_dir)
 
-    network = Marabou.read_tf(str(filename))  # type: MarabouNetwork.MarabouNetwork
-
-    network.nlr = network.createNLR(MarabouCore.NetworkLevelReasoner.ActivationFunction.Sigmoid)
-
-    # Get the input and output variable numbers; [0] since first dimension is batch size
-    inputVars = network.inputVars[0][0]
-    outputVars = network.outputVars[0]
-
-    large = 100.0
-    deltas = [0.01, 0.015, 0.023, 0.3, 0.4, 0.6, 0.7]
 
     x = [0., 0., 0., 0., 0.,
          0., 0., 0., 0., 0.,
@@ -204,10 +202,15 @@ for name in range(10, 100, 10):
         with open(exp_dir / f'times_{name}.txt', "x") as times_file:
 
             for delta in deltas:
-                # # Set input bounds
-                for var in inputVars:
-                    network.setLowerBound(var, x[var] - delta)
-                    network.setUpperBound(var, x[var] + delta)
+                print(delta, name)
+                filename = path_to_sigmoids / f'mnist_{name}.pb'
+
+                network = Marabou.read_tf(str(filename))  # type: MarabouNetwork.MarabouNetwork
+
+
+                # Get the input and output variable numbers; [0] since first dimension is batch size
+                inputVars = network.inputVars[0][0]
+                outputVars = network.outputVars[0]
 
                 # Set output bounds
                 for var in outputVars:
@@ -215,14 +218,18 @@ for name in range(10, 100, 10):
                     network.setUpperBound(var, large)
 
                 network.addAdverserialQuery((outputVars[7], 7), (outputVars[9], 9))
-
                 network.nlr = network.createNLR(MarabouCore.NetworkLevelReasoner.ActivationFunction.Sigmoid)
+
+                # # Set input bounds
+                for var in inputVars:
+                    network.setLowerBound(var, x[var] - delta)
+                    network.setUpperBound(var, x[var] + delta)
+
 
                 # network.evaluateWithMarabou(np.array([x]))
                 # # Call to C++ Marabou solver
                 # options = Marabou.createOptions(dnc=True, numWorkers=6, initialDivides=2, verbosity=0)
-                # network.saveQuery("query_10")
-                vals, stats = network.solve(str(exp_dir / f'marabou_mnist_{name}.log'))
+                vals, stats = network.solve(str(exp_dir / f'marabou_mnist_{name}_{delta}.log'))
                 res_file.write(f'== Net with {name} sigmoids and delta: {delta}\n')
                 res_file.write(f'number splits: {stats.getNumSplits()}\n')
                 res_file.write(f'number active: {stats.getNumActivePlConstraints()} / {stats.getNumPlConstraints()}'

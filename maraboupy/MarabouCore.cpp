@@ -76,6 +76,7 @@ int redirectOutputToFile(std::string outputFilePath){
 void restoreOutputStream(int outputStream)
 {
     // Restore standard output
+    fsync( outputStream );
     fflush( stdout );
     if (dup2( outputStream, STDOUT_FILENO ) < 0){
         printf( "Error restoring output stream\n" );

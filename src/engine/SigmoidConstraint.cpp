@@ -72,7 +72,7 @@ void SigmoidConstraint::notifyLowerBound(unsigned variable, double bound) {
     _lowerBounds[variable] = bound;
     _isBoundWereChanged = true;
 
-    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable],
+    if (FloatUtils::areEqual(_lowerBounds[variable], (_upperBounds[variable] + _lowerBounds[variable]) / 2,
                              GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
         _isFixed = true;
 
@@ -94,7 +94,7 @@ void SigmoidConstraint::notifyUpperBound(unsigned variable, double bound) {
     _upperBounds[variable] = bound;
     _isBoundWereChanged = true;
 
-    if (FloatUtils::areEqual(_lowerBounds[variable], _upperBounds[variable],
+    if (FloatUtils::areEqual(_lowerBounds[variable], (_upperBounds[variable] + _lowerBounds[variable]) / 2,
                              GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
         _isFixed = true;
 
@@ -115,8 +115,8 @@ void SigmoidConstraint::notifyBrokenAssignment() {
 
     if (getConvexTypeInSegment(_lowerBounds[_b], _upperBounds[_b]) == UNKNOWN)
         addSpuriousPoint({0.0, 0.5});
-//    else
-//        addSpuriousPoint({_assignment[_b], _assignment[_f]});
+    else
+        addSpuriousPoint({_assignment[_b], _assignment[_f]});
 }
 
 bool SigmoidConstraint::participatingVariable(unsigned variable) const {
@@ -198,16 +198,18 @@ PiecewiseLinearCaseSplit SigmoidConstraint::getValidCaseSplit() const {
     if (GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION) {
         if (_isBoundWereChanged) {
 
-            try {
-                refinements.append(const_cast<SigmoidConstraint *>(this)->refineCurrentSplit());
-            } catch (...) {}
-            const_cast<SigmoidConstraint *>(this)->_isBoundWereChanged = false;
+            const Equation &value = const_cast<SigmoidConstraint *>(this)->refineCurrentSplit();
+            if (value._type != Equation::EQ)
+            {
+                refinements.append(value);
+                const_cast<SigmoidConstraint *>(this)->_isBoundWereChanged = false;
+            }
         }
     }
 
     PiecewiseLinearCaseSplit serializedEquations;
     if (refinements.empty())
-        throw 0;
+        return PiecewiseLinearCaseSplit();
 
     for (auto equation : refinements)
         serializedEquations.addEquation(equation);
@@ -242,9 +244,12 @@ void SigmoidConstraint::dump(String &output) const {
 }
 
 void SigmoidConstraint::addAuxiliaryEquations(InputQuery &inputQuery) {
-    try {
-        inputQuery.addEquation((refineCurrentSplit()));
-    } catch (...) {}
+    const Equation &equation = refineCurrentSplit();
+    if (equation._type == Equation::EQ )
+    {
+        return;
+    }
+    inputQuery.addEquation(equation);
 }
 
 void SigmoidConstraint::eliminateVariable(unsigned /* variable */, double /* fixedValue */) {

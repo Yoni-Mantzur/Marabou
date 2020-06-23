@@ -15,9 +15,6 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
     ASSERT(!FloatUtils::areEqual(lowerBound.x, upperBound.x,
                                  GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
 
-    // Guided point will be from lower bound to upper bound
-    _pointsForSplits.sort();
-
 
     // TODO: Generalize to several guided points
     ASSERT(_pointsForSplits.size() <= 1)
@@ -53,7 +50,8 @@ List<PiecewiseLinearCaseSplit> PiecewiseLinearAbstraction::getSplitsAbstraction(
 
     Point p1 = *guidedPointsIter;
     _registeredPointsForCurrentSplit.append(p1);
-    while (++guidedPointsIter != guidedPoints.end()) {
+    while (++guidedPointsIter != guidedPoints.end())
+    {
 
         ASSERT((validatePoint(p1, guidedPoints, true, true)))
         Point p2 = *guidedPointsIter;
@@ -118,13 +116,13 @@ Equation PiecewiseLinearAbstraction::refineCurrentSplit() {
     Point p = {lowerBound.x, upperBound.x};
 
     if (_registeredPointsForCurrentSplit.exists(p))
-        throw 0;
+        return Equation();
 
     _registeredPointsForCurrentSplit.append(p);
 
     if (getConvexTypeInSegment(lowerBound.x, upperBound.x) == UNKNOWN) {
         // TODO: add equation for the general case
-        throw 0;
+        return Equation();
     }
 
     Equation equation = getLinearEquation(lowerBound, upperBound);
@@ -170,12 +168,16 @@ List<Tightening> PiecewiseLinearAbstraction::boundVars(Point p1, Point p2) const
     unsigned b = getB(), f = getF();
 
     // Bound b
-    ASSERT(FloatUtils::lt(p1.x, p2.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+    if (!FloatUtils::lte(p1.x, p2.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+        printf("here");
+
+    ASSERT(FloatUtils::lte(p1.x, p2.x, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+
     bounds.append(Tightening(b, p1.x, Tightening::LB));
     bounds.append(Tightening(b, p2.x, Tightening::UB));
 
     // Bound f
-    ASSERT(FloatUtils::lt(p1.y, p2.y, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+    ASSERT(FloatUtils::lte(p1.y, p2.y, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
     bounds.append(Tightening(f, p1.y, Tightening::LB));
     bounds.append(Tightening(f, p2.y, Tightening::UB));
 

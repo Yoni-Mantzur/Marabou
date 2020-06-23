@@ -204,7 +204,7 @@ private:
     // Total number of states in the search tree visited so far
     unsigned _numVisitedTreeStates;
 
-    // Total equations in tableau
+    // Total abstracted equations in tableau
     unsigned int _numEquations;
 
     // Total number of tableau pivot operations performed, both

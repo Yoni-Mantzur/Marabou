@@ -115,7 +115,6 @@ void Preprocessor::makeAllEquationsEqualities()
 {
     for ( auto &equation : _preprocessed.getEquations() )
     {
-        equation.dump();
         if ( equation._type == Equation::EQ )
             continue;
 
@@ -131,7 +130,6 @@ void Preprocessor::makeAllEquationsEqualities()
         equation._type = Equation::EQ;
 
         equation.addAddend( 1, auxVariable );
-        equation.dump();
     }
 }
 

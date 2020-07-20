@@ -20,7 +20,7 @@
 
 // Use the polarity metrics to decide which branch to take first in a case split
 // and how to repair a ReLU constraint.
-const bool GlobalConfiguration::USE_POLARITY_BASED_DIRECTION_HEURISTICS = true;
+const bool GlobalConfiguration::USE_POLARITY_BASED_DIRECTION_HEURISTICS = false;
 
 const double GlobalConfiguration::DEFAULT_EPSILON_FOR_COMPARISONS = 0.0000000001;
 const unsigned GlobalConfiguration::DEFAULT_DOUBLE_TO_STRING_PRECISION = 10;
@@ -60,7 +60,7 @@ const bool GlobalConfiguration::PREPROCESSOR_ELIMINATE_VARIABLES = true;
 const bool GlobalConfiguration::PREPROCESSOR_PL_CONSTRAINTS_ADD_AUX_EQUATIONS = true;
 const double GlobalConfiguration::PREPROCESSOR_ALMOST_FIXED_THRESHOLD = 0.00001;
 
-const bool GlobalConfiguration::WARM_START = false;
+const bool GlobalConfiguration::WARM_START = true;
 
 const unsigned GlobalConfiguration::MAX_ITERATIONS_WITHOUT_PROGRESS = 10000;
 
@@ -99,7 +99,7 @@ const bool GlobalConfiguration::SMT_CORE_LOGGING = false;
 const bool GlobalConfiguration::DANTZIGS_RULE_LOGGING = false;
 const bool GlobalConfiguration::BASIS_FACTORIZATION_LOGGING = false;
 const bool GlobalConfiguration::PREPROCESSOR_LOGGING = false;
-const bool GlobalConfiguration::INPUT_QUERY_LOGGING = false;
+const bool GlobalConfiguration::INPUT_QUERY_LOGGING = true;
 const bool GlobalConfiguration::PROJECTED_STEEPEST_EDGE_LOGGING = false;
 const bool GlobalConfiguration::GAUSSIAN_ELIMINATION_LOGGING = false;
 const bool GlobalConfiguration::QUERY_LOADER_LOGGING = false;

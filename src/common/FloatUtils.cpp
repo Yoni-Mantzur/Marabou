@@ -70,10 +70,10 @@ double FloatUtils::sigmoid( double x )
 
 double FloatUtils::sigmoidInverse( double x )
 {
-    if ( gte(x, 1) )
-        return 10;
-    if ( lte(x, 0) )
-        return -10;
+//    if ( gte(x, 1) )
+//        return 100;
+//    if ( lte(x, 0) )
+//        return -100;
     return log ( x / ( 1.0 - x ) );
 }
 
@@ -81,6 +81,10 @@ double FloatUtils::sigmoidDerivative( double x )
 {
     return sigmoid( x ) * (1 - sigmoid( x ));
 }
+
+
+
+
 
 //
 // Local Variables:

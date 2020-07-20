@@ -180,7 +180,7 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
         # This function changes all of the variables assignments so that the output variables
         # come immediately after input variables (Marabou convention).
         # This feature is optional, and can be disabled by commenting this line out
-        self.reassignOutputVariables()
+        # self.reassignOutputVariables()
 
     def findPlaceholders(self, op, returnOps):
         """Function that recursively finds the placeholder operations that contribute to a given operation
@@ -714,7 +714,7 @@ class MarabouNetworkTF(MarabouNetwork.MarabouNetwork):
         outputVars = self.makeNewVariables(op).flatten()
         assert len(inputVars) == len(outputVars)
 
-        # Generate Relu constratins
+        # Generate sigmoid constratins
         for inVar, outVar in zip(inputVars, outputVars):
             self.addSigmoid(inVar, outVar)
 

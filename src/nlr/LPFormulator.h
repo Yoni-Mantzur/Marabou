@@ -79,8 +79,12 @@ private:
     void addReluLayerToLpRelaxation( GurobiWrapper &gurobi,
                                      const Layer *layer );
 
+    void addSigmoidLayerToLpRelaxation( GurobiWrapper &gurobi,
+                                        const Layer *layer );
+
     void addWeightedSumLayerToLpRelaxation( GurobiWrapper &gurobi,
                                             const Layer *layer );
+
 };
 
 } // namespace NLR

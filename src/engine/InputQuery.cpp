@@ -19,6 +19,7 @@
 #include "InputQuery.h"
 #include "MStringf.h"
 #include "MarabouError.h"
+#include "SigmoidConstraint.h"
 
 #define INPUT_QUERY_LOG( x, ... ) LOG( GlobalConfiguration::INPUT_QUERY_LOGGING, "Preprocessor: %s\n", x )
 
@@ -355,53 +356,6 @@ void InputQuery::saveQuery( const String &fileName )
         ++i;
     }
 
-    // nlr
-    if (_networkLevelReasoner)
-    {
-        queryFile->write(Stringf("\n%s\n", "nlr"));
-
-        // Activation
-        queryFile->write(Stringf("%d\n", _networkLevelReasoner->Sigmoid));
-
-        // Is adversarial
-        queryFile->write(Stringf("%d\n", _networkLevelReasoner->isAdversarial()? 1:0));
-
-        // Number of layers
-        queryFile->write(Stringf("%u\n", _networkLevelReasoner->getNumberOfLayers()));
-
-        // Layer sizes
-        for (auto layer_size : _networkLevelReasoner->getLayerSizes()) {
-            queryFile->write(Stringf("%u,%u\n", layer_size.first, layer_size.second));
-        }
-
-        // Biases
-        queryFile->write(Stringf("%u\n", _networkLevelReasoner->getBias().size()));
-        for (auto bias : _networkLevelReasoner->getBias()) {
-            NetworkLevelReasoner::Index biasIndex = bias.first;
-            queryFile->write(Stringf("%u,%u,%f\n", biasIndex._layer, biasIndex._neuron, bias.second));
-        }
-
-        // Weights
-        for (unsigned layer = 0; layer < _networkLevelReasoner->getNumberOfLayers() - 1; ++layer) {
-            unsigned int numberOfWeightsInLayer = _networkLevelReasoner->getLayerSizes()[layer] * _networkLevelReasoner->getLayerSizes()[layer + 1];
-            for (unsigned w_index = 0; w_index < numberOfWeightsInLayer; ++w_index)
-                queryFile->write(Stringf("%u,%f\n", layer, _networkLevelReasoner->getWeights()[layer][w_index]));
-        }
-
-        // Node to b variable
-        queryFile->write(Stringf("%u\n", _networkLevelReasoner->getIndexToWeightedSumVariable().size()));
-        for (auto nodeToBVar : _networkLevelReasoner->getIndexToWeightedSumVariable()) {
-            NetworkLevelReasoner::Index node = nodeToBVar.first;
-            queryFile->write(Stringf("%u,%u,%u\n", node._layer, node._neuron, nodeToBVar.second));
-        }
-
-        // Node to f variable
-        queryFile->write(Stringf("%u\n", _networkLevelReasoner->getIndexToActivationResultVariable().size()));
-        for (auto nodeToFVar : _networkLevelReasoner->getIndexToActivationResultVariable()) {
-            NetworkLevelReasoner::Index node = nodeToFVar.first;
-            queryFile->write(Stringf("%u,%u,%u\n", node._layer, node._neuron, nodeToFVar.second));
-        }
-    }
     queryFile->close();
 }
 
@@ -620,7 +574,8 @@ bool InputQuery::constructNetworkLevelReasoner()
     unsigned newLayerIndex = 1;
     // Now, repeatedly attempt to construct addditional layers
     while ( constructWeighedSumLayer( nlr, handledVariableToLayer, newLayerIndex ) ||
-            constructReluLayer( nlr, handledVariableToLayer, newLayerIndex ) )
+            constructReluLayer( nlr, handledVariableToLayer, newLayerIndex )  ||
+            constructSigmoidLayer( nlr, handledVariableToLayer, newLayerIndex ) )
     {
         ++newLayerIndex;
     }
@@ -646,6 +601,7 @@ bool InputQuery::constructNetworkLevelReasoner()
         delete nlr;
     }
 
+    _networkLevelReasoner->dumpTopology();
     return success;
 }
 
@@ -683,7 +639,7 @@ bool InputQuery::constructWeighedSumLayer( NLR::NetworkLevelReasoner *nlr,
         // Only consider equalities
         if ( eq._type != Equation::EQ )
             continue;
-
+        
         List<unsigned> eqVariables = eq.getListParticipatingVariables();
         auto it = eqVariables.begin();
         while ( it != eqVariables.end() )
@@ -804,6 +760,80 @@ bool InputQuery::constructReluLayer( NLR::NetworkLevelReasoner *nlr,
         return false;
 
     nlr->addLayer( newLayerIndex, NLR::Layer::RELU, newNeurons.size() );
+    for ( const auto &newNeuron : newNeurons )
+    {
+        handledVariableToLayer[newNeuron._variable] = newLayerIndex;
+
+        unsigned sourceLayer = handledVariableToLayer[newNeuron._sourceVariable];
+        unsigned sourceNeuron = nlr->getLayer( sourceLayer )->variableToNeuron( newNeuron._sourceVariable );
+
+        // Mark the layer dependency
+        nlr->addLayerDependency( sourceLayer, newLayerIndex );
+
+        // Add the new neuron
+        nlr->setNeuronVariable( NLR::NeuronIndex( newLayerIndex, newNeuron._neuron ), newNeuron._variable );
+
+        // Mark the activation connection
+        nlr->addActivationSource( sourceLayer,
+                                  sourceNeuron,
+                                  newLayerIndex,
+                                  newNeuron._neuron );
+    }
+
+    return true;
+}
+
+bool InputQuery::constructSigmoidLayer(NLR::NetworkLevelReasoner *nlr,
+                                       Map<unsigned int, unsigned int> &handledVariableToLayer,
+                                       unsigned int newLayerIndex) {
+    struct NeuronInformation
+    {
+    public:
+
+        NeuronInformation( unsigned variable, unsigned neuron, unsigned sourceVariable )
+                : _variable( variable )
+                , _neuron( neuron )
+                , _sourceVariable( sourceVariable )
+        {
+        }
+
+        unsigned _variable;
+        unsigned _neuron;
+        unsigned _sourceVariable;
+    };
+
+    List<NeuronInformation> newNeurons;
+
+    // Look for ReLUs where all b variables have already been handled
+    const List<PiecewiseLinearConstraint *> &plConstraints = getPiecewiseLinearConstraints();
+
+    for ( const auto &plc : plConstraints )
+    {
+        // Only consider ReLUs
+        if ( plc->getType() != SIGMOID )
+            continue;
+
+        const SigmoidConstraint *sigmoid = (const SigmoidConstraint *)plc;
+
+        // Has the b variable been handled?
+        unsigned b = sigmoid->getB();
+        if ( !handledVariableToLayer.exists( b ) )
+            continue;
+
+        // If the f variable has also been handled, ignore this constraint
+        unsigned f = sigmoid->getF();
+        if ( handledVariableToLayer.exists( f ) )
+            continue;
+
+        // B has been handled, f hasn't. Add f
+        newNeurons.append( NeuronInformation( f, newNeurons.size(), b ) );
+    }
+
+    // No neurons found for the new layer
+    if ( newNeurons.empty() )
+        return false;
+
+    nlr->addLayer( newLayerIndex, NLR::Layer::SIGMOID, newNeurons.size() );
     for ( const auto &newNeuron : newNeurons )
     {
         handledVariableToLayer[newNeuron._variable] = newLayerIndex;

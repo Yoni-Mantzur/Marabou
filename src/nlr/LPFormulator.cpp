@@ -351,6 +351,10 @@ void LPFormulator::addLayerToModel( GurobiWrapper &gurobi, const Layer *layer )
         addReluLayerToLpRelaxation( gurobi, layer );
         break;
 
+    case Layer::SIGMOID:
+        addSigmoidLayerToLpRelaxation( gurobi, layer );
+        break;
+
     case Layer::WEIGHTED_SUM:
         addWeightedSumLayerToLpRelaxation( gurobi, layer );
         break;
@@ -444,6 +448,70 @@ void LPFormulator::addReluLayerToLpRelaxation( GurobiWrapper &gurobi,
                 terms.append( GurobiWrapper::Term( 1, Stringf( "x%u", targetVariable ) ) );
                 terms.append( GurobiWrapper::Term( -sourceUb / ( sourceUb - sourceLb ), Stringf( "x%u", sourceVariable ) ) );
                 gurobi.addLeqConstraint( terms, ( -sourceUb * sourceLb ) / ( sourceUb - sourceLb ) );
+            }
+        }
+    }
+}
+
+void LPFormulator::addSigmoidLayerToLpRelaxation( GurobiWrapper &gurobi,
+                                                  const Layer *layer )
+{
+    for ( unsigned i = 0; i < layer->getSize(); ++i )
+    {
+        if ( !layer->neuronEliminated( i ) )
+        {
+            unsigned targetVariable = layer->neuronToVariable( i );
+
+            List<NeuronIndex> sources = layer->getActivationSources( i );
+            const Layer *sourceLayer = _layerOwner->getLayer( sources.begin()->_layer );
+            unsigned sourceNeuron = sources.begin()->_neuron;
+            unsigned sourceVariable = sourceLayer->neuronToVariable( sourceNeuron );
+
+            double sourceLb = sourceLayer->getLb( sourceNeuron );
+            double sourceUb = sourceLayer->getUb( sourceNeuron );
+
+            gurobi.addVariable( Stringf( "x%u", targetVariable ),
+                                0,
+                                layer->getUb( i ) );
+
+
+            double rangeSize = sourceUb - sourceLb;
+            int numberOfPointsInRange = 100;
+            double subRangeSize = rangeSize / numberOfPointsInRange;
+
+            ASSERT( FloatUtils::isPositive( rangeSize ) )
+
+            double b1 = sourceLb, f1 = FloatUtils::sigmoid( b1 );
+            for (int j = 1; j < numberOfPointsInRange; j++)
+            {
+                double b2 =  b1 + subRangeSize, f2 = FloatUtils::sigmoid( b2 );
+
+                ASSERT( FloatUtils::isPositive ( b2 - b1 ) )
+                List<GurobiWrapper::Term> terms1;
+                double slope = ( f2 - f1 ) / ( b2 - b1 );
+                terms1.append( GurobiWrapper::Term( 1, Stringf( "x%u", targetVariable ) ) );
+                terms1.append( GurobiWrapper::Term( -slope, Stringf( "x%u", sourceVariable ) ) );
+
+                // In concave case lower bound
+                if ( FloatUtils::isPositive( sourceLb ))
+                    gurobi.addGeqConstraint( terms1, f1 - slope * b1 );
+                // In convex case upper bound
+                else
+                    gurobi.addLeqConstraint( terms1, f1 - slope * b1 );
+
+                // In concave case upper bound
+                List<GurobiWrapper::Term> terms2;
+                slope = FloatUtils::sigmoidDerivative( b1 );
+                terms2.append( GurobiWrapper::Term( 1, Stringf( "x%u", targetVariable ) ) );
+                terms2.append( GurobiWrapper::Term( -slope, Stringf( "x%u", sourceVariable ) ) );
+
+                // In concave case upper bound
+                if ( FloatUtils::isPositive( sourceLb ))
+                    gurobi.addLeqConstraint( terms2, f1 - slope * b1 );
+                // In convex case lower bound
+                else
+                    gurobi.addGeqConstraint( terms2, f1 - slope * b1 );
+
             }
         }
     }

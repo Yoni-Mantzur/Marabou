@@ -168,6 +168,17 @@ void Layer::computeAssignment()
         }
     }
 
+    else if ( _type == SIGMOID )
+    {
+        for ( unsigned i = 0; i < _size; ++i )
+        {
+            NeuronIndex sourceIndex = *_neuronToActivationSources[i].begin();
+            double inputValue = _layerOwner->getLayer( sourceIndex._layer )->getAssignment( sourceIndex._neuron );
+
+            _assignment[i] = FloatUtils::sigmoid( inputValue );
+        }
+    }
+
     else
     {
         printf( "Error! Neuron type %u unsupported\n", _type );
@@ -244,7 +255,7 @@ double Layer::getBias( unsigned neuron ) const
 
 void Layer::addActivationSource( unsigned sourceLayer, unsigned sourceNeuron, unsigned targetNeuron )
 {
-    ASSERT( _type == RELU || _type == ABSOLUTE_VALUE || _type == MAX );
+    ASSERT( _type == RELU || _type == ABSOLUTE_VALUE || _type == MAX || _type == SIGMOID);
 
     if ( !_neuronToActivationSources.exists( targetNeuron ) )
         _neuronToActivationSources[targetNeuron] = List<NeuronIndex>();
@@ -252,7 +263,7 @@ void Layer::addActivationSource( unsigned sourceLayer, unsigned sourceNeuron, un
     _neuronToActivationSources[targetNeuron].append( NeuronIndex( sourceLayer, sourceNeuron ) );
 
     DEBUG({
-            if ( _type == RELU || _type == ABSOLUTE_VALUE )
+            if ( _type == RELU || _type == ABSOLUTE_VALUE || _type == SIGMOID )
                 ASSERT( _neuronToActivationSources[targetNeuron].size() == 1 );
         });
 }
@@ -343,6 +354,10 @@ void Layer::computeIntervalArithmeticBounds()
 
     case ABSOLUTE_VALUE:
         computeIntervalArithmeticBoundsForAbs();
+        break;
+
+    case SIGMOID:
+        computeIntervalArithmeticBoundsForSigmoid();
         break;
 
     case MAX:
@@ -497,6 +512,35 @@ void Layer::computeIntervalArithmeticBoundsForAbs()
                 _ub[i] = FloatUtils::max( ub, -lb );
                 _layerOwner->receiveTighterBound( Tightening( _neuronToVariable[i], _ub[i], Tightening::UB ) );
             }
+        }
+    }
+}
+
+
+void Layer::computeIntervalArithmeticBoundsForSigmoid()
+{
+    for ( unsigned i = 0; i < _size; ++i )
+    {
+        if ( _eliminatedNeurons.exists( i ) )
+            continue;
+
+        NeuronIndex sourceIndex = *_neuronToActivationSources[i].begin();
+        const Layer *sourceLayer = _layerOwner->getLayer( sourceIndex._layer );
+
+        double lb = sourceLayer->getLb( sourceIndex._neuron );
+        double ub = sourceLayer->getUb( sourceIndex._neuron );
+
+        double sigmoidLb = FloatUtils::sigmoid(lb);
+        if (sigmoidLb > _lb[i] )
+        {
+            _lb[i] = sigmoidLb;
+            _layerOwner->receiveTighterBound( Tightening( _neuronToVariable[i], _lb[i], Tightening::LB ) );
+        }
+        double sigmoidUb = FloatUtils::sigmoid(ub);
+        if (sigmoidUb < _ub[i] )
+        {
+            _ub[i] = sigmoidUb;
+            _layerOwner->receiveTighterBound( Tightening( _neuronToVariable[i], _ub[i], Tightening::UB ) );
         }
     }
 }
@@ -1279,6 +1323,10 @@ String Layer::typeToString( Type type )
         return "MAX";
         break;
 
+    case SIGMOID:
+        return "SIGMOID";
+        break;
+
     default:
         return "UNKNOWN TYPE";
         break;
@@ -1335,6 +1383,7 @@ void Layer::dump() const
 
     case RELU:
     case ABSOLUTE_VALUE:
+    case SIGMOID:
     case MAX:
 
         for ( unsigned i = 0; i < _size; ++i )

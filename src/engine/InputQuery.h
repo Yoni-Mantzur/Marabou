@@ -157,8 +157,9 @@ private:
     bool constructReluLayer( NLR::NetworkLevelReasoner *nlr,
                              Map<unsigned, unsigned> &handledVariableToLayer,
                              unsigned newLayerIndex );
-
-
+    bool constructSigmoidLayer( NLR::NetworkLevelReasoner *nlr,
+                                Map<unsigned int, unsigned int> &handledVariableToLayer,
+                                unsigned int newLayerIndex);
 public:
     /*
       Mapping of input/output variables to their indices.
@@ -175,6 +176,7 @@ public:
       evaluation of topology-based bound tightening.
      */
     NLR::NetworkLevelReasoner *_networkLevelReasoner;
+
 };
 
 #endif // __InputQuery_h__

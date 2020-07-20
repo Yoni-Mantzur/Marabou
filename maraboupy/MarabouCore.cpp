@@ -263,6 +263,15 @@ PYBIND11_MODULE(MarabouCore, m) {
             var2 (int): Output variable to Relu constraint
         )pbdoc",
         py::arg("inputQuery"), py::arg("var1"), py::arg("var2"));
+    m.def("addSigmoidConstraint", &addSigmoidConstraint, R"pbdoc(
+        Add a Sigmoid constraint to the InputQuery
+
+        Args:
+            inputQuery (:class:`~maraboupy.MarabouCore.InputQuery`): Marabou input query to be solved
+            var1 (int): Input variable to Sigmoid constraint
+            var2 (int): Output variable to Sigmoid constraint
+        )pbdoc",
+          py::arg("inputQuery"), py::arg("var1"), py::arg("var2"));
     m.def("addMaxConstraint", &addMaxConstraint, R"pbdoc(
         Add a Max constraint to the InputQuery
 

@@ -39,6 +39,7 @@ public:
         RELU,
         ABSOLUTE_VALUE,
         MAX,
+        SIGMOID,
     };
 
     /*
@@ -166,6 +167,7 @@ private:
     void computeIntervalArithmeticBoundsForWeightedSum();
     void computeIntervalArithmeticBoundsForRelu();
     void computeIntervalArithmeticBoundsForAbs();
+    void computeIntervalArithmeticBoundsForSigmoid();
 
     const double *getSymbolicLb() const;
     const double *getSymbolicUb() const;
@@ -175,6 +177,7 @@ private:
     double getSymbolicUbOfLb( unsigned neuron ) const;
     double getSymbolicLbOfUb( unsigned neuron ) const;
     double getSymbolicUbOfUb( unsigned neuron ) const;
+
 };
 
 } // namespace NLR

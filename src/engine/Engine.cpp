@@ -2044,7 +2044,7 @@ void Engine::addAbstractionEquations()
 
             String constraintString;
             constraint->dump(constraintString);
-            log(Stringf("Adding abstraction to constraint: %s", constraintString.ascii()));
+            ENGINE_LOG( Stringf("Adding abstraction to constraint: %s", constraintString.ascii()).ascii() );
             const PiecewiseLinearCaseSplit &split = constraint->getValidCaseSplit();
 
             if (split.getBoundTightenings().empty() && split.getEquations().empty())

@@ -45,6 +45,9 @@ bool NetworkLevelReasoner::functionTypeSupported( PiecewiseLinearFunctionType ty
     if ( type == PiecewiseLinearFunctionType::ABSOLUTE_VALUE )
         return true;
 
+    if ( type == PiecewiseLinearFunctionType::SIGMOID )
+        return true;
+
     return false;
 }
 

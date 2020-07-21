@@ -7,7 +7,7 @@
 
 
 module load tensorflow
-
+module load tensorflow
 
 dir=/cs/labs/guykatz/yoni_mantzur/marabou/maraboupy/examples
 

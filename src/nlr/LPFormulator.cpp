@@ -474,44 +474,75 @@ void LPFormulator::addSigmoidLayerToLpRelaxation( GurobiWrapper &gurobi,
                                 0,
                                 layer->getUb( i ) );
 
+            bool isConcave = FloatUtils::isPositive( sourceLb ), isConvex = FloatUtils::isNegative( sourceUb );
+            double fLower = FloatUtils::sigmoid( sourceLb ), fUpper = FloatUtils::sigmoid( sourceUb );
+            
+            fLower = FloatUtils::max( fLower, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE );
+            fUpper = FloatUtils::min( fUpper, 1 - GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE );
 
-            double rangeSize = sourceUb - sourceLb;
-            int numberOfPointsInRange = 100;
-            double subRangeSize = rangeSize / numberOfPointsInRange;
+            ASSERT( FloatUtils::lt(fUpper, 1) && FloatUtils::gt(fLower, 0) )
+
+            if ( !( isConcave || isConvex ) )
+            {
+                List<GurobiWrapper::Term> terms;
+
+                // fLower < f < fUpper
+                terms.append( GurobiWrapper::Term( 1, Stringf( "x%u", targetVariable ) ) );
+                gurobi.addLeqConstraint( terms, fUpper );
+                gurobi.addGeqConstraint( terms, fLower );
+
+                // sourceLb < b < sourceUb
+                terms.append( GurobiWrapper::Term( 1, Stringf( "x%u", sourceVariable ) ) );
+                gurobi.addLeqConstraint( terms, sourceUb );
+                gurobi.addGeqConstraint( terms, sourceLb );
+
+                continue;
+            }
+
+            // We divide the f segment to `numberSegments` segments and we abstract with upper and lower equations
+            double rangeSize = fUpper - fLower;
+
+            int numberSegments = 20;
+            double subRangeSize = rangeSize / numberSegments;
 
             ASSERT( FloatUtils::isPositive( rangeSize ) )
 
-            double b1 = sourceLb, f1 = FloatUtils::sigmoid( b1 );
-            for (int j = 1; j < numberOfPointsInRange; j++)
+            double b1 = FloatUtils::sigmoidInverse(fLower), f1 = fLower;
+            for (int j = 1; j < numberSegments; j++)
             {
-                double b2 =  b1 + subRangeSize, f2 = FloatUtils::sigmoid( b2 );
+                double f2 = f1 + subRangeSize, b2 =  FloatUtils::sigmoidInverse( f2 );
 
                 ASSERT( FloatUtils::isPositive ( b2 - b1 ) )
-                List<GurobiWrapper::Term> terms1;
-                double slope = ( f2 - f1 ) / ( b2 - b1 );
-                terms1.append( GurobiWrapper::Term( 1, Stringf( "x%u", targetVariable ) ) );
-                terms1.append( GurobiWrapper::Term( -slope, Stringf( "x%u", sourceVariable ) ) );
+                ASSERT( FloatUtils::gt( f2, fLower ) && FloatUtils::lte( f2, fUpper ) )
 
+                List<GurobiWrapper::Term> terms;
+                double slope = ( f2 - f1 ) / ( b2 - b1 );
+                terms.append( GurobiWrapper::Term( 1, Stringf( "x%u", targetVariable ) ) );
+                terms.append( GurobiWrapper::Term( -slope, Stringf( "x%u", sourceVariable ) ) );
+
+                double scalar = f1 - slope * b1;
                 // In concave case lower bound
-                if ( FloatUtils::isPositive( sourceLb ))
-                    gurobi.addGeqConstraint( terms1, f1 - slope * b1 );
+                if ( isConcave )
+                    gurobi.addGeqConstraint( terms,  scalar );
                 // In convex case upper bound
                 else
-                    gurobi.addLeqConstraint( terms1, f1 - slope * b1 );
+                    gurobi.addLeqConstraint( terms, scalar );
 
                 // In concave case upper bound
-                List<GurobiWrapper::Term> terms2;
+                terms.clear();
                 slope = FloatUtils::sigmoidDerivative( b1 );
-                terms2.append( GurobiWrapper::Term( 1, Stringf( "x%u", targetVariable ) ) );
-                terms2.append( GurobiWrapper::Term( -slope, Stringf( "x%u", sourceVariable ) ) );
+                terms.append( GurobiWrapper::Term( 1, Stringf( "x%u", targetVariable ) ) );
+                terms.append( GurobiWrapper::Term( -slope, Stringf( "x%u", sourceVariable ) ) );
 
+                scalar = f2 - slope * b2;
                 // In concave case upper bound
-                if ( FloatUtils::isPositive( sourceLb ))
-                    gurobi.addLeqConstraint( terms2, f1 - slope * b1 );
+                if ( isConcave )
+                    gurobi.addLeqConstraint( terms, scalar );
                 // In convex case lower bound
                 else
-                    gurobi.addGeqConstraint( terms2, f1 - slope * b1 );
+                    gurobi.addGeqConstraint( terms, scalar );
 
+                b1 = b2, f1 = f2;
             }
         }
     }

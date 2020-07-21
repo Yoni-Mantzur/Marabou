@@ -217,14 +217,23 @@ for name in range(10, 100, 10):
                     network.setLowerBound(var, -large)
                     network.setUpperBound(var, large)
 
-                network.addAdverserialQuery((outputVars[7], 7), (outputVars[9], 9))
-                network.nlr = network.createNLR(MarabouCore.NetworkLevelReasoner.ActivationFunction.Sigmoid)
-
                 # # Set input bounds
                 for var in inputVars:
                     network.setLowerBound(var, x[var] - delta)
                     network.setUpperBound(var, x[var] + delta)
 
+                new_var = network.getNewVariable()
+                network.setLowerBound(new_var, 0)
+
+                equation1 = MarabouUtils.Equation(MarabouCore.Equation.EquationType.EQ)
+                equation1.addAddend(1, outputVars[7])
+                equation1.addAddend(-1, outputVars[9])
+                equation1.addAddend(1, new_var)
+                equation1.setScalar(0)
+
+                network.addEquation(equation1)
+
+                network.outputVars = np.array([[new_var]])
 
                 # network.evaluateWithMarabou(np.array([x]))
                 # # Call to C++ Marabou solver

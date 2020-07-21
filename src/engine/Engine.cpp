@@ -105,7 +105,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
     bool splitJustPerformed = true;
     struct timespec mainLoopStart = TimeUtils::sampleMicro();
-
+    int n = 0;
     while ( true )
     {
         struct timespec mainLoopEnd = TimeUtils::sampleMicro();
@@ -190,6 +190,12 @@ bool Engine::solve( unsigned timeoutInSeconds )
                     performSymbolicOrArithmeticBoundTightening();
                 }
                 while ( applyAllValidConstraintCaseSplits() );
+
+                n++;
+                if (n % 10 == 0) {
+                    printf("Running milp");
+                    performMILPSolverBoundedTightening();
+                }
                 splitJustPerformed = false;
             }
 
@@ -240,8 +246,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
 
                 // Add abstraction equations to the violated constraints
-                addAbstractionEquations();
-
+//                addAbstractionEquations();
 
                 // Finally, take this opporunity to tighten any bounds
                 // and perform any valid case splits.

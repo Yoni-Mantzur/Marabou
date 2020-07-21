@@ -601,7 +601,7 @@ bool InputQuery::constructNetworkLevelReasoner()
         delete nlr;
     }
 
-    _networkLevelReasoner->dumpTopology();
+    // _networkLevelReasoner->dumpTopology();
     return success;
 }
 

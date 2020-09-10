@@ -15,4 +15,4 @@ cd $dir
 
 export PYTHONPATH="/cs/labs/guykatz/yoni_mantzur/marabou:${PYTHONPATH}"
 
-python sigmoid_network_example.py
+python3 sigmoid_network_example.py

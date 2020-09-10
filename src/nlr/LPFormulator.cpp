@@ -476,7 +476,7 @@ void LPFormulator::addSigmoidLayerToLpRelaxation( GurobiWrapper &gurobi,
 
             bool isConcave = FloatUtils::isPositive( sourceLb ), isConvex = FloatUtils::isNegative( sourceUb );
             double fLower = FloatUtils::sigmoid( sourceLb ), fUpper = FloatUtils::sigmoid( sourceUb );
-            
+
             fLower = FloatUtils::max( fLower, GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE );
             fUpper = FloatUtils::min( fUpper, 1 - GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE );
 
@@ -492,6 +492,7 @@ void LPFormulator::addSigmoidLayerToLpRelaxation( GurobiWrapper &gurobi,
                 gurobi.addGeqConstraint( terms, fLower );
 
                 // sourceLb < b < sourceUb
+                terms.clear();
                 terms.append( GurobiWrapper::Term( 1, Stringf( "x%u", sourceVariable ) ) );
                 gurobi.addLeqConstraint( terms, sourceUb );
                 gurobi.addGeqConstraint( terms, sourceLb );

@@ -24,7 +24,7 @@ const bool GlobalConfiguration::USE_POLARITY_BASED_DIRECTION_HEURISTICS = false;
 
 const double GlobalConfiguration::DEFAULT_EPSILON_FOR_COMPARISONS = 0.0000000001;
 const unsigned GlobalConfiguration::DEFAULT_DOUBLE_TO_STRING_PRECISION = 10;
-const unsigned GlobalConfiguration::STATISTICS_PRINTING_FREQUENCY = 1000;
+const unsigned GlobalConfiguration::STATISTICS_PRINTING_FREQUENCY = 100000;
 const double GlobalConfiguration::BOUND_COMPARISON_ADDITIVE_TOLERANCE = 0.0000001;
 const double GlobalConfiguration::BOUND_COMPARISON_MULTIPLICATIVE_TOLERANCE = 0.001 * 0.0000001;
 const double GlobalConfiguration::PIVOT_CHANGE_COLUMN_TOLERANCE = 0.000000001;
@@ -99,7 +99,7 @@ const bool GlobalConfiguration::SMT_CORE_LOGGING = false;
 const bool GlobalConfiguration::DANTZIGS_RULE_LOGGING = false;
 const bool GlobalConfiguration::BASIS_FACTORIZATION_LOGGING = false;
 const bool GlobalConfiguration::PREPROCESSOR_LOGGING = false;
-const bool GlobalConfiguration::INPUT_QUERY_LOGGING = true;
+const bool GlobalConfiguration::INPUT_QUERY_LOGGING = false;
 const bool GlobalConfiguration::PROJECTED_STEEPEST_EDGE_LOGGING = false;
 const bool GlobalConfiguration::GAUSSIAN_ELIMINATION_LOGGING = false;
 const bool GlobalConfiguration::QUERY_LOADER_LOGGING = false;
@@ -114,7 +114,7 @@ const bool GlobalConfiguration::ADD_ABSTRACTION_EQUATIONS = true;
 const bool GlobalConfiguration::REFINE_CURRENT_SPLIT_EQUATION = true;
 const bool GlobalConfiguration::PREPROCESSOR_PL_CONSTRAINTS_ADD_ABSTRACTION = true;
 
-const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH = 3;
+const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_ABSTRACTION_EQUATIONS_TH = 2;
 const unsigned int GlobalConfiguration::GUIDED_POINTS_FOR_SPLIT_SEGMENTS_TH = 1;
 
 

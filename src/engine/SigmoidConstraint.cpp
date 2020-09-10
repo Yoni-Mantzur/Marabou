@@ -72,9 +72,9 @@ void SigmoidConstraint::notifyLowerBound(unsigned variable, double bound) {
     _lowerBounds[variable] = bound;
     _isBoundWereChanged = true;
 
-//    if (FloatUtils::areEqual(_lowerBounds[variable], (_upperBounds[variable] + _lowerBounds[variable]) / 2,
-//                             GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
-//        _isFixed = true;
+    if (FloatUtils::areEqual(_lowerBounds[variable], (_upperBounds[variable] + _lowerBounds[variable]) / 2,
+                             GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+        _isFixed = true;
 
     if (_constraintBoundTightener) {
         if (variable == _b) {
@@ -94,9 +94,9 @@ void SigmoidConstraint::notifyUpperBound(unsigned variable, double bound) {
     _upperBounds[variable] = bound;
     _isBoundWereChanged = true;
 
-//    if (FloatUtils::areEqual(_lowerBounds[variable], (_upperBounds[variable] + _lowerBounds[variable]) / 2,
-//                             GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
-//        _isFixed = true;
+    if (FloatUtils::areEqual(_lowerBounds[variable], (_upperBounds[variable] + _lowerBounds[variable]) / 2,
+                             GlobalConfiguration::SIGMOID_CONSTRAINT_COMPARISON_TOLERANCE))
+        _isFixed = true;
 
     if (_constraintBoundTightener) {
         if (variable == _b) {

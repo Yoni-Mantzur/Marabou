@@ -246,7 +246,7 @@ bool Engine::solve( unsigned timeoutInSeconds )
 
 
                 // Add abstraction equations to the violated constraints
-//                addAbstractionEquations();
+                addAbstractionEquations();
 
                 // Finally, take this opporunity to tighten any bounds
                 // and perform any valid case splits.
@@ -1105,7 +1105,7 @@ bool Engine::processInputQuery( InputQuery &inputQuery, bool preprocess )
 
         delete[] constraintMatrix;
 
-        performMILPSolverBoundedTightening();
+//        performMILPSolverBoundedTightening();
 
         struct timespec end = TimeUtils::sampleMicro();
         _statistics.setPreprocessingTime( TimeUtils::timePassed( start, end ) );

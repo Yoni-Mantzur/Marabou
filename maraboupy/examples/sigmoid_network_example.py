@@ -9,20 +9,23 @@ import os
 
 # marabou_path = Path(r'/mnt/c/Users/t-yomant/lab/Marabou')
 
-path_to_sigmoids = marabou_path / r'maraboupy/examples/networks/sigmoids'
+path_to_sigmoids = marabou_path / r'resources/tf/frozen_graph/sigmoids/'
+path_to_experiments = marabou_path / r'maraboupy/examples/networks/sigmoids'
 
-from maraboupy import MarabouCore, MarabouNetwork, Marabou
+from maraboupy import MarabouCore, MarabouNetwork, Marabou, MarabouUtils
+
+
 import numpy as np
 
 try:
     exp_num = max(map(int, map(lambda y: ''.join(y),
                                map(lambda f: filter(lambda c: c.isdigit(), f), filter(lambda dir: 'experiment_' in dir,
                                                                                       os.listdir(
-                                                                                          path_to_sigmoids)))))) + 1
+                                                                                          path_to_experiments)))))) + 1
 except ValueError:
     exp_num = 1
 
-exp_dir = path_to_sigmoids / f'experiment_{exp_num}'
+exp_dir = path_to_experiments / f'experiment_{exp_num}'
 if not os.path.exists(exp_dir):
     os.mkdir(exp_dir)
 
